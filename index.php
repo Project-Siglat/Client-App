@@ -19,7 +19,9 @@
     $dotenv = Dotenv::createImmutable(__DIR__);
     $dotenv->load();
 
-    echo $_ENV["ENVIRONMENT"];
+    $iyot = $_ENV["ENVIRONMENT"];
+
+    echo $iyot;
 
     include "./pack/route.php";
     ?>
