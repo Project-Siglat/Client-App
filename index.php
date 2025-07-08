@@ -8,7 +8,7 @@
 </head>
 <body>
     <!-- Eto yung tailwind CSS -->
-
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <!-- Eto yung cdn external dependencies -->
 
     <!-- Andito lahat ng mga ruta ng mga web pages.... -->
