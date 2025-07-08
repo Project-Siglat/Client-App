@@ -8,8 +8,6 @@ COPY . .
 
 RUN composer install
 
-RUN composer run build
-
 FROM nginx
 
 COPY --from=build /app/dist /usr/share/nginx/html
