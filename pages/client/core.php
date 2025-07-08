@@ -19,8 +19,8 @@
 
      <style>
          @keyframes emergencyPulse {
-             0%, 100% { box-shadow: 0 4px 15px rgba(255,68,68,0.4); }
-             50% { box-shadow: 0 6px 25px rgba(255,68,68,0.8); }
+             0%, 100% { box-shadow: 0 4px 15px rgba(0,194,100,0.4); }
+             50% { box-shadow: 0 6px 25px rgba(0,194,100,0.8); }
          }
 
          @keyframes messageAlert {
@@ -52,12 +52,23 @@
 
          @keyframes slideIn {
              from {
-                 transform: translateX(100%);
+                 transform: translateX(-100%);
                  opacity: 0;
              }
              to {
                  transform: translateX(0);
                  opacity: 1;
+             }
+         }
+
+         @keyframes slideOut {
+             from {
+                 transform: translateX(0);
+                 opacity: 1;
+             }
+             to {
+                 transform: translateX(-100%);
+                 opacity: 0;
              }
          }
 
@@ -71,27 +82,102 @@
              100% { transform: rotate(360deg); }
          }
 
+         .grab-theme {
+             background: linear-gradient(135deg, #00c264 0%, #00a556 100%);
+         }
+
          .emergency-btn {
-             background: linear-gradient(45deg, #ff4444, #cc0000);
+             background: linear-gradient(45deg, #00c264, #00a556);
              animation: emergencyPulse 2s infinite;
+             border-radius: 50px;
          }
 
          .emergency-btn:hover {
              transform: scale(1.05);
-             box-shadow: 0 6px 20px rgba(255,68,68,0.6);
+             box-shadow: 0 8px 25px rgba(0,194,100,0.6);
+         }
+
+         .burger-menu {
+             cursor: pointer;
+             transition: all 0.3s ease;
+         }
+
+         .burger-menu:hover {
+             transform: scale(1.1);
+         }
+
+         .sidebar {
+             position: fixed;
+             top: 0;
+             left: -320px;
+             width: 320px;
+             height: 100vh;
+             background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+             z-index: 9999;
+             transition: all 0.3s ease;
+             overflow-y: auto;
+         }
+
+         .sidebar.active {
+             left: 0;
+         }
+
+         .sidebar-overlay {
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100vw;
+             height: 100vh;
+             background: rgba(0,0,0,0.5);
+             z-index: 9998;
+             opacity: 0;
+             visibility: hidden;
+             transition: all 0.3s ease;
+         }
+
+         .sidebar-overlay.active {
+             opacity: 1;
+             visibility: visible;
+         }
+
+         .floating-action-btn {
+             position: fixed;
+             bottom: 80px;
+             right: 20px;
+             width: 60px;
+             height: 60px;
+             border-radius: 50%;
+             background: linear-gradient(45deg, #00c264, #00a556);
+             color: white;
+             border: none;
+             box-shadow: 0 4px 20px rgba(0,194,100,0.3);
+             cursor: pointer;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             font-size: 24px;
+             z-index: 1000;
+             transition: all 0.3s ease;
+         }
+
+         .floating-action-btn:hover {
+             transform: scale(1.1);
+             box-shadow: 0 6px 25px rgba(0,194,100,0.5);
          }
 
          .control-btn.emergency {
-             background: linear-gradient(45deg, #ff4444, #cc0000);
+             background: linear-gradient(45deg, #00c264, #00a556);
+             border-radius: 25px;
          }
 
          .control-btn.success {
-             background: linear-gradient(45deg, #ffcc00, #ff8800);
+             background: linear-gradient(45deg, #00c264, #00a556);
+             border-radius: 25px;
          }
 
          .control-btn:hover {
              transform: translateY(-2px);
-             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+             box-shadow: 0 4px 15px rgba(0,194,100,0.3);
          }
 
          .control-btn:disabled {
@@ -101,39 +187,22 @@
          }
 
          .message.dispatcher {
-             background: linear-gradient(135deg, #333333, #1a1a1a);
-             color: #ffcc00;
-             border-left: 3px solid #ff4444;
+             background: rgba(245, 245, 245, 0.9);
+             color: #333;
+             border-radius: 20px 20px 20px 5px;
          }
 
          .message.user {
-             background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
-             color: #ffcc00;
-             border-right: 3px solid #ffcc00;
+             background: linear-gradient(135deg, #00c264, #00a556);
+             color: white;
+             border-radius: 20px 20px 5px 20px;
          }
 
          .message.emergency {
              background: linear-gradient(135deg, #ff4444, #cc0000);
              color: #ffffff;
              animation: messageAlert 1s ease-in-out;
-         }
-
-         .upload-btn:hover {
-             background: #ff8800;
-         }
-
-         .send-btn:hover {
-             background: #ffcc00;
-             transform: scale(1.05);
-         }
-
-         .dispatch-btn {
-             background: linear-gradient(45deg, #ffcc00, #ff8800);
-         }
-
-         .dispatch-btn:hover {
-             transform: translateY(-2px);
-             box-shadow: 0 4px 15px rgba(255,204,0,0.4);
+             border-radius: 20px;
          }
 
          .notification-panel {
@@ -143,6 +212,7 @@
              transition: all 0.3s ease;
              background: linear-gradient(135deg, #1a1a1a, #000000);
              border: 1px solid #333;
+             border-radius: 15px;
          }
 
          .notification-panel.show {
@@ -171,10 +241,12 @@
              background: linear-gradient(135deg, #1a1a1a, #000000);
              border: 1px solid #333;
              color: #ffffff;
+             border-radius: 20px;
          }
 
          .confirm-btn {
-             background: linear-gradient(45deg, #ff4444, #cc0000);
+             background: linear-gradient(45deg, #00c264, #00a556);
+             border-radius: 25px;
          }
 
          .confirm-btn:hover {
@@ -183,6 +255,7 @@
 
          .cancel-btn {
              background: linear-gradient(45deg, #333333, #1a1a1a);
+             border-radius: 25px;
          }
 
          .cancel-btn:hover {
@@ -200,7 +273,7 @@
 
          .priority-high { background: #ff4444; }
          .priority-medium { background: #ffcc00; }
-         .priority-low { background: #ff8800; }
+         .priority-low { background: #00c264; }
 
          .slide-in {
              animation: slideIn 0.3s ease-out;
@@ -211,58 +284,54 @@
          }
 
          .chat-messages::-webkit-scrollbar {
-             width: 6px;
+             width: 4px;
          }
 
          .chat-messages::-webkit-scrollbar-track {
-             background: rgba(0,0,0,0.2);
+             background: rgba(0,0,0,0.1);
          }
 
          .chat-messages::-webkit-scrollbar-thumb {
-             background: rgba(255,204,0,0.6);
-             border-radius: 3px;
+             background: rgba(0,194,100,0.6);
+             border-radius: 2px;
          }
 
          .chat-messages::-webkit-scrollbar-thumb:hover {
-             background: rgba(255,204,0,0.8);
+             background: rgba(0,194,100,0.8);
          }
 
          .notification-list::-webkit-scrollbar {
-             width: 6px;
+             width: 4px;
          }
 
          .notification-list::-webkit-scrollbar-track {
-             background: rgba(0,0,0,0.2);
+             background: rgba(0,0,0,0.1);
          }
 
          .notification-list::-webkit-scrollbar-thumb {
-             background: rgba(255,204,0,0.6);
-             border-radius: 3px;
+             background: rgba(0,194,100,0.6);
+             border-radius: 2px;
          }
 
          .notification-list::-webkit-scrollbar-thumb:hover {
-             background: rgba(255,204,0,0.8);
+             background: rgba(0,194,100,0.8);
          }
 
          .main-container {
-             grid-template-columns: 1fr;
-             transition: grid-template-columns 0.3s ease;
+             transition: all 0.3s ease;
          }
 
-         .main-container.chat-active {
-             grid-template-columns: 1fr 350px;
-         }
-
-         @media (max-width: 1024px) {
-             .main-container,
-             .main-container.chat-active {
-                 grid-template-columns: 1fr;
-                 grid-template-areas:
-                     'header'
-                     'main-content'
-                     'sidebar';
-                 grid-template-rows: 60px 1fr auto;
-             }
+         .status-compact {
+             position: fixed;
+             bottom: 20px;
+             left: 20px;
+             background: rgba(0,0,0,0.9);
+             backdrop-filter: blur(10px);
+             border-radius: 15px;
+             padding: 10px 15px;
+             color: white;
+             z-index: 1000;
+             display: none;
          }
 
          @media (max-width: 768px) {
@@ -270,202 +339,234 @@
                  width: calc(100vw - 2rem);
                  right: 1rem;
              }
-             .confirmation-modal .bg-white {
+             .confirmation-modal .confirmation-content {
                  margin: 1rem;
                  width: calc(100% - 2rem);
              }
-             .text-2xl {
-                 font-size: 1.25rem;
-             }
-             .min-w-44 {
-                 min-width: auto;
-                 width: 100%;
+             .floating-action-btn {
+                 width: 50px;
+                 height: 50px;
+                 font-size: 20px;
+                 bottom: 100px;
              }
          }
 
          @media (max-width: 640px) {
-             .grid-cols-3 {
-                 grid-template-columns: 1fr;
-                 gap: 0.5rem;
-             }
-             .flex.gap-4 {
-                 gap: 0.5rem;
-             }
-             .py-3.px-6 {
-                 padding: 0.5rem 1rem;
+             .sidebar {
+                 width: 280px;
+                 left: -280px;
              }
          }
      </style>
 
-     <div class="grid main-container grid-rows-[60px_1fr] lg:grid-rows-[60px_1fr] md:grid-rows-[60px_1fr_auto] h-screen bg-gradient-to-br from-black via-red-900 to-yellow-600 font-sans overflow-hidden" style="grid-template-areas: 'header header' 'main-content sidebar';">
+     <!-- Mobile-First Layout -->
+     <div class="h-screen bg-white overflow-hidden relative">
          <!-- Header -->
-         <header class="bg-black/95 backdrop-blur-sm text-white px-3 sm:px-5 flex items-center justify-between border-b border-red-500/30 z-50" style="grid-area: header;">
-             <div class="text-lg sm:text-2xl font-semibold flex items-center gap-2.5">
-                 🚨 Emergency Response Dashboard
-             </div>
-             <div class="flex gap-2 sm:gap-4 items-center">
-                 <button class="relative bg-red-500/20 border border-red-500/50 text-white p-2 sm:p-2.5 rounded-full cursor-pointer transition-all duration-300 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-red-500/30" onclick="toggleNotifications()">
-                     <svg width="16" height="16" sm:width="20" sm:height="20" viewBox="0 0 24 24" fill="currentColor">
-                         <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+         <header class="bg-white shadow-sm border-b border-gray-200 px-4 py-3 flex items-center justify-between relative z-50">
+             <div class="flex items-center gap-3">
+                 <button class="burger-menu p-2 rounded-lg hover:bg-gray-100" onclick="toggleSidebar()">
+                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2">
+                         <line x1="3" y1="6" x2="21" y2="6"></line>
+                         <line x1="3" y1="12" x2="21" y2="12"></line>
+                         <line x1="3" y1="18" x2="21" y2="18"></line>
                      </svg>
-                     <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-3 h-3 sm:w-4 sm:h-4 text-xs flex items-center justify-center font-bold">6</span>
                  </button>
-                 <button class="emergency-btn border-none text-white py-2 px-3 sm:py-3 sm:px-6 rounded-full font-bold cursor-pointer shadow-lg transition-all duration-300 text-xs sm:text-sm" onclick="triggerEmergency()">
-                     🚨 EMERGENCY CALL
+                 <div class="text-lg font-bold text-gray-800">EmergencyGo</div>
+             </div>
+
+             <div class="flex items-center gap-3">
+                 <button class="relative p-2 rounded-full hover:bg-gray-100" onclick="toggleNotifications()">
+                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2">
+                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                         <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                     </svg>
+                     <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center font-bold">3</span>
                  </button>
+
+                 <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                     <span class="text-sm font-semibold text-gray-600">JS</span>
+                 </div>
              </div>
          </header>
 
-         <!-- Main Content -->
-         <main class="bg-gradient-to-br from-gray-900/95 to-black/95 backdrop-blur-sm flex flex-col relative border-red-500/20" style="grid-area: main-content; min-height: 0;">
-             <div class="flex-1 relative overflow-hidden" style="min-height: 0;">
-                 <div id="loading" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/95 border border-red-500/50 text-yellow-400 py-3 sm:py-5 px-5 sm:px-7 rounded-lg shadow-lg text-sm sm:text-base z-50">
-                     <div class="flex items-center gap-2.5">
-                         <div class="w-4 h-4 sm:w-5 sm:h-5 border-2 border-gray-600 border-t-yellow-400 rounded-full animate-spin"></div>
-                         Loading emergency map...
-                     </div>
+         <!-- Main Map Area -->
+         <main class="relative flex-1 h-[calc(100vh-64px)]">
+             <div id="loading" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-lg p-6 z-50">
+                 <div class="flex items-center gap-3">
+                     <div class="w-6 h-6 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin"></div>
+                     <span class="text-gray-700">Loading map...</span>
                  </div>
-                 <div id="map" class="w-full h-full"></div>
-
-                 <!-- Map Controls - Left Side -->
-                 <!-- <div class="absolute top-2 sm:top-4 left-2 sm:left-4 flex flex-col gap-2 z-50">
-                     <button id="findNearestAmbulance" class="control-btn emergency border border-red-500/50 py-2 sm:py-3 px-3 sm:px-5 rounded-lg cursor-pointer shadow-lg transition-all duration-300 font-semibold text-white min-w-32 sm:min-w-44 text-left flex items-center gap-2 text-xs sm:text-sm">
-                         🚑 Find Nearest Ambulance
-                     </button>
-                 </div> -->
-
-                 <!-- Map Controls - Right Side -->
-                 <!-- <div class="absolute top-2 sm:top-4 right-2 sm:right-4 flex flex-col gap-2 z-50">
-                     <button id="simulateMovement" class="control-btn success border border-yellow-500/50 py-2 sm:py-3 px-3 sm:px-5 rounded-lg cursor-pointer shadow-lg transition-all duration-300 font-semibold text-black min-w-32 sm:min-w-44 text-left flex items-center gap-2 text-xs sm:text-sm">
-                         ▶️ Start Ambulance Movement
-                     </button>
-                 </div> -->
              </div>
+             <div id="map" class="w-full h-full"></div>
 
-             <!-- Status Panel -->
-             <div id="statusDisplay" class="bg-black/20 py-3 sm:py-4 px-3 sm:px-5 border-t border-red-500/30 hidden" style="flex-shrink: 0;">
-                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
-                     <div class="text-center p-2 sm:p-2.5 bg-gradient-to-br from-gray-800 to-black border border-red-500/30 rounded-lg shadow-sm">
-                         <div class="text-xs text-yellow-400 uppercase font-semibold mb-1">Status</div>
-                         <div id="statusText" class="text-sm sm:text-base font-bold text-white">Ready</div>
-                     </div>
-                     <div class="text-center p-2 sm:p-2.5 bg-gradient-to-br from-gray-800 to-black border border-red-500/30 rounded-lg shadow-sm">
-                         <div class="text-xs text-yellow-400 uppercase font-semibold mb-1">ETA</div>
-                         <div id="etaText" class="text-sm sm:text-base font-bold text-white">--</div>
-                     </div>
-                     <div class="text-center p-2 sm:p-2.5 bg-gradient-to-br from-gray-800 to-black border border-red-500/30 rounded-lg shadow-sm">
-                         <div class="text-xs text-yellow-400 uppercase font-semibold mb-1">Distance</div>
-                         <div id="distanceText" class="text-sm sm:text-base font-bold text-white">--</div>
-                     </div>
-                 </div>
+             <!-- Floating Emergency Button -->
+             <button class="floating-action-btn" onclick="triggerEmergency()">
+                 🚨
+             </button>
+
+             <!-- Compact Status Display -->
+             <div id="statusCompact" class="status-compact">
+                 <div class="text-xs opacity-75">Status</div>
+                 <div id="statusTextCompact" class="font-semibold">Ready</div>
              </div>
          </main>
 
          <!-- Sidebar -->
-         <aside class="bg-gradient-to-br from-gray-900/95 to-black/95 backdrop-blur-sm flex flex-col border-l border-red-500/30 md:border-t md:border-l-0" style="grid-area: sidebar; min-height: 0; max-height: calc(100vh - 60px);">
-             <!-- Chat System -->
-             <div id="chatSystem" class="flex-1 flex-col h-full hidden" style="min-height: 0;">
-                 <div class="p-3 sm:p-5 border-b border-red-500/30 bg-red-500/10" style="flex-shrink: 0;">
-                     <div class="text-lg sm:text-xl font-semibold text-red-400 mb-1">Emergency Chat</div>
-                     <div class="text-xs text-yellow-400 uppercase">Live Support Available</div>
+         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+         <aside class="sidebar" id="sidebar">
+             <div class="p-6 border-b border-gray-700">
+                 <div class="flex items-center justify-between mb-4">
+                     <h2 class="text-xl font-bold text-white">Profile</h2>
+                     <button class="text-gray-400 hover:text-white" onclick="toggleSidebar()">
+                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                             <line x1="18" y1="6" x2="6" y2="18"></line>
+                             <line x1="6" y1="6" x2="18" y2="18"></line>
+                         </svg>
+                     </button>
                  </div>
 
-                 <div id="chatMessages" class="flex-1 overflow-y-auto p-3 sm:p-4 flex flex-col gap-3" style="min-height: 0;">
-                     <!-- Messages will be added dynamically -->
-                 </div>
-
-                 <!-- Image Upload Section -->
-                 <div class="p-3 sm:p-4 bg-yellow-600/10 border-t border-b border-yellow-500/30" style="flex-shrink: 0;">
-                     <div class="font-semibold text-yellow-400 mb-2 text-sm">📷 Share Photo</div>
-                     <div class="flex gap-2 items-center">
-                         <input type="file" id="imageUpload" accept="image/*" class="flex-1 p-2 border border-gray-600 bg-black/50 text-white rounded text-xs">
-                         <button id="sendImage" class="bg-gradient-to-r from-yellow-600 to-yellow-500 text-black border-none py-2 px-3 sm:px-4 rounded cursor-pointer text-xs font-semibold transition-all duration-300">Send</button>
+                 <div class="flex items-center gap-4 mb-6">
+                     <div class="w-16 h-16 bg-gray-600 rounded-full flex items-center justify-center">
+                         <span class="text-xl font-bold text-white">JS</span>
                      </div>
-                     <div id="imagePreview" class="mt-2.5 hidden">
-                         <img id="previewImg" class="max-w-25 h-auto rounded border-2 border-yellow-500/50">
+                     <div>
+                         <div class="text-lg font-semibold text-white">John Smith</div>
+                         <div class="text-sm text-gray-400">john.smith@email.com</div>
+                         <div class="text-xs text-green-400">●  Online</div>
                      </div>
                  </div>
 
-                 <!-- Chat Input -->
-                 <div class="p-3 sm:p-4 bg-black/20 border-t border-red-500/30" style="flex-shrink: 0;">
-                     <div class="flex gap-2 mb-2.5">
-                         <input type="text" id="chatInput" placeholder="Type your message..." class="flex-1 py-2 sm:py-2.5 px-3 sm:px-4 border border-gray-600 bg-black/50 text-white rounded-full outline-none text-xs sm:text-sm focus:border-yellow-500 focus:shadow-[0_0_0_2px_rgba(255,204,0,0.2)]" disabled>
-                         <button id="sendMessage" class="bg-gradient-to-r from-yellow-600 to-yellow-500 border-none text-black p-2 sm:p-2.5 rounded-full cursor-pointer transition-all duration-300 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center" disabled>
-                             <svg width="14" height="14" sm:width="16" sm:height="16" viewBox="0 0 24 24" fill="currentColor">
-                                 <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-                             </svg>
-                         </button>
+                 <div class="space-y-3">
+                     <div class="bg-gray-800 rounded-lg p-3">
+                         <div class="text-xs text-gray-400 uppercase">Emergency Contact</div>
+                         <div class="text-sm text-white">+1 (555) 123-4567</div>
                      </div>
-                     <button id="startDispatch" class="dispatch-btn w-full p-2 sm:p-3 text-black border-none rounded-lg cursor-pointer font-bold text-xs sm:text-sm transition-all duration-300">
-                         🚑 Start Ambulance Dispatch
+                     <div class="bg-gray-800 rounded-lg p-3">
+                         <div class="text-xs text-gray-400 uppercase">Location</div>
+                         <div class="text-sm text-white">Villaverde, Nueva Vizcaya</div>
+                     </div>
+                 </div>
+             </div>
+
+             <!-- Emergency Actions -->
+             <div class="p-6">
+                 <h3 class="text-lg font-semibold text-white mb-4">Quick Actions</h3>
+                 <div class="space-y-3">
+                     <button class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300" onclick="findNearestAmbulance()">
+                         🚑 Find Ambulance
+                     </button>
+                     <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300" onclick="startChatSimulation()">
+                         💬 Emergency Chat
+                     </button>
+                     <button class="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300">
+                         📍 Share Location
+                     </button>
+                     <button class="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300">
+                         ⚠️ Report Hazard
                      </button>
                  </div>
              </div>
+
+             <!-- Recent Activity -->
+             <div class="p-6 border-t border-gray-700">
+                 <h3 class="text-lg font-semibold text-white mb-4">Recent Activity</h3>
+                 <div class="space-y-3">
+                     <div class="flex items-center gap-3">
+                         <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                         <div class="text-sm text-gray-300">Emergency contact updated</div>
+                     </div>
+                     <div class="flex items-center gap-3">
+                         <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                         <div class="text-sm text-gray-300">Location services enabled</div>
+                     </div>
+                     <div class="flex items-center gap-3">
+                         <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                         <div class="text-sm text-gray-300">Profile verified</div>
+                     </div>
+                 </div>
+             </div>
          </aside>
+
+         <!-- Chat System (Modal) -->
+         <div id="chatSystem" class="fixed inset-0 bg-black bg-opacity-30 z-[9999] hidden" onclick="closeChatSystem(event)">
+             <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[80vh] flex flex-col" onclick="event.stopPropagation()">
+                 <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+                     <div>
+                         <div class="text-lg font-semibold text-gray-800">Emergency Chat</div>
+                         <div class="text-sm text-green-600">● Live Support</div>
+                     </div>
+                     <button class="p-2 hover:bg-gray-100 rounded-full" onclick="closeChatSystem()">
+                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2">
+                             <line x1="18" y1="6" x2="6" y2="18"></line>
+                             <line x1="6" y1="6" x2="18" y2="18"></line>
+                         </svg>
+                     </button>
+                 </div>
+
+                 <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+                     <!-- Messages will be added dynamically -->
+                 </div>
+
+                 <div class="p-4 border-t border-gray-200">
+                     <div class="flex gap-3 items-end">
+                         <input type="text" id="chatInput" placeholder="Type your message..."
+                                class="flex-1 px-4 py-3 border border-gray-300 rounded-full outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" disabled>
+                         <button id="sendMessage" class="bg-green-500 text-white p-3 rounded-full hover:bg-green-600 transition-colors" disabled>
+                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                 <line x1="22" y1="2" x2="11" y2="13"></line>
+                                 <polygon points="22,2 15,22 11,13 2,9 22,2"></polygon>
+                             </svg>
+                         </button>
+                     </div>
+                 </div>
+             </div>
+         </div>
      </div>
 
      <!-- Notification Panel -->
-     <div class="notification-panel fixed top-12 sm:top-15 right-2 sm:right-4 w-72 sm:w-80 rounded-lg shadow-2xl z-[2000] max-h-80 sm:max-h-96 overflow-hidden transition-all duration-300" id="notificationPanel">
-         <div class="py-3 sm:py-4 px-4 sm:px-5 bg-gradient-to-br from-red-600 to-yellow-600 text-black font-semibold text-sm sm:text-base">
+     <div class="notification-panel fixed top-16 right-4 w-80 shadow-2xl z-[2000] max-h-96 overflow-hidden" id="notificationPanel">
+         <div class="py-4 px-5 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold">
              Emergency Notifications
          </div>
-         <div class="max-h-64 sm:max-h-72 overflow-y-auto bg-gradient-to-br from-gray-900 to-black">
-             <div class="py-3 sm:py-4 px-4 sm:px-5 border-b border-gray-700 cursor-pointer transition-all duration-300 relative text-white hover:bg-gray-800/50">
-                 <div class="absolute top-3 sm:top-4 right-3 sm:right-4 w-2 h-2 rounded-full priority-high"></div>
+         <div class="max-h-72 overflow-y-auto bg-gradient-to-br from-gray-900 to-black">
+             <div class="py-4 px-5 border-b border-gray-700 cursor-pointer transition-all duration-300 relative text-white hover:bg-gray-800/50">
+                 <div class="absolute top-4 right-4 w-2 h-2 rounded-full priority-high"></div>
                  <div class="font-semibold text-red-400 mb-1 text-sm">🌪️ Typhoon Warning</div>
-                 <div class="text-gray-300 text-xs leading-relaxed mb-1">Typhoon approaching your area. Seek shelter immediately in a sturdy building. Avoid windows and stay indoors until the all-clear is given.</div>
+                 <div class="text-gray-300 text-xs leading-relaxed mb-1">Typhoon approaching your area. Seek shelter immediately.</div>
                  <div class="text-gray-500 text-xs">Just now</div>
              </div>
-             <div class="py-3 sm:py-4 px-4 sm:px-5 border-b border-gray-700 cursor-pointer transition-all duration-300 relative text-white hover:bg-gray-800/50">
-                 <div class="absolute top-3 sm:top-4 right-3 sm:right-4 w-2 h-2 rounded-full priority-high"></div>
-                 <div class="font-semibold text-red-400 mb-1 text-sm">🌊 Flood Alert</div>
-                 <div class="text-gray-300 text-xs leading-relaxed mb-1">Rising water levels detected nearby. Move to higher ground immediately. Do not attempt to drive through flooded roads.</div>
+             <div class="py-4 px-5 border-b border-gray-700 cursor-pointer transition-all duration-300 relative text-white hover:bg-gray-800/50">
+                 <div class="absolute top-4 right-4 w-2 h-2 rounded-full priority-medium"></div>
+                 <div class="font-semibold text-yellow-400 mb-1 text-sm">📍 Location Services Active</div>
+                 <div class="text-gray-300 text-xs leading-relaxed mb-1">Your location is being shared with emergency services</div>
                  <div class="text-gray-500 text-xs">5 minutes ago</div>
              </div>
-             <div class="py-3 sm:py-4 px-4 sm:px-5 border-b border-gray-700 cursor-pointer transition-all duration-300 relative text-white hover:bg-gray-800/50">
-                 <div class="absolute top-3 sm:top-4 right-3 sm:right-4 w-2 h-2 rounded-full priority-medium"></div>
-                 <div class="font-semibold text-yellow-400 mb-1 text-sm">🔥 Fire Hazard Warning</div>
-                 <div class="text-gray-300 text-xs leading-relaxed mb-1">High fire risk in your area due to dry conditions. Avoid open flames and report any smoke immediately.</div>
-                 <div class="text-gray-500 text-xs">15 minutes ago</div>
-             </div>
-             <div class="py-3 sm:py-4 px-4 sm:px-5 border-b border-gray-700 cursor-pointer transition-all duration-300 relative text-white hover:bg-gray-800/50">
-                 <div class="absolute top-3 sm:top-4 right-3 sm:right-4 w-2 h-2 rounded-full priority-medium"></div>
-                 <div class="font-semibold text-yellow-400 mb-1 text-sm">⚡ Power Outage Alert</div>
-                 <div class="text-gray-300 text-xs leading-relaxed mb-1">Power outage affecting your area. Use flashlights instead of candles. Check on elderly neighbors and conserve phone battery.</div>
-                 <div class="text-gray-500 text-xs">30 minutes ago</div>
-             </div>
-             <div class="py-3 sm:py-4 px-4 sm:px-5 border-b border-gray-700 cursor-pointer transition-all duration-300 relative text-white hover:bg-gray-800/50">
-                 <div class="absolute top-3 sm:top-4 right-3 sm:right-4 w-2 h-2 rounded-full priority-medium"></div>
-                 <div class="font-semibold text-yellow-400 mb-1 text-sm">Location Services Active</div>
-                 <div class="text-gray-300 text-xs leading-relaxed mb-1">Your location is being shared with emergency services</div>
-                 <div class="text-gray-500 text-xs">1 hour ago</div>
-             </div>
-             <div class="py-3 sm:py-4 px-4 sm:px-5 cursor-pointer transition-all duration-300 relative text-white hover:bg-gray-800/50">
-                 <div class="absolute top-3 sm:top-4 right-3 sm:right-4 w-2 h-2 rounded-full priority-low"></div>
-                 <div class="font-semibold text-yellow-400 mb-1 text-sm">System Ready</div>
-                 <div class="text-gray-300 text-xs leading-relaxed mb-1">Emergency response system is online and ready</div>
-                 <div class="text-gray-500 text-xs">2 hours ago</div>
+             <div class="py-4 px-5 cursor-pointer transition-all duration-300 relative text-white hover:bg-gray-800/50">
+                 <div class="absolute top-4 right-4 w-2 h-2 rounded-full priority-low"></div>
+                 <div class="font-semibold text-green-400 mb-1 text-sm">✅ System Ready</div>
+                 <div class="text-gray-300 text-xs leading-relaxed mb-1">Emergency response system is online</div>
+                 <div class="text-gray-500 text-xs">10 minutes ago</div>
              </div>
          </div>
      </div>
 
      <!-- Confirmation Modal -->
-     <div class="confirmation-modal fixed inset-0 bg-black/80 flex items-center justify-center z-[3000] transition-all duration-300" id="confirmationModal">
-         <div class="confirmation-content rounded-2xl p-6 sm:p-8 max-w-xs sm:max-w-sm w-11/12 text-center shadow-2xl">
-             <div class="text-xl sm:text-2xl font-bold text-red-400 mb-4">⚠️ Confirm Emergency Dispatch</div>
-             <div class="text-sm sm:text-base text-gray-300 mb-5 leading-relaxed">
-                 Are you sure you want to contact the ambulance? This will alert emergency services and dispatch an ambulance to your location.
+     <div class="confirmation-modal fixed inset-0 bg-black/80 flex items-center justify-center z-[3000]" id="confirmationModal">
+         <div class="confirmation-content p-8 max-w-sm w-11/12 text-center shadow-2xl">
+             <div class="text-2xl font-bold text-green-400 mb-4">⚠️ Confirm Emergency</div>
+             <div class="text-base text-gray-300 mb-5 leading-relaxed">
+                 Are you sure you want to request emergency assistance? This will alert emergency services immediately.
              </div>
-             <div class="text-4xl sm:text-5xl font-bold text-red-400 my-5 font-mono" id="countdownDisplay">10</div>
-             <div class="flex gap-3 sm:gap-4 justify-center">
-                 <button class="cancel-btn py-2 sm:py-3 px-6 sm:px-8 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-xs sm:text-sm text-white" onclick="cancelDispatch()">Cancel</button>
-                 <button class="confirm-btn py-2 sm:py-3 px-6 sm:px-8 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-xs sm:text-sm text-white" onclick="confirmDispatch()">Confirm Dispatch</button>
+             <div class="text-5xl font-bold text-green-400 my-5 font-mono" id="countdownDisplay">10</div>
+             <div class="flex gap-4 justify-center">
+                 <button class="cancel-btn py-3 px-8 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-white" onclick="cancelDispatch()">Cancel</button>
+                 <button class="confirm-btn py-3 px-8 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-white" onclick="confirmDispatch()">Confirm</button>
              </div>
          </div>
      </div>
 
      <script>
-         // All your existing JavaScript code with enhanced functionality
+         // Enhanced JavaScript with Grab-like functionality
          var map;
          var userLocationMarker;
          var ambulanceMarkers = [];
@@ -482,6 +583,45 @@
          var confirmationTimer = null;
          var countdownInterval = null;
          var pendingDispatch = false;
+         var sidebarVisible = false;
+
+         // Sidebar functionality
+         function toggleSidebar() {
+             const sidebar = document.getElementById('sidebar');
+             const overlay = document.getElementById('sidebarOverlay');
+             sidebarVisible = !sidebarVisible;
+
+             if (sidebarVisible) {
+                 sidebar.classList.add('active');
+                 overlay.classList.add('active');
+             } else {
+                 sidebar.classList.remove('active');
+                 overlay.classList.remove('active');
+             }
+         }
+
+         // Chat system functionality
+         function startChatSimulation() {
+             const chatSystem = document.getElementById('chatSystem');
+             chatSystem.classList.remove('hidden');
+
+             document.getElementById('chatInput').disabled = false;
+             document.getElementById('sendMessage').disabled = false;
+             chatActive = true;
+             chatStep = 0;
+
+             setTimeout(function() {
+                 addChatMessage('Emergency Dispatcher', 'Emergency services responding. How can we assist you?', 'dispatcher');
+             }, 1000);
+         }
+
+         function closeChatSystem(event) {
+             if (event && event.target !== event.currentTarget) return;
+
+             const chatSystem = document.getElementById('chatSystem');
+             chatSystem.classList.add('hidden');
+             chatActive = false;
+         }
 
          // Enhanced notification system
          function toggleNotifications() {
@@ -538,11 +678,6 @@
              pendingDispatch = false;
              document.getElementById('countdownDisplay').textContent = '10';
 
-             // Actually start the ambulance simulation
-             document.getElementById('findNearestAmbulance').disabled = true;
-             document.getElementById('simulateMovement').style.display = 'none';
-             document.getElementById('chatInput').disabled = true;
-             document.getElementById('sendMessage').disabled = true;
              simulateAmbulanceMovement();
          }
 
@@ -553,9 +688,7 @@
                  addChatMessage('System', '🚨 EMERGENCY BUTTON ACTIVATED - EMERGENCY SERVICES ALERTED', 'emergency');
              }
 
-             findNearestAmbulance();
-
-             alert('🚨 EMERGENCY SERVICES HAVE BEEN NOTIFIED!\n\nHelp is on the way. Please stay calm and follow the instructions in the chat.');
+             showConfirmationModal();
          }
 
          function initializeAudio() {
@@ -572,17 +705,8 @@
                          console.log('Siren sound loaded successfully');
                      });
 
-                     emergencySound.addEventListener('error', function(e) {
-                         console.log('Emergency sound failed to load:', e);
-                     });
-
-                     sirenSound.addEventListener('error', function(e) {
-                         console.log('Siren sound failed to load:', e);
-                     });
-
                      emergencySound.load();
                      sirenSound.load();
-
                      audioInitialized = true;
                  } catch (e) {
                      console.log('Audio initialization failed:', e);
@@ -597,8 +721,6 @@
                  if (sound.readyState >= 2) {
                      sound.volume = 0.7;
                      sound.play().catch(e => console.log('Could not play emergency sound:', e));
-                 } else {
-                     console.log('Emergency sound not ready to play');
                  }
              } catch (e) {
                  console.log('Emergency sound not available:', e);
@@ -613,8 +735,6 @@
                      sound.volume = 0.6;
                      sound.loop = true;
                      sound.play().catch(e => console.log('Could not play siren sound:', e));
-                 } else {
-                     console.log('Siren sound not ready to play');
                  }
              } catch (e) {
                  console.log('Siren sound not available:', e);
@@ -641,8 +761,6 @@
          }
 
          function addFloodPoints(centerLat, centerLng) {
-             var distanceInDegrees = 50 / 111320;
-
              var floodIcon = L.divIcon({
                  html: '<div class="w-8 h-8 rounded-full flex items-center justify-center text-base hazard-point flood-point">🌊</div>',
                  iconSize: [30, 30],
@@ -650,12 +768,11 @@
                  className: 'custom-div-icon'
              });
 
-             // Add multiple flood points around the area
              var floodLocations = [
                  {lat: 16.58096627153094, lng: 121.18894636631013, severity: 'Moderate'},
                  {lat: 16.57778888993198, lng: 121.18751943111421, severity: 'High'},
                  {lat: 16.57759865668323, lng: 121.1872297525406, severity: 'Low'},
-                 {lat: 16.57970149484927, lng: 121.18929505348206, severity: "Baha na"},
+                 {lat: 16.57970149484927, lng: 121.18929505348206, severity: "Severe"},
                  {lat: 16.582611497050678, lng: 121.18772864341737, severity: 'High'}
              ];
 
@@ -672,19 +789,15 @@
 
              var ambulanceSvg = `
                  <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                     <rect x="3" y="12" width="20" height="10" rx="1" fill="#ffffff" stroke="#ff0000" stroke-width="1"/>
-                     <rect x="3" y="8" width="8" height="4" rx="1" fill="#ffffff" stroke="#ff0000" stroke-width="1"/>
+                     <rect x="3" y="12" width="20" height="10" rx="1" fill="#ffffff" stroke="#00c264" stroke-width="2"/>
+                     <rect x="3" y="8" width="8" height="4" rx="1" fill="#ffffff" stroke="#00c264" stroke-width="2"/>
                      <rect x="4" y="9" width="6" height="2" fill="#87ceeb"/>
                      <rect x="13" y="13" width="4" height="3" fill="#87ceeb"/>
                      <rect x="18" y="13" width="4" height="3" fill="#87ceeb"/>
-                     <rect x="14.5" y="17" width="3" height="1" fill="#ff0000"/>
-                     <rect x="15.5" y="16" width="1" height="3" fill="#ff0000"/>
+                     <rect x="14.5" y="17" width="3" height="1" fill="#00c264"/>
+                     <rect x="15.5" y="16" width="1" height="3" fill="#00c264"/>
                      <circle cx="7" cy="23" r="2" fill="#333333"/>
                      <circle cx="19" cy="23" r="2" fill="#333333"/>
-                     <circle cx="7" cy="23" r="1" fill="#666666"/>
-                     <circle cx="19" cy="23" r="1" fill="#666666"/>
-                     <rect x="2" y="10" width="1" height="1" fill="#ff0000" opacity="0.8"/>
-                     <rect x="22" y="14" width="1" height="1" fill="#0000ff" opacity="0.8"/>
                  </svg>
              `;
 
@@ -760,28 +873,22 @@
          }
 
          function updateStatusDisplay(status, eta, distance) {
-             document.getElementById('statusText').textContent = status;
-             document.getElementById('etaText').textContent = eta;
-             document.getElementById('distanceText').textContent = distance;
+             document.getElementById('statusTextCompact').textContent = status;
+             document.getElementById('statusCompact').style.display = 'block';
          }
 
-         // Enhanced chat system with auto-scroll
          function addChatMessage(sender, message, type = 'user', isImage = false) {
              var chatMessages = document.getElementById('chatMessages');
              var messageDiv = document.createElement('div');
 
-             messageDiv.classList.add('message', 'fade-in', 'max-w-[85%]', 'py-2.5', 'px-4', 'rounded-2xl', 'text-sm', 'leading-relaxed', 'break-words');
-             messageDiv.style.flexShrink = '0';
+             messageDiv.classList.add('message', 'fade-in', 'max-w-[85%]', 'py-3', 'px-4', 'text-sm', 'leading-relaxed', 'break-words');
 
              if (type === 'dispatcher') {
                  messageDiv.classList.add('dispatcher', 'self-start');
-                 messageDiv.style.borderBottomLeftRadius = '5px';
-                 playEmergencySound();
              } else if (type === 'emergency') {
                  messageDiv.classList.add('emergency', 'self-center', 'text-center', 'font-semibold');
              } else {
                  messageDiv.classList.add('user', 'self-end');
-                 messageDiv.style.borderBottomRightRadius = '5px';
              }
 
              if (isImage) {
@@ -792,7 +899,6 @@
 
              chatMessages.appendChild(messageDiv);
 
-             // Auto-scroll to bottom with smooth behavior
              setTimeout(() => {
                  chatMessages.scrollTo({
                      top: chatMessages.scrollHeight,
@@ -801,85 +907,20 @@
              }, 100);
          }
 
-         function handleImageUpload() {
-             var fileInput = document.getElementById('imageUpload');
-             var file = fileInput.files[0];
-
-             if (file) {
-                 var reader = new FileReader();
-                 reader.onload = function(e) {
-                     var imageUrl = e.target.result;
-                     var previewDiv = document.getElementById('imagePreview');
-                     var previewImg = document.getElementById('previewImg');
-
-                     previewImg.src = imageUrl;
-                     previewDiv.style.display = 'block';
-
-                     var imageHtml = '<img src="' + imageUrl + '" style="max-width: 150px; height: auto; border-radius: 8px; border: 2px solid #ddd; margin-top: 5px;">';
-                     addChatMessage('You', imageHtml, 'user', true);
-
-                     setTimeout(function() {
-                         addChatMessage('Emergency Dispatcher', 'Photo received. This visual information helps us assess the situation better. Emergency response has been prioritized.', 'dispatcher');
-                     }, 2000);
-
-                     fileInput.value = '';
-                     previewDiv.style.display = 'none';
-                 };
-                 reader.readAsDataURL(file);
-             }
-         }
-
-         function startChatSimulation() {
-             // Show chat system and adjust layout
-             const mainContainer = document.querySelector('.main-container');
-             const chatSystem = document.getElementById('chatSystem');
-
-             mainContainer.classList.add('chat-active');
-             chatSystem.style.display = 'flex';
-             chatSystem.classList.add('slide-in');
-
-             document.getElementById('chatInput').disabled = false;
-             document.getElementById('sendMessage').disabled = false;
-             chatActive = true;
-             chatStep = 0;
-
-             // Invalidate map size after layout change
-             setTimeout(function() {
-                 if (map) {
-                     map.invalidateSize();
-                 }
-             }, 350); // Wait for transition to complete
-
-             setTimeout(function() {
-                 addChatMessage('Emergency Dispatcher', 'Emergency services responding. How can we assist you?', 'dispatcher');
-
-                 setTimeout(function() {
-                     addChatMessage('Emergency Dispatcher', 'I can see your location. Are you in immediate danger?', 'dispatcher');
-                 }, 2000);
-             }, 1000);
-         }
-
          function simulateChatResponse(userMessage) {
              var responses = [
                  'Can you describe your current condition?',
                  'How many people require medical attention?',
-                 'Are you in a safe location away from traffic?',
-                 'Ambulance has been dispatched to your exact location.',
-                 'ETA is approximately 8-12 minutes. Please remain calm and stay on the line.'
+                 'Are you in a safe location?',
+                 'Ambulance has been dispatched to your location.',
+                 'ETA is approximately 8-12 minutes. Please remain calm.'
              ];
 
              if (chatStep < responses.length) {
                  setTimeout(function() {
                      addChatMessage('Emergency Dispatcher', responses[chatStep], 'dispatcher');
                      chatStep++;
-
-                     if (chatStep >= responses.length) {
-                         setTimeout(function() {
-                             addChatMessage('Emergency Dispatcher', 'You can now track the ambulance on the map. Help is on the way.', 'dispatcher');
-                             document.getElementById('startDispatch').style.display = 'block';
-                         }, 2000);
-                     }
-                 }, 1500 + Math.random() * 1000);
+                 }, 1500);
              }
          }
 
@@ -887,6 +928,7 @@
              if (!selectedAmbulance || !simulationData) return;
 
              playSirenSound();
+             updateStatusDisplay('Ambulance dispatched', '--', '--');
 
              var coordinates = simulationData.coordinates;
              var totalDuration = simulationData.duration || 300;
@@ -900,15 +942,16 @@
                  if (currentRouteIndex >= coordinates.length - 1) {
                      clearInterval(simulationInterval);
                      stopSirenSound();
-                     updateStatusDisplay('Arrived at location', '0 minutes', '0 meters');
-                     selectedAmbulance.setPopupContent('🚑 Ambulance Arrived!<br>Paramedics en route to patient...');
+                     updateStatusDisplay('Ambulance arrived');
+                     selectedAmbulance.setPopupContent('🚑 Ambulance Arrived!');
                      selectedAmbulance.openPopup();
 
-                     addChatMessage('Emergency Dispatcher', '🚑 Ambulance has arrived at your location. Paramedics will be with you momentarily.', 'dispatcher');
+                     if (chatActive) {
+                         addChatMessage('Emergency Dispatcher', '🚑 Ambulance has arrived at your location.', 'dispatcher');
+                     }
 
                      setTimeout(function() {
-                         alert('🎉 Ambulance has successfully reached the patient!\n\nEmergency response completed.');
-                         resetSimulation();
+                         alert('🎉 Emergency response completed successfully!');
                      }, 3000);
                      return;
                  }
@@ -917,74 +960,18 @@
                  selectedAmbulance.setLatLng([currentPos[0], currentPos[1]]);
 
                  var remainingCoords = coordinates.slice(currentRouteIndex);
-                 var remainingDistance = 0;
-                 for (var i = 0; i < remainingCoords.length - 1; i++) {
-                     remainingDistance += calculateDistance(
-                         remainingCoords[i][0], remainingCoords[i][1],
-                         remainingCoords[i + 1][0], remainingCoords[i + 1][1]
-                     );
-                 }
-
-                 var remainingTime = Math.round((remainingDistance / 1000) * 2);
-
-                 updateStatusDisplay(
-                     'En route to patient',
-                     remainingTime + ' minutes',
-                     Math.round(remainingDistance) + ' meters'
-                 );
-
                  if (routeLine) {
                      map.removeLayer(routeLine);
                  }
                  routeLine = L.polyline(remainingCoords, {
-                     color: 'blue',
+                     color: '#00c264',
                      weight: 4,
                      opacity: 0.7,
                      dashArray: '5, 10'
                  }).addTo(map);
 
-                 selectedAmbulance.setPopupContent(
-                     '🚑 Ambulance En Route<br>' +
-                     'Distance: ' + Math.round(remainingDistance) + 'm<br>' +
-                     'ETA: ' + remainingTime + ' min'
-                 );
-
                  currentRouteIndex += stepSize;
              }, stepInterval);
-         }
-
-         function resetSimulation() {
-             if (simulationInterval) {
-                 clearInterval(simulationInterval);
-                 simulationInterval = null;
-             }
-
-             stopSirenSound();
-
-             selectedAmbulance = null;
-             simulationData = null;
-             currentRouteIndex = 0;
-             chatActive = false;
-             chatStep = 0;
-
-             // Reset layout
-             const mainContainer = document.querySelector('.main-container');
-             mainContainer.classList.remove('chat-active');
-
-             document.getElementById('simulateMovement').style.display = 'none';
-             document.getElementById('statusDisplay').style.display = 'none';
-             document.getElementById('chatSystem').style.display = 'none';
-             document.getElementById('startDispatch').style.display = 'none';
-             document.getElementById('findNearestAmbulance').disabled = false;
-             document.getElementById('chatMessages').innerHTML = '';
-             document.getElementById('imagePreview').style.display = 'none';
-
-             // Invalidate map size after layout change
-             setTimeout(function() {
-                 if (map) {
-                     map.invalidateSize();
-                 }
-             }, 350);
          }
 
          function findNearestAmbulanceWithRouting() {
@@ -1029,27 +1016,21 @@
                      }
 
                      routeLine = L.polyline(shortestRoute.coordinates, {
-                         color: 'red',
+                         color: '#00c264',
                          weight: 4,
                          opacity: 0.8
                      }).addTo(map);
 
-                     var durationText = shortestRoute.duration ?
-                         '<br>Duration: ' + Math.round(shortestRoute.duration / 60) + ' minutes' : '';
-
                      nearestAmbulance.openPopup();
-                     nearestAmbulance.setPopupContent('🚑 Nearest Ambulance<br>Route Distance: ' +
-                         Math.round(shortestDistance) + ' meters' + durationText);
-
-                     map.fitBounds(routeLine.getBounds(), {padding: [20, 20]});
-
-                     document.getElementById('simulateMovement').style.display = 'inline-block';
-                     document.getElementById('statusDisplay').style.display = 'block';
-                     updateStatusDisplay('Ready for dispatch',
-                         shortestRoute.duration ? Math.round(shortestRoute.duration / 60) + ' minutes' : '--',
+                     nearestAmbulance.setPopupContent('🚑 Nearest Ambulance<br>Distance: ' +
                          Math.round(shortestDistance) + ' meters');
 
-                     startChatSimulation();
+                     map.fitBounds(routeLine.getBounds(), {padding: [20, 20]});
+                     updateStatusDisplay('Ambulance found', '--', Math.round(shortestDistance) + 'm');
+
+                     if (!chatActive) {
+                         startChatSimulation();
+                     }
                  }
              });
          }
@@ -1076,14 +1057,6 @@
              map.on('click', onMapClick);
 
              // Event listeners
-             document.getElementById('findNearestAmbulance').addEventListener('click', findNearestAmbulance);
-
-             document.getElementById('simulateMovement').addEventListener('click', function() {
-                 showConfirmationModal();
-             });
-
-             document.getElementById('sendImage').addEventListener('click', handleImageUpload);
-
              document.getElementById('sendMessage').addEventListener('click', function() {
                  var input = document.getElementById('chatInput');
                  var message = input.value.trim();
@@ -1100,28 +1073,24 @@
                  }
              });
 
-             document.getElementById('startDispatch').addEventListener('click', function() {
-                 showConfirmationModal();
-             });
-
              hideLoading();
 
              setTimeout(function() {
                  map.invalidateSize();
-             }, 10);
+             }, 100);
          }
 
-         // Close notifications when clicking outside
+         // Close notifications and sidebar when clicking outside
          document.addEventListener('click', function(event) {
              const panel = document.getElementById('notificationPanel');
-             const button = document.querySelector('.notification-btn');
+             const notifButton = event.target.closest('[onclick="toggleNotifications()"]');
 
-             if (notificationVisible && !panel.contains(event.target) && !button.contains(event.target)) {
+             if (notificationVisible && !panel.contains(event.target) && !notifButton) {
                  toggleNotifications();
              }
          });
 
-         // Initialize map with default location (Villaverde, Nueva Vizcaya)
+         // Initialize map with default location
          initMap(16.606254918019598, 121.18314743041994);
      </script>
 </section>

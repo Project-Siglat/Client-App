@@ -10,9 +10,9 @@
         SIGLAT provides immediate emergency rescue services 24/7 in Villaverde, Nueva Vizcaya. When disaster strikes, we're here to help.
       </p>
       <div class="flex flex-wrap justify-center gap-4">
-        <button class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-4 px-10 rounded-xl transition-all duration-300 shadow-lg hover:shadow-red-500/30">
-          Emergency Alert
-        </button>
+          <a href="/client" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-4 px-10 rounded-xl transition-all duration-300 shadow-lg hover:shadow-red-500/30">
+            Emergency Alert
+          </a>
         <a href="/about" class="border-2 border-gradient-to-r border-yellow-500 text-yellow-400 hover:bg-gradient-to-r hover:from-yellow-500/10 hover:to-red-500/10 hover:text-yellow-300 font-semibold py-4 px-10 rounded-xl transition-all duration-300">
           Learn More
         </a>

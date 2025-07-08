@@ -9,6 +9,9 @@ switch ($request_uri) {
     case "/about":
         include "./pages/landing-page/about.php";
         break;
+    case "/contact":
+        include "./pages/contact/core.php";
+        break;
     case "/login":
         include "./pages/auth/login.php";
         break;
