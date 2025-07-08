@@ -8,10 +8,12 @@ COPY . .
 
 RUN composer install
 
-FROM nginx
+FROM php:8.1-cli
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
+
+COPY --from=build /app /app
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["php", "-S", "0.0.0.0:80", "-t", "/app"]
