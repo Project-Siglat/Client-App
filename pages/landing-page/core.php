@@ -9,13 +9,13 @@
       <p class="text-xl mb-10 text-gray-300 max-w-2xl mx-auto leading-relaxed">
         SIGLAT provides immediate emergency rescue services 24/7 in Villaverde, Nueva Vizcaya. When disaster strikes, we're here to help.
       </p>
-      <div class="space-x-4">
+      <div class="flex flex-wrap justify-center gap-4">
         <button class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-4 px-10 rounded-xl transition-all duration-300 shadow-lg hover:shadow-red-500/30">
           Emergency Alert
         </button>
-        <button class="border-2 border-gradient-to-r border-yellow-500 text-yellow-400 hover:bg-gradient-to-r hover:from-yellow-500/10 hover:to-red-500/10 hover:text-yellow-300 font-semibold py-4 px-10 rounded-xl transition-all duration-300">
+        <a href="/about" class="border-2 border-gradient-to-r border-yellow-500 text-yellow-400 hover:bg-gradient-to-r hover:from-yellow-500/10 hover:to-red-500/10 hover:text-yellow-300 font-semibold py-4 px-10 rounded-xl transition-all duration-300">
           Learn More
-        </button>
+        </a>
       </div>
     </div>
   </section>
@@ -58,49 +58,7 @@
   <!-- Footer -->
   <footer class="bg-gradient-to-r from-black via-gray-900 to-black py-12 px-6 border-t border-gray-800">
     <div class="container mx-auto text-center">
-      <p class="text-gray-500">&copy; 2024 SIGLAT Emergency Services. All rights reserved.</p>
+        <p class="text-gray-500">&copy; 2025 SIGLAT Emergency Services. All rights reserved.</p>
     </div>
   </footer>
 </div>
-
-<script>
-function toggleMobileMenu() {
-  const mobileMenu = document.getElementById('mobileMenu');
-  const hamburger = document.getElementById('hamburger');
-  const close = document.getElementById('close');
-  const menuButton = document.getElementById('mobileMenuButton');
-  const menuLinks = mobileMenu.querySelectorAll('nav a');
-
-  const isOpen = mobileMenu.classList.contains('max-h-0');
-
-  if (isOpen) {
-    // Open menu
-    mobileMenu.classList.remove('max-h-0');
-    mobileMenu.classList.add('max-h-96');
-    hamburger.classList.add('hidden');
-    close.classList.remove('hidden');
-    menuButton.querySelector('svg').classList.add('rotate-90');
-
-    // Animate menu items
-    menuLinks.forEach((link, index) => {
-      setTimeout(() => {
-        link.classList.remove('translate-y-2', 'opacity-0');
-        link.classList.add('translate-y-0', 'opacity-100');
-      }, index * 50);
-    });
-  } else {
-    // Close menu
-    mobileMenu.classList.remove('max-h-96');
-    mobileMenu.classList.add('max-h-0');
-    hamburger.classList.remove('hidden');
-    close.classList.add('hidden');
-    menuButton.querySelector('svg').classList.remove('rotate-90');
-
-    // Reset menu items
-    menuLinks.forEach(link => {
-      link.classList.remove('translate-y-0', 'opacity-100');
-      link.classList.add('translate-y-2', 'opacity-0');
-    });
-  }
-}
-</script>
