@@ -265,7 +265,7 @@
 
                  <!-- Map Controls - Right Side -->
                  <div class="absolute top-4 right-4 flex flex-col gap-2 z-50">
-                     <button id="simulateMovement" class="control-btn success border-none py-3 px-5 rounded-lg cursor-pointer shadow-lg transition-all duration-300 font-semibold text-white min-w-44 text-left flex items-center gap-2 text-sm hidden">
+                     <button id="simulateMovement" class="control-btn success border-none py-3 px-5 rounded-lg cursor-pointer shadow-lg transition-all duration-300 font-semibold text-white min-w-44 text-left flex items-center gap-2 text-sm">
                          ▶️ Start Ambulance Movement
                      </button>
                  </div>
@@ -293,7 +293,7 @@
          <!-- Sidebar -->
          <aside class="bg-white/95 backdrop-blur-sm flex flex-col border-l border-black/10" style="grid-area: sidebar; min-height: 0; max-height: calc(100vh - 60px);">
              <!-- Chat System -->
-             <div id="chatSystem" class="flex-1 flex flex-col h-full hidden" style="min-height: 0;">
+             <div id="chatSystem" class="flex-1 flex-col h-full hidden" style="min-height: 0;">
                  <div class="p-5 border-b border-black/10 bg-red-500/5" style="flex-shrink: 0;">
                      <div class="text-xl font-semibold text-red-700 mb-1">Emergency Chat</div>
                      <div class="text-xs text-gray-600 uppercase">Live Support Available</div>
@@ -325,7 +325,7 @@
                              </svg>
                          </button>
                      </div>
-                     <button id="startDispatch" class="dispatch-btn w-full p-3 text-white border-none rounded-lg cursor-pointer font-bold text-sm transition-all duration-300 hidden">
+                     <button id="startDispatch" class="dispatch-btn w-full p-3 text-white border-none rounded-lg cursor-pointer font-bold text-sm transition-all duration-300">
                          🚑 Start Ambulance Dispatch
                      </button>
                  </div>

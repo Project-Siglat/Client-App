@@ -3,6 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" type="image/png" href="https://staging-invest.rdc2.gov.ph/wp-content/uploads/2024/04/villaverde.png">
 	<title>Siglat</title>
 </head>
 <body>
@@ -11,19 +12,8 @@
     <!-- Eto yung cdn external dependencies -->
 
     <!-- Andito lahat ng mga ruta ng mga web pages.... -->
-    <?php
-    require_once __DIR__ . "/vendor/autoload.php";
 
-    use Dotenv\Dotenv;
 
-    $dotenv = Dotenv::createImmutable(__DIR__);
-    $dotenv->load();
-
-    $iyot = $_ENV["ENVIRONMENT"];
-
-    echo $iyot;
-
-    include "./pack/route.php";
-    ?>
+    <?php include "./config/route.php"; ?>
 </body>
 </html>
