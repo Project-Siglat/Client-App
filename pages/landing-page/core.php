@@ -5,7 +5,7 @@
   <!-- Hero Section -->
   <section class="py-24 px-6 bg-gradient-to-b from-transparent via-red-950/10 to-transparent">
     <div class="container mx-auto text-center">
-      <h2 class="text-6xl font-bold mb-6 bg-gradient-to-r from-yellow-400 via-red-500 to-yellow-400 bg-clip-text text-transparent leading-tight">Emergency Response System</h2>
+      <h2 class="text-6xl font-bold mb-6 text-white leading-tight">Emergency Response System</h2>
       <p class="text-xl mb-10 text-gray-300 max-w-2xl mx-auto leading-relaxed">
         SIGLAT provides immediate emergency rescue services 24/7 in Villaverde, Nueva Vizcaya. When disaster strikes, we're here to help.
       </p>
@@ -23,7 +23,7 @@
   <!-- Features Section -->
   <section class="py-20 px-6 bg-gradient-to-b from-gray-900/50 via-black to-gray-900/50">
     <div class="container mx-auto">
-      <h3 class="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-yellow-400 to-red-500 bg-clip-text text-transparent">Why Choose SIGLAT</h3>
+      <h3 class="text-4xl font-bold text-center mb-16 text-white">Why Choose SIGLAT</h3>
       <div class="grid md:grid-cols-3 gap-8">
         <div class="text-center p-8 bg-gradient-to-b from-gray-800/50 to-black/50 rounded-2xl border border-yellow-500/20 hover:border-yellow-500/40 transition-all duration-300 backdrop-blur-sm">
           <div class="text-yellow-400 text-5xl mb-6">🚨</div>
