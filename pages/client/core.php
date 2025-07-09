@@ -52,7 +52,7 @@
 
          @keyframes slideIn {
              from {
-                 transform: translateX(-100%);
+                 transform: translateX(100%);
                  opacity: 0;
              }
              to {
@@ -67,7 +67,7 @@
                  opacity: 1;
              }
              to {
-                 transform: translateX(-100%);
+                 transform: translateX(100%);
                  opacity: 0;
              }
          }
@@ -97,20 +97,20 @@
              box-shadow: 0 8px 25px rgba(0,194,100,0.6);
          }
 
-         .burger-menu {
+         .profile-icon {
              cursor: pointer;
              transition: all 0.3s ease;
          }
 
-         .burger-menu:hover {
+         .profile-icon:hover {
              transform: scale(1.1);
          }
 
          .sidebar {
              position: fixed;
              top: 0;
-             left: -320px;
-             width: 320px;
+             right: -280px;
+             width: 280px;
              height: 100vh;
              background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
              z-index: 9999;
@@ -119,7 +119,7 @@
          }
 
          .sidebar.active {
-             left: 0;
+             right: 0;
          }
 
          .sidebar-overlay {
@@ -147,6 +147,35 @@
              width: 60px;
              height: 60px;
              border-radius: 50%;
+             background: linear-gradient(45deg, #ff4444, #cc0000);
+             color: white;
+             border: none;
+             box-shadow: 0 4px 20px rgba(255,68,68,0.3);
+             cursor: pointer;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             font-size: 24px;
+             z-index: 1000;
+             transition: all 0.3s ease;
+         }
+
+         .floating-action-btn:hover {
+             transform: scale(1.1);
+             box-shadow: 0 6px 25px rgba(255,68,68,0.5);
+         }
+
+         .floating-action-btn.hidden {
+             display: none;
+         }
+
+         .floating-find-btn {
+             position: fixed;
+             bottom: 150px;
+             right: 20px;
+             width: 60px;
+             height: 60px;
+             border-radius: 50%;
              background: linear-gradient(45deg, #00c264, #00a556);
              color: white;
              border: none;
@@ -160,9 +189,38 @@
              transition: all 0.3s ease;
          }
 
-         .floating-action-btn:hover {
+         .floating-find-btn:hover {
              transform: scale(1.1);
              box-shadow: 0 6px 25px rgba(0,194,100,0.5);
+         }
+
+         .floating-find-btn.hidden {
+             display: none;
+         }
+
+         .floating-chat-btn {
+             position: fixed;
+             bottom: 220px;
+             right: 20px;
+             width: 60px;
+             height: 60px;
+             border-radius: 50%;
+             background: linear-gradient(45deg, #2196f3, #1976d2);
+             color: white;
+             border: none;
+             box-shadow: 0 4px 20px rgba(33,150,243,0.3);
+             cursor: pointer;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             font-size: 24px;
+             z-index: 1000;
+             transition: all 0.3s ease;
+         }
+
+         .floating-chat-btn:hover {
+             transform: scale(1.1);
+             box-shadow: 0 6px 25px rgba(33,150,243,0.5);
          }
 
          .control-btn.emergency {
@@ -262,6 +320,15 @@
              background: linear-gradient(45deg, #555555, #333333);
          }
 
+         .logout-btn {
+             background: linear-gradient(45deg, #dc2626, #b91c1c);
+             border-radius: 25px;
+         }
+
+         .logout-btn:hover {
+             background: linear-gradient(45deg, #ef4444, #dc2626);
+         }
+
          .hazard-point {
              animation: hazardPulse 2s infinite;
          }
@@ -334,6 +401,23 @@
              display: none;
          }
 
+         .loading-overlay {
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100vw;
+             height: 100vh;
+             background: rgba(0,0,0,0.8);
+             z-index: 10000;
+             display: none;
+             align-items: center;
+             justify-content: center;
+         }
+
+         .loading-overlay.show {
+             display: flex;
+         }
+
          @media (max-width: 768px) {
              .notification-panel {
                  width: calc(100vw - 2rem);
@@ -347,14 +431,26 @@
                  width: 50px;
                  height: 50px;
                  font-size: 20px;
-                 bottom: 100px;
+                 bottom: 80px;
+             }
+             .floating-find-btn {
+                 width: 50px;
+                 height: 50px;
+                 font-size: 20px;
+                 bottom: 140px;
+             }
+             .floating-chat-btn {
+                 width: 50px;
+                 height: 50px;
+                 font-size: 20px;
+                 bottom: 200px;
              }
          }
 
          @media (max-width: 640px) {
              .sidebar {
                  width: 280px;
-                 left: -280px;
+                 right: -280px;
              }
          }
      </style>
@@ -364,13 +460,6 @@
          <!-- Header -->
          <header class="bg-white shadow-sm border-b border-gray-200 px-4 py-3 flex items-center justify-between relative z-50">
              <div class="flex items-center gap-3">
-                 <button class="burger-menu p-2 rounded-lg hover:bg-gray-100" onclick="toggleSidebar()">
-                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2">
-                         <line x1="3" y1="6" x2="21" y2="6"></line>
-                         <line x1="3" y1="12" x2="21" y2="12"></line>
-                         <line x1="3" y1="18" x2="21" y2="18"></line>
-                     </svg>
-                 </button>
                  <div class="text-lg font-bold text-gray-800">EmergencyGo</div>
              </div>
 
@@ -383,9 +472,9 @@
                      <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center font-bold">3</span>
                  </button>
 
-                 <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                 <button class="profile-icon w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center" onclick="toggleSidebar()">
                      <span class="text-sm font-semibold text-gray-600">JS</span>
-                 </div>
+                 </button>
              </div>
          </header>
 
@@ -399,8 +488,27 @@
              </div>
              <div id="map" class="w-full h-full"></div>
 
+             <!-- Loading Overlay for Routing -->
+             <div id="routingLoading" class="loading-overlay">
+                 <div class="bg-white rounded-xl shadow-lg p-6">
+                     <div class="flex items-center gap-3">
+                         <div class="w-6 h-6 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin"></div>
+                         <span class="text-gray-700">Finding nearest ambulance...</span>
+                     </div>
+                 </div>
+             </div>
+
+             <!-- Floating Action Buttons -->
+             <button class="floating-chat-btn" onclick="startChatSimulation()" title="Emergency Chat">
+                 💬
+             </button>
+
+             <button class="floating-find-btn" onclick="findNearestAmbulance()" title="Find Ambulance">
+                 🚑
+             </button>
+
              <!-- Floating Emergency Button -->
-             <button class="floating-action-btn" onclick="triggerEmergency()">
+             <button class="floating-action-btn" onclick="triggerEmergency()" title="Call Emergency">
                  🚨
              </button>
 
@@ -414,81 +522,39 @@
          <!-- Sidebar -->
          <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
          <aside class="sidebar" id="sidebar">
-             <div class="p-6 border-b border-gray-700">
+             <div class="p-4 border-b border-gray-700">
                  <div class="flex items-center justify-between mb-4">
-                     <h2 class="text-xl font-bold text-white">Profile</h2>
+                     <h2 class="text-lg font-bold text-white">Profile</h2>
                      <button class="text-gray-400 hover:text-white" onclick="toggleSidebar()">
-                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                              <line x1="18" y1="6" x2="6" y2="18"></line>
                              <line x1="6" y1="6" x2="18" y2="18"></line>
                          </svg>
                      </button>
                  </div>
 
-                 <div class="flex items-center gap-4 mb-6">
-                     <div class="w-16 h-16 bg-gray-600 rounded-full flex items-center justify-center">
-                         <span class="text-xl font-bold text-white">JS</span>
+                 <div class="flex items-center gap-3 mb-4">
+                     <div class="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center">
+                         <span class="text-lg font-bold text-white">JS</span>
                      </div>
                      <div>
-                         <div class="text-lg font-semibold text-white">John Smith</div>
-                         <div class="text-sm text-gray-400">john.smith@email.com</div>
+                         <div class="text-sm font-semibold text-white">John Smith</div>
+                         <div class="text-xs text-gray-400">john.smith@email.com</div>
                          <div class="text-xs text-green-400">●  Online</div>
                      </div>
                  </div>
-
-                 <div class="space-y-3">
-                     <div class="bg-gray-800 rounded-lg p-3">
-                         <div class="text-xs text-gray-400 uppercase">Emergency Contact</div>
-                         <div class="text-sm text-white">+1 (555) 123-4567</div>
-                     </div>
-                     <div class="bg-gray-800 rounded-lg p-3">
-                         <div class="text-xs text-gray-400 uppercase">Location</div>
-                         <div class="text-sm text-white">Villaverde, Nueva Vizcaya</div>
-                     </div>
-                 </div>
              </div>
 
-             <!-- Emergency Actions -->
-             <div class="p-6">
-                 <h3 class="text-lg font-semibold text-white mb-4">Quick Actions</h3>
-                 <div class="space-y-3">
-                     <button class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300" onclick="findNearestAmbulance()">
-                         🚑 Find Ambulance
-                     </button>
-                     <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300" onclick="startChatSimulation()">
-                         💬 Emergency Chat
-                     </button>
-                     <button class="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300">
-                         📍 Share Location
-                     </button>
-                     <button class="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300">
-                         ⚠️ Report Hazard
-                     </button>
-                 </div>
-             </div>
-
-             <!-- Recent Activity -->
-             <div class="p-6 border-t border-gray-700">
-                 <h3 class="text-lg font-semibold text-white mb-4">Recent Activity</h3>
-                 <div class="space-y-3">
-                     <div class="flex items-center gap-3">
-                         <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                         <div class="text-sm text-gray-300">Emergency contact updated</div>
-                     </div>
-                     <div class="flex items-center gap-3">
-                         <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                         <div class="text-sm text-gray-300">Location services enabled</div>
-                     </div>
-                     <div class="flex items-center gap-3">
-                         <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                         <div class="text-sm text-gray-300">Profile verified</div>
-                     </div>
-                 </div>
+             <!-- Logout Button -->
+             <div class="p-4 border-t border-gray-700">
+                 <button class="logout-btn w-full py-2 px-3 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-white" onclick="logout()">
+                     🚪 Logout
+                 </button>
              </div>
          </aside>
 
          <!-- Chat System (Modal) -->
-         <div id="chatSystem" class="fixed inset-0 bg-black bg-opacity-30 z-[9999] hidden" onclick="closeChatSystem(event)">
+         <div id="chatSystem" class="fixed inset-0 bg-opacity-50 z-[9999] hidden" onclick="closeChatSystem(event)">
              <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[80vh] flex flex-col" onclick="event.stopPropagation()">
                  <div class="p-4 border-b border-gray-200 flex items-center justify-between">
                      <div>
@@ -584,6 +650,7 @@
          var countdownInterval = null;
          var pendingDispatch = false;
          var sidebarVisible = false;
+         var routeFound = false;
 
          // Sidebar functionality
          function toggleSidebar() {
@@ -598,6 +665,25 @@
                  sidebar.classList.remove('active');
                  overlay.classList.remove('active');
              }
+         }
+
+         // Logout functionality
+         function logout() {
+             // Close sidebar first
+             if (sidebarVisible) {
+                 toggleSidebar();
+             }
+
+             // Clear any ongoing activities
+             if (simulationInterval) {
+                 clearInterval(simulationInterval);
+             }
+             if (countdownInterval) {
+                 clearInterval(countdownInterval);
+             }
+
+             // Redirect to home
+             window.location.href = '/';
          }
 
          // Chat system functionality
@@ -633,6 +719,16 @@
              } else {
                  panel.classList.remove('show');
              }
+         }
+
+         function showLoadingOverlay() {
+             const overlay = document.getElementById('routingLoading');
+             overlay.classList.add('show');
+         }
+
+         function hideLoadingOverlay() {
+             const overlay = document.getElementById('routingLoading');
+             overlay.classList.remove('show');
          }
 
          function showConfirmationModal() {
@@ -682,6 +778,20 @@
          }
 
          function triggerEmergency() {
+             if (!routeFound) {
+                 findNearestAmbulanceWithRouting();
+                 setTimeout(() => {
+                     if (routeFound) {
+                         playEmergencySound();
+                         if (chatActive) {
+                             addChatMessage('System', '🚨 EMERGENCY BUTTON ACTIVATED - EMERGENCY SERVICES ALERTED', 'emergency');
+                         }
+                         showConfirmationModal();
+                     }
+                 }, 2000);
+                 return;
+             }
+
              playEmergencySound();
 
              if (chatActive) {
@@ -975,6 +1085,7 @@
          }
 
          function findNearestAmbulanceWithRouting() {
+             showLoadingOverlay();
              playEmergencySound();
 
              var userPos = userLocationMarker.getLatLng();
@@ -995,6 +1106,8 @@
              });
 
              Promise.all(routePromises).then(results => {
+                 hideLoadingOverlay();
+
                  var nearestAmbulance = null;
                  var shortestRoute = null;
                  var shortestDistance = Infinity;
@@ -1010,6 +1123,7 @@
                  if (nearestAmbulance && shortestRoute) {
                      selectedAmbulance = nearestAmbulance;
                      simulationData = shortestRoute;
+                     routeFound = true;
 
                      if (routeLine) {
                          map.removeLayer(routeLine);
