@@ -6,15 +6,14 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""></script>
      <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+     <!-- Leaflet Routing Machine for pathfinding -->
+     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 
      <!-- Audio elements for sound effects -->
      <audio id="emergencySound" preload="none">
          <source src="../assets/sounds/emergency.mp3" type="audio/mpeg">
          <source src="../assets/sounds/emergency.wav" type="audio/wav">
-     </audio>
-     <audio id="sirenSound" preload="none">
-         <source src="../assets/sounds/siren.mp3" type="audio/mpeg">
-         <source src="../assets/sounds/siren.wav" type="audio/wav">
      </audio>
 
      <style>
@@ -52,7 +51,7 @@
 
          @keyframes slideIn {
              from {
-                 transform: translateX(-100%);
+                 transform: translateX(100%);
                  opacity: 0;
              }
              to {
@@ -67,7 +66,7 @@
                  opacity: 1;
              }
              to {
-                 transform: translateX(-100%);
+                 transform: translateX(100%);
                  opacity: 0;
              }
          }
@@ -80,6 +79,17 @@
          @keyframes spin {
              0% { transform: rotate(0deg); }
              100% { transform: rotate(360deg); }
+         }
+
+         @keyframes countdownPulse {
+             0%, 100% {
+                 transform: scale(1);
+                 background: linear-gradient(45deg, #ff4444, #cc0000);
+             }
+             50% {
+                 transform: scale(1.1);
+                 background: linear-gradient(45deg, #ff6666, #ff4444);
+             }
          }
 
          .grab-theme {
@@ -97,20 +107,20 @@
              box-shadow: 0 8px 25px rgba(0,194,100,0.6);
          }
 
-         .burger-menu {
+         .profile-icon {
              cursor: pointer;
              transition: all 0.3s ease;
          }
 
-         .burger-menu:hover {
+         .profile-icon:hover {
              transform: scale(1.1);
          }
 
          .sidebar {
              position: fixed;
              top: 0;
-             left: -320px;
-             width: 320px;
+             right: -280px;
+             width: 280px;
              height: 100vh;
              background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
              z-index: 9999;
@@ -119,7 +129,7 @@
          }
 
          .sidebar.active {
-             left: 0;
+             right: 0;
          }
 
          .sidebar-overlay {
@@ -147,6 +157,35 @@
              width: 60px;
              height: 60px;
              border-radius: 50%;
+             background: linear-gradient(45deg, #ff4444, #cc0000);
+             color: white;
+             border: none;
+             box-shadow: 0 4px 20px rgba(255,68,68,0.3);
+             cursor: pointer;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             font-size: 24px;
+             z-index: 1000;
+             transition: all 0.3s ease;
+         }
+
+         .floating-action-btn:hover {
+             transform: scale(1.1);
+             box-shadow: 0 6px 25px rgba(255,68,68,0.5);
+         }
+
+         .floating-action-btn.hidden {
+             display: none;
+         }
+
+         .floating-find-btn {
+             position: fixed;
+             bottom: 150px;
+             right: 20px;
+             width: 60px;
+             height: 60px;
+             border-radius: 50%;
              background: linear-gradient(45deg, #00c264, #00a556);
              color: white;
              border: none;
@@ -160,9 +199,38 @@
              transition: all 0.3s ease;
          }
 
-         .floating-action-btn:hover {
+         .floating-find-btn:hover {
              transform: scale(1.1);
              box-shadow: 0 6px 25px rgba(0,194,100,0.5);
+         }
+
+         .floating-find-btn.hidden {
+             display: none;
+         }
+
+         .floating-chat-btn {
+             position: fixed;
+             bottom: 150px;
+             right: 20px;
+             width: 60px;
+             height: 60px;
+             border-radius: 50%;
+             background: linear-gradient(45deg, #2196f3, #1976d2);
+             color: white;
+             border: none;
+             box-shadow: 0 4px 20px rgba(33,150,243,0.3);
+             cursor: pointer;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             font-size: 24px;
+             z-index: 1000;
+             transition: all 0.3s ease;
+         }
+
+         .floating-chat-btn:hover {
+             transform: scale(1.1);
+             box-shadow: 0 6px 25px rgba(33,150,243,0.5);
          }
 
          .control-btn.emergency {
@@ -244,6 +312,49 @@
              border-radius: 20px;
          }
 
+         .countdown-modal {
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100vw;
+             height: 100vh;
+             background: rgba(0,0,0,0.9);
+             z-index: 10002;
+             display: none;
+             align-items: center;
+             justify-content: center;
+         }
+
+         .countdown-modal.show {
+             display: flex;
+         }
+
+         .countdown-content {
+             background: linear-gradient(135deg, #1a1a1a, #000000);
+             border: 1px solid #333;
+             color: #ffffff;
+             border-radius: 20px;
+             padding: 2rem;
+             max-width: 400px;
+             width: 90%;
+             text-align: center;
+             animation: modalSlideIn 0.3s ease-out;
+         }
+
+         .countdown-timer {
+             font-size: 4rem;
+             font-weight: bold;
+             color: #ff4444;
+             animation: countdownPulse 1s infinite;
+             border-radius: 50%;
+             width: 120px;
+             height: 120px;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             margin: 0 auto 1rem;
+         }
+
          .confirm-btn {
              background: linear-gradient(45deg, #00c264, #00a556);
              border-radius: 25px;
@@ -260,6 +371,15 @@
 
          .cancel-btn:hover {
              background: linear-gradient(45deg, #555555, #333333);
+         }
+
+         .logout-btn {
+             background: linear-gradient(45deg, #dc2626, #b91c1c);
+             border-radius: 25px;
+         }
+
+         .logout-btn:hover {
+             background: linear-gradient(45deg, #ef4444, #dc2626);
          }
 
          .hazard-point {
@@ -334,6 +454,91 @@
              display: none;
          }
 
+         .loading-overlay {
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100vw;
+             height: 100vh;
+             background: rgba(0,0,0,0.8);
+             z-index: 10000;
+             display: none;
+             align-items: center;
+             justify-content: center;
+         }
+
+         .loading-overlay.show {
+             display: flex;
+         }
+
+         .ambulance-finder-modal {
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100vw;
+             height: 100vh;
+             background: rgba(0,0,0,0.8);
+             z-index: 10001;
+             display: none;
+             align-items: center;
+             justify-content: center;
+         }
+
+         .ambulance-finder-modal.show {
+             display: flex;
+         }
+
+         .ambulance-finder-content {
+             background: linear-gradient(135deg, #1a1a1a, #000000);
+             border: 1px solid #333;
+             color: #ffffff;
+             border-radius: 20px;
+             padding: 2rem;
+             max-width: 400px;
+             width: 90%;
+             text-align: center;
+             animation: modalSlideIn 0.3s ease-out;
+         }
+
+         .nearest-ambulance {
+             background: linear-gradient(45deg, #00c264, #00a556);
+             border: 3px solid #ffffff;
+             box-shadow: 0 0 20px rgba(0,194,100,0.5);
+             animation: emergencyPulse 2s infinite;
+         }
+
+         /* Custom styling for Leaflet Routing Machine */
+         .leaflet-routing-container {
+             background: rgba(26, 26, 26, 0.95);
+             color: #ffffff;
+             border: 1px solid #333;
+             border-radius: 10px;
+             padding: 10px;
+         }
+
+         .leaflet-routing-container h2,
+         .leaflet-routing-container h3 {
+             color: #00c264;
+         }
+
+         .leaflet-routing-alt {
+             background: rgba(0, 0, 0, 0.1);
+             border-radius: 5px;
+             margin: 5px 0;
+         }
+
+         .leaflet-routing-alt:hover {
+             background: rgba(0, 194, 100, 0.2);
+         }
+
+         .leaflet-routing-geocoders {
+             display: none;
+         }
+
+         .leaflet-routing-container-hide {
+             width: 300px;
+         }
+
          @media (max-width: 768px) {
              .notification-panel {
                  width: calc(100vw - 2rem);
@@ -347,14 +552,30 @@
                  width: 50px;
                  height: 50px;
                  font-size: 20px;
-                 bottom: 100px;
+                 bottom: 80px;
+             }
+             .floating-find-btn {
+                 width: 50px;
+                 height: 50px;
+                 font-size: 20px;
+                 bottom: 140px;
+             }
+             .floating-chat-btn {
+                 width: 50px;
+                 height: 50px;
+                 font-size: 20px;
+                 bottom: 140px;
+             }
+             .leaflet-routing-container {
+                 width: calc(100vw - 2rem) !important;
+                 max-width: 280px;
              }
          }
 
          @media (max-width: 640px) {
              .sidebar {
                  width: 280px;
-                 left: -280px;
+                 right: -280px;
              }
          }
      </style>
@@ -364,13 +585,6 @@
          <!-- Header -->
          <header class="bg-white shadow-sm border-b border-gray-200 px-4 py-3 flex items-center justify-between relative z-50">
              <div class="flex items-center gap-3">
-                 <button class="burger-menu p-2 rounded-lg hover:bg-gray-100" onclick="toggleSidebar()">
-                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2">
-                         <line x1="3" y1="6" x2="21" y2="6"></line>
-                         <line x1="3" y1="12" x2="21" y2="12"></line>
-                         <line x1="3" y1="18" x2="21" y2="18"></line>
-                     </svg>
-                 </button>
                  <div class="text-lg font-bold text-gray-800">EmergencyGo</div>
              </div>
 
@@ -383,9 +597,9 @@
                      <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center font-bold">3</span>
                  </button>
 
-                 <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                 <button class="profile-icon w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center" onclick="toggleSidebar()">
                      <span class="text-sm font-semibold text-gray-600">JS</span>
-                 </div>
+                 </button>
              </div>
          </header>
 
@@ -399,8 +613,13 @@
              </div>
              <div id="map" class="w-full h-full"></div>
 
+             <!-- Floating Action Buttons -->
+             <button class="floating-chat-btn" onclick="startChat()" title="Emergency Chat">
+                 💬
+             </button>
+
              <!-- Floating Emergency Button -->
-             <button class="floating-action-btn" onclick="triggerEmergency()">
+             <button class="floating-action-btn" onclick="triggerEmergency()" title="Call Emergency">
                  🚨
              </button>
 
@@ -414,81 +633,78 @@
          <!-- Sidebar -->
          <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
          <aside class="sidebar" id="sidebar">
-             <div class="p-6 border-b border-gray-700">
+             <div class="p-4 border-b border-gray-700">
                  <div class="flex items-center justify-between mb-4">
-                     <h2 class="text-xl font-bold text-white">Profile</h2>
+                     <h2 class="text-lg font-bold text-white">Profile</h2>
                      <button class="text-gray-400 hover:text-white" onclick="toggleSidebar()">
-                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                              <line x1="18" y1="6" x2="6" y2="18"></line>
                              <line x1="6" y1="6" x2="18" y2="18"></line>
                          </svg>
                      </button>
                  </div>
 
-                 <div class="flex items-center gap-4 mb-6">
-                     <div class="w-16 h-16 bg-gray-600 rounded-full flex items-center justify-center">
-                         <span class="text-xl font-bold text-white">JS</span>
+                 <div class="flex items-center gap-3 mb-4">
+                     <div class="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center">
+                         <span class="text-lg font-bold text-white">JS</span>
                      </div>
                      <div>
-                         <div class="text-lg font-semibold text-white">John Smith</div>
-                         <div class="text-sm text-gray-400">john.smith@email.com</div>
+                         <div class="text-sm font-semibold text-white">John Smith</div>
+                         <div class="text-xs text-gray-400">john.smith@email.com</div>
                          <div class="text-xs text-green-400">●  Online</div>
                      </div>
                  </div>
-
-                 <div class="space-y-3">
-                     <div class="bg-gray-800 rounded-lg p-3">
-                         <div class="text-xs text-gray-400 uppercase">Emergency Contact</div>
-                         <div class="text-sm text-white">+1 (555) 123-4567</div>
-                     </div>
-                     <div class="bg-gray-800 rounded-lg p-3">
-                         <div class="text-xs text-gray-400 uppercase">Location</div>
-                         <div class="text-sm text-white">Villaverde, Nueva Vizcaya</div>
-                     </div>
-                 </div>
              </div>
 
-             <!-- Emergency Actions -->
-             <div class="p-6">
-                 <h3 class="text-lg font-semibold text-white mb-4">Quick Actions</h3>
-                 <div class="space-y-3">
-                     <button class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300" onclick="findNearestAmbulance()">
-                         🚑 Find Ambulance
-                     </button>
-                     <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300" onclick="startChatSimulation()">
-                         💬 Emergency Chat
-                     </button>
-                     <button class="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300">
-                         📍 Share Location
-                     </button>
-                     <button class="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300">
-                         ⚠️ Report Hazard
-                     </button>
-                 </div>
-             </div>
-
-             <!-- Recent Activity -->
-             <div class="p-6 border-t border-gray-700">
-                 <h3 class="text-lg font-semibold text-white mb-4">Recent Activity</h3>
-                 <div class="space-y-3">
-                     <div class="flex items-center gap-3">
-                         <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                         <div class="text-sm text-gray-300">Emergency contact updated</div>
-                     </div>
-                     <div class="flex items-center gap-3">
-                         <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                         <div class="text-sm text-gray-300">Location services enabled</div>
-                     </div>
-                     <div class="flex items-center gap-3">
-                         <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                         <div class="text-sm text-gray-300">Profile verified</div>
-                     </div>
-                 </div>
+             <!-- Logout Button -->
+             <div class="p-4 border-t border-gray-700">
+                 <button class="logout-btn w-full py-2 px-3 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-white" onclick="logout()">
+                     🚪 Logout
+                 </button>
              </div>
          </aside>
 
+         <!-- Emergency Countdown Modal -->
+         <div id="countdownModal" class="countdown-modal">
+             <div class="countdown-content">
+                 <div class="text-2xl font-bold text-red-400 mb-4">🚨 Emergency Alert</div>
+                 <div class="text-lg text-gray-300 mb-4">Emergency services will be contacted in:</div>
+                 <div id="countdownTimer" class="countdown-timer">5</div>
+                 <div class="text-sm text-gray-400 mb-6">Press Cancel to abort</div>
+                 <div class="flex gap-4 justify-center">
+                     <button class="cancel-btn py-3 px-8 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-white" onclick="cancelCountdown()">Cancel</button>
+                     <button class="confirm-btn py-3 px-8 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-white" onclick="confirmCountdown()">Confirm Now</button>
+                 </div>
+             </div>
+         </div>
+
+         <!-- Ambulance Finder Modal -->
+         <div id="ambulanceFinderModal" class="ambulance-finder-modal">
+             <div class="ambulance-finder-content">
+                 <div class="text-2xl font-bold text-green-400 mb-4">🚑 Finding Nearest Ambulance</div>
+                 <div class="flex items-center gap-3 justify-center mb-4">
+                     <div class="w-6 h-6 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin"></div>
+                     <span class="text-gray-300">Locating ambulances...</span>
+                 </div>
+                 <div id="ambulanceFinderStatus" class="text-sm text-gray-400 mb-4">
+                     Scanning emergency vehicles in your area...
+                 </div>
+                 <div id="ambulanceFinderResult" class="hidden">
+                     <div class="text-lg font-semibold text-green-400 mb-2">🚑 Nearest Ambulance Found!</div>
+                     <div class="text-sm text-gray-300 mb-4">
+                         <div id="ambulanceDistance" class="font-semibold"></div>
+                         <div id="ambulanceETA" class="text-xs opacity-75"></div>
+                         <div id="routeDetails" class="text-xs text-blue-400 mt-2"></div>
+                     </div>
+                     <button class="confirm-btn py-2 px-6 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-white" onclick="proceedToChat()">
+                         Proceed to Chat
+                     </button>
+                 </div>
+             </div>
+         </div>
+
          <!-- Chat System (Modal) -->
-         <div id="chatSystem" class="fixed inset-0 bg-black bg-opacity-30 z-[9999] hidden" onclick="closeChatSystem(event)">
+         <div id="chatSystem" class="fixed inset-0 bg-opacity-50 z-[9999] hidden" onclick="closeChatSystem(event)">
              <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[80vh] flex flex-col" onclick="event.stopPropagation()">
                  <div class="p-4 border-b border-gray-200 flex items-center justify-between">
                      <div>
@@ -510,8 +726,8 @@
                  <div class="p-4 border-t border-gray-200">
                      <div class="flex gap-3 items-end">
                          <input type="text" id="chatInput" placeholder="Type your message..."
-                                class="flex-1 px-4 py-3 border border-gray-300 rounded-full outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" disabled>
-                         <button id="sendMessage" class="bg-green-500 text-white p-3 rounded-full hover:bg-green-600 transition-colors" disabled>
+                                class="flex-1 px-4 py-3 border border-gray-300 rounded-full outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                         <button id="sendMessage" class="bg-green-500 text-white p-3 rounded-full hover:bg-green-600 transition-colors">
                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                  <line x1="22" y1="2" x2="11" y2="13"></line>
                                  <polygon points="22,2 15,22 11,13 2,9 22,2"></polygon>
@@ -557,7 +773,6 @@
              <div class="text-base text-gray-300 mb-5 leading-relaxed">
                  Are you sure you want to request emergency assistance? This will alert emergency services immediately.
              </div>
-             <div class="text-5xl font-bold text-green-400 my-5 font-mono" id="countdownDisplay">10</div>
              <div class="flex gap-4 justify-center">
                  <button class="cancel-btn py-3 px-8 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-white" onclick="cancelDispatch()">Cancel</button>
                  <button class="confirm-btn py-3 px-8 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-white" onclick="confirmDispatch()">Confirm</button>
@@ -566,24 +781,99 @@
      </div>
 
      <script>
-         // Enhanced JavaScript with Grab-like functionality
+         // Enhanced JavaScript functionality
          var map;
          var userLocationMarker;
          var ambulanceMarkers = [];
          var floodMarkers = [];
-         var routeLine = null;
-         var selectedAmbulance = null;
-         var simulationData = null;
-         var simulationInterval = null;
-         var currentRouteIndex = 0;
          var chatActive = false;
-         var chatStep = 0;
          var audioInitialized = false;
          var notificationVisible = false;
-         var confirmationTimer = null;
-         var countdownInterval = null;
-         var pendingDispatch = false;
          var sidebarVisible = false;
+         var nearestAmbulanceMarker = null;
+         var ambulanceFindingInProgress = false;
+         var routeControl = null;
+         var currentRoute = null;
+         var countdownTimer = null;
+         var countdownValue = 5;
+
+         // Geolocation functions
+         function getUserLocation() {
+             return new Promise((resolve, reject) => {
+                 if (!navigator.geolocation) {
+                     reject(new Error('Geolocation is not supported by this browser.'));
+                     return;
+                 }
+
+                 navigator.geolocation.getCurrentPosition(
+                     (position) => {
+                         resolve({
+                             lat: position.coords.latitude,
+                             lng: position.coords.longitude
+                         });
+                     },
+                     (error) => {
+                         console.log('Geolocation error:', error);
+                         // Fallback to default location
+                         resolve({
+                             lat: 16.606254918019598,
+                             lng: 121.18314743041994
+                         });
+                     },
+                     {
+                         enableHighAccuracy: true,
+                         timeout: 10000,
+                         maximumAge: 600000
+                     }
+                 );
+             });
+         }
+
+         // Emergency countdown functions
+         function startCountdown() {
+             const modal = document.getElementById('countdownModal');
+             const timerElement = document.getElementById('countdownTimer');
+
+             countdownValue = 5;
+             modal.classList.add('show');
+             timerElement.textContent = countdownValue;
+
+             countdownTimer = setInterval(() => {
+                 countdownValue--;
+                 timerElement.textContent = countdownValue;
+
+                 if (countdownValue <= 0) {
+                     clearInterval(countdownTimer);
+                     confirmCountdown();
+                 }
+             }, 1000);
+         }
+
+         function cancelCountdown() {
+             if (countdownTimer) {
+                 clearInterval(countdownTimer);
+                 countdownTimer = null;
+             }
+             const modal = document.getElementById('countdownModal');
+             modal.classList.remove('show');
+         }
+
+         function confirmCountdown() {
+             if (countdownTimer) {
+                 clearInterval(countdownTimer);
+                 countdownTimer = null;
+             }
+             const modal = document.getElementById('countdownModal');
+             modal.classList.remove('show');
+
+             // Contact emergency services
+             if (chatActive) {
+                 addChatMessage('System', '🚨 EMERGENCY SERVICES CONTACTED - HELP IS ON THE WAY', 'emergency');
+             }
+
+             // Start the chat process
+             startChat();
+         }
 
          // Sidebar functionality
          function toggleSidebar() {
@@ -600,19 +890,245 @@
              }
          }
 
-         // Chat system functionality
-         function startChatSimulation() {
+         // Logout functionality
+         function logout() {
+             // Close sidebar first
+             if (sidebarVisible) {
+                 toggleSidebar();
+             }
+
+             // Redirect to home
+             window.location.href = '/';
+         }
+
+         // Calculate great circle distance between two points
+         function calculateDistance(lat1, lng1, lat2, lng2) {
+             const R = 6371000; // Earth's radius in meters
+             const φ1 = lat1 * Math.PI / 180;
+             const φ2 = lat2 * Math.PI / 180;
+             const Δφ = (lat2 - lat1) * Math.PI / 180;
+             const Δλ = (lng2 - lng1) * Math.PI / 180;
+
+             const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                       Math.cos(φ1) * Math.cos(φ2) *
+                       Math.sin(Δλ/2) * Math.sin(Δλ/2);
+             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+             return R * c; // Distance in meters
+         }
+
+         // Calculate bearing from point A to point B
+         function calculateBearing(lat1, lng1, lat2, lng2) {
+             const φ1 = lat1 * Math.PI / 180;
+             const φ2 = lat2 * Math.PI / 180;
+             const Δλ = (lng2 - lng1) * Math.PI / 180;
+
+             const y = Math.sin(Δλ) * Math.cos(φ2);
+             const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+
+             const θ = Math.atan2(y, x);
+             return (θ * 180 / Math.PI + 360) % 360; // Bearing in degrees
+         }
+
+         // Create route using Leaflet Routing Machine for pathfinding
+         function drawRoute(userPos, ambulancePos) {
+             // Clear existing route
+             if (routeControl) {
+                 map.removeControl(routeControl);
+             }
+
+             // Create routing control with pathfinding
+             routeControl = L.Routing.control({
+                 waypoints: [
+                     L.latLng(userPos.lat, userPos.lng),
+                     L.latLng(ambulancePos.lat, ambulancePos.lng)
+                 ],
+                 routeWhileDragging: false,
+                 addWaypoints: false,
+                 createMarker: function() {
+                     return null; // Don't create default markers
+                 },
+                 lineOptions: {
+                     styles: [{
+                         color: '#00c264',
+                         weight: 6,
+                         opacity: 0.8
+                     }]
+                 },
+                 router: L.Routing.osrmv1({
+                     serviceUrl: 'https://router.project-osrm.org/route/v1',
+                     profile: 'driving'
+                 }),
+                 formatter: new L.Routing.Formatter({
+                     language: 'en',
+                     units: 'metric'
+                 }),
+                 show: true,
+                 collapsible: true,
+                 fitSelectedRoutes: false
+             }).addTo(map);
+
+             // Store route reference
+             routeControl.on('routesfound', function(e) {
+                 currentRoute = e.routes[0];
+
+                 // Update UI with actual route information
+                 const routeDistance = currentRoute.summary.totalDistance;
+                 const routeTime = currentRoute.summary.totalTime;
+                 const bearing = calculateBearing(userPos.lat, userPos.lng, ambulancePos.lat, ambulancePos.lng);
+                 const cardinalDirection = getCardinalDirection(bearing);
+
+                 // Update the route details in the modal if it's open
+                 const routeDetailsElement = document.getElementById('routeDetails');
+                 const distanceElement = document.getElementById('ambulanceDistance');
+                 const etaElement = document.getElementById('ambulanceETA');
+
+                 if (routeDetailsElement && distanceElement && etaElement) {
+                     distanceElement.textContent = `Distance: ${(routeDistance / 1000).toFixed(1)} km`;
+                     etaElement.textContent = `Estimated arrival: ${Math.ceil(routeTime / 60)} minutes`;
+                     routeDetailsElement.textContent = `Direction: ${cardinalDirection} (${bearing.toFixed(0)}°) via optimal route`;
+                 }
+             });
+         }
+
+         // Convert bearing to cardinal direction
+         function getCardinalDirection(bearing) {
+             const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+             const index = Math.round(bearing / 22.5) % 16;
+             return directions[index];
+         }
+
+         // Find nearest ambulance functionality
+         function findNearestAmbulance() {
+             if (ambulanceFindingInProgress) return;
+
+             const modal = document.getElementById('ambulanceFinderModal');
+             const status = document.getElementById('ambulanceFinderStatus');
+             const result = document.getElementById('ambulanceFinderResult');
+
+             ambulanceFindingInProgress = true;
+             modal.classList.add('show');
+             result.classList.add('hidden');
+
+             // Simulate finding nearest ambulance
+             let progress = 0;
+             const messages = [
+                 'Scanning emergency vehicles in your area...',
+                 'Checking ambulance availability...',
+                 'Calculating optimal route...',
+                 'Confirming ambulance assignment...'
+             ];
+
+             const interval = setInterval(() => {
+                 if (progress < messages.length) {
+                     status.textContent = messages[progress];
+                     progress++;
+                 } else {
+                     clearInterval(interval);
+                     showNearestAmbulance();
+                     ambulanceFindingInProgress = false;
+                 }
+             }, 1000);
+         }
+
+         function showNearestAmbulance() {
+             // Calculate nearest ambulance
+             if (ambulanceMarkers.length > 0 && userLocationMarker) {
+                 const userPos = userLocationMarker.getLatLng();
+                 let nearestDistance = Infinity;
+                 let nearestAmbulance = null;
+
+                 ambulanceMarkers.forEach((marker, index) => {
+                     const ambulancePos = marker.getLatLng();
+                     const distance = calculateDistance(userPos.lat, userPos.lng, ambulancePos.lat, ambulancePos.lng);
+
+                     if (distance < nearestDistance) {
+                         nearestDistance = distance;
+                         nearestAmbulance = marker;
+                     }
+                 });
+
+                 if (nearestAmbulance) {
+                     // Reset previous highlighted ambulance
+                     if (nearestAmbulanceMarker && nearestAmbulanceMarker.getElement) {
+                         nearestAmbulanceMarker.getElement().classList.remove('nearest-ambulance');
+                     }
+
+                     nearestAmbulanceMarker = nearestAmbulance;
+                     if (nearestAmbulanceMarker.getElement) {
+                         nearestAmbulanceMarker.getElement().classList.add('nearest-ambulance');
+                     }
+
+                     // Draw route with pathfinding
+                     const ambulancePos = nearestAmbulance.getLatLng();
+                     drawRoute(userPos, ambulancePos);
+
+                     // Calculate additional route details (will be updated when route is calculated)
+                     const bearing = calculateBearing(userPos.lat, userPos.lng, ambulancePos.lat, ambulancePos.lng);
+                     const cardinalDirection = getCardinalDirection(bearing);
+
+                     // Show result with initial values (will be updated by route calculation)
+                     const result = document.getElementById('ambulanceFinderResult');
+                     const distanceElement = document.getElementById('ambulanceDistance');
+                     const etaElement = document.getElementById('ambulanceETA');
+                     const routeDetailsElement = document.getElementById('routeDetails');
+
+                     const distanceKm = (nearestDistance / 1000).toFixed(1);
+                     const eta = Math.ceil(nearestDistance / 833.33); // Initial rough calculation
+
+                     distanceElement.textContent = `Distance: ${distanceKm} km (calculating route...)`;
+                     etaElement.textContent = `Estimated arrival: ${eta} minutes (calculating...)`;
+                     routeDetailsElement.textContent = `Direction: ${cardinalDirection} (${bearing.toFixed(0)}°) - Finding optimal route...`;
+
+                     result.classList.remove('hidden');
+
+                     // Adjust map view to show both user and ambulance
+                     const bounds = L.latLngBounds([userPos, ambulancePos]);
+                     map.fitBounds(bounds, { padding: [80, 80] });
+                 }
+             }
+         }
+
+         function proceedToChat() {
+             const modal = document.getElementById('ambulanceFinderModal');
+             modal.classList.remove('show');
+
+             // Set chat as active and open it
+             chatActive = true;
              const chatSystem = document.getElementById('chatSystem');
              chatSystem.classList.remove('hidden');
 
-             document.getElementById('chatInput').disabled = false;
-             document.getElementById('sendMessage').disabled = false;
-             chatActive = true;
-             chatStep = 0;
-
+             // Add initial message from dispatcher with route info
              setTimeout(function() {
-                 addChatMessage('Emergency Dispatcher', 'Emergency services responding. How can we assist you?', 'dispatcher');
-             }, 1000);
+                 if (nearestAmbulanceMarker && userLocationMarker && currentRoute) {
+                     const routeDistance = currentRoute.summary.totalDistance;
+                     const routeTime = currentRoute.summary.totalTime;
+
+                     addChatMessage('Emergency Dispatcher', `Nearest ambulance (${(routeDistance/1000).toFixed(1)}km away via optimal route) has been notified and is en route. ETA: ${Math.ceil(routeTime/60)} minutes. Turn-by-turn directions have been calculated and displayed on your map. How can we assist you further?`, 'dispatcher');
+                 } else if (nearestAmbulanceMarker && userLocationMarker) {
+                     const userPos = userLocationMarker.getLatLng();
+                     const ambulancePos = nearestAmbulanceMarker.getLatLng();
+                     const distance = calculateDistance(userPos.lat, userPos.lng, ambulancePos.lat, ambulancePos.lng);
+                     const eta = Math.ceil(distance / 833.33);
+
+                     addChatMessage('Emergency Dispatcher', `Nearest ambulance (${(distance/1000).toFixed(1)}km away) has been notified and is en route. ETA: ${eta} minutes. Route has been displayed on your map. How can we assist you further?`, 'dispatcher');
+                 } else {
+                     addChatMessage('Emergency Dispatcher', 'Nearest ambulance has been notified and is en route. How can we assist you further?', 'dispatcher');
+                 }
+             }, 500);
+         }
+
+         // Chat system functionality
+         function startChat() {
+             // If chat is already active, just open it
+             if (chatActive) {
+                 const chatSystem = document.getElementById('chatSystem');
+                 chatSystem.classList.remove('hidden');
+                 return;
+             }
+
+             // First find nearest ambulance before showing chat
+             findNearestAmbulance();
          }
 
          function closeChatSystem(event) {
@@ -620,7 +1136,6 @@
 
              const chatSystem = document.getElementById('chatSystem');
              chatSystem.classList.add('hidden');
-             chatActive = false;
          }
 
          // Enhanced notification system
@@ -638,75 +1153,42 @@
          function showConfirmationModal() {
              const modal = document.getElementById('confirmationModal');
              modal.classList.add('show');
-
-             let countdown = 10;
-             const countdownDisplay = document.getElementById('countdownDisplay');
-
-             countdownInterval = setInterval(() => {
-                 countdown--;
-                 countdownDisplay.textContent = countdown;
-
-                 if (countdown <= 0) {
-                     clearInterval(countdownInterval);
-                     confirmDispatch();
-                 }
-             }, 1000);
          }
 
          function cancelDispatch() {
              const modal = document.getElementById('confirmationModal');
              modal.classList.remove('show');
-
-             if (countdownInterval) {
-                 clearInterval(countdownInterval);
-                 countdownInterval = null;
-             }
-
-             pendingDispatch = false;
-             document.getElementById('countdownDisplay').textContent = '10';
          }
 
          function confirmDispatch() {
              const modal = document.getElementById('confirmationModal');
              modal.classList.remove('show');
 
-             if (countdownInterval) {
-                 clearInterval(countdownInterval);
-                 countdownInterval = null;
-             }
-
-             pendingDispatch = false;
-             document.getElementById('countdownDisplay').textContent = '10';
-
-             simulateAmbulanceMovement();
+             // Start the chat process
+             startChat();
          }
 
          function triggerEmergency() {
              playEmergencySound();
 
              if (chatActive) {
-                 addChatMessage('System', '🚨 EMERGENCY BUTTON ACTIVATED - EMERGENCY SERVICES ALERTED', 'emergency');
+                 addChatMessage('System', '🚨 EMERGENCY BUTTON ACTIVATED - STARTING EMERGENCY PROTOCOL', 'emergency');
              }
 
-             showConfirmationModal();
+             // Start countdown instead of showing confirmation modal
+             startCountdown();
          }
 
          function initializeAudio() {
              if (!audioInitialized) {
                  try {
                      var emergencySound = document.getElementById('emergencySound');
-                     var sirenSound = document.getElementById('sirenSound');
 
                      emergencySound.addEventListener('canplaythrough', function() {
                          console.log('Emergency sound loaded successfully');
                      });
 
-                     sirenSound.addEventListener('canplaythrough', function() {
-                         console.log('Siren sound loaded successfully');
-                     });
-
                      emergencySound.load();
-                     sirenSound.load();
                      audioInitialized = true;
                  } catch (e) {
                      console.log('Audio initialization failed:', e);
@@ -724,30 +1206,6 @@
                  }
              } catch (e) {
                  console.log('Emergency sound not available:', e);
-             }
-         }
-
-         function playSirenSound() {
-             try {
-                 initializeAudio();
-                 var sound = document.getElementById('sirenSound');
-                 if (sound.readyState >= 2) {
-                     sound.volume = 0.6;
-                     sound.loop = true;
-                     sound.play().catch(e => console.log('Could not play siren sound:', e));
-                 }
-             } catch (e) {
-                 console.log('Siren sound not available:', e);
-             }
-         }
-
-         function stopSirenSound() {
-             try {
-                 var sound = document.getElementById('sirenSound');
-                 sound.pause();
-                 sound.currentTime = 0;
-             } catch (e) {
-                 console.log('Could not stop siren sound:', e);
              }
          }
 
@@ -769,11 +1227,11 @@
              });
 
              var floodLocations = [
-                 {lat: 16.58096627153094, lng: 121.18894636631013, severity: 'Moderate'},
-                 {lat: 16.57778888993198, lng: 121.18751943111421, severity: 'High'},
-                 {lat: 16.57759865668323, lng: 121.1872297525406, severity: 'Low'},
-                 {lat: 16.57970149484927, lng: 121.18929505348206, severity: "Severe"},
-                 {lat: 16.582611497050678, lng: 121.18772864341737, severity: 'High'}
+                 {lat: centerLat + 0.01, lng: centerLng + 0.01, severity: 'Moderate'},
+                 {lat: centerLat - 0.01, lng: centerLng - 0.01, severity: 'High'},
+                 {lat: centerLat + 0.005, lng: centerLng - 0.005, severity: 'Low'},
+                 {lat: centerLat - 0.005, lng: centerLng + 0.005, severity: "Severe"},
+                 {lat: centerLat + 0.008, lng: centerLng - 0.008, severity: 'High'}
              ];
 
              floodLocations.forEach((location, index) => {
@@ -822,62 +1280,7 @@
              }
          }
 
-         function calculateDistance(lat1, lng1, lat2, lng2) {
-             var R = 6371e3;
-             var φ1 = lat1 * Math.PI/180;
-             var φ2 = lat2 * Math.PI/180;
-             var Δφ = (lat2-lat1) * Math.PI/180;
-             var Δλ = (lng2-lng1) * Math.PI/180;
-
-             var a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                     Math.cos(φ1) * Math.cos(φ2) *
-                     Math.sin(Δλ/2) * Math.sin(Δλ/2);
-             var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-             var d = R * c;
-             return d;
-         }
-
-         function getRoute(startLat, startLng, endLat, endLng, callback) {
-             var url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
-
-             fetch(url)
-                 .then(response => response.json())
-                 .then(data => {
-                     if (data.routes && data.routes.length > 0) {
-                         var route = data.routes[0];
-                         var coordinates = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                         var distance = route.distance;
-                         var duration = route.duration;
-                         callback({
-                             coordinates: coordinates,
-                             distance: distance,
-                             duration: duration
-                         });
-                     } else {
-                         callback({
-                             coordinates: [[startLat, startLng], [endLat, endLng]],
-                             distance: calculateDistance(startLat, startLng, endLat, endLng),
-                             duration: null
-                         });
-                     }
-                 })
-                 .catch(error => {
-                     console.error('Routing error:', error);
-                     callback({
-                         coordinates: [[startLat, startLng], [endLat, endLng]],
-                         distance: calculateDistance(startLat, startLng, endLat, endLng),
-                         duration: null
-                     });
-                 });
-         }
-
-         function updateStatusDisplay(status, eta, distance) {
-             document.getElementById('statusTextCompact').textContent = status;
-             document.getElementById('statusCompact').style.display = 'block';
-         }
-
-         function addChatMessage(sender, message, type = 'user', isImage = false) {
+         function addChatMessage(sender, message, type = 'user') {
              var chatMessages = document.getElementById('chatMessages');
              var messageDiv = document.createElement('div');
 
@@ -891,11 +1294,7 @@
                  messageDiv.classList.add('user', 'self-end');
              }
 
-             if (isImage) {
-                 messageDiv.innerHTML = '<div class="font-semibold mb-1 text-xs opacity-80">' + sender + '</div>' + message;
-             } else {
-                 messageDiv.innerHTML = '<div class="font-semibold mb-1 text-xs opacity-80">' + sender + '</div>' + message;
-             }
+             messageDiv.innerHTML = '<div class="font-semibold mb-1 text-xs opacity-80">' + sender + '</div>' + message;
 
              chatMessages.appendChild(messageDiv);
 
@@ -907,139 +1306,17 @@
              }, 100);
          }
 
-         function simulateChatResponse(userMessage) {
-             var responses = [
-                 'Can you describe your current condition?',
-                 'How many people require medical attention?',
-                 'Are you in a safe location?',
-                 'Ambulance has been dispatched to your location.',
-                 'ETA is approximately 8-12 minutes. Please remain calm.'
-             ];
-
-             if (chatStep < responses.length) {
-                 setTimeout(function() {
-                     addChatMessage('Emergency Dispatcher', responses[chatStep], 'dispatcher');
-                     chatStep++;
-                 }, 1500);
+         async function initMap(lat, lng) {
+             // Try to get user's actual location first
+             try {
+                 const userLocation = await getUserLocation();
+                 lat = userLocation.lat;
+                 lng = userLocation.lng;
+                 console.log('Using user location:', lat, lng);
+             } catch (error) {
+                 console.log('Using default location:', error.message);
              }
-         }
 
-         function simulateAmbulanceMovement() {
-             if (!selectedAmbulance || !simulationData) return;
-
-             playSirenSound();
-             updateStatusDisplay('Ambulance dispatched', '--', '--');
-
-             var coordinates = simulationData.coordinates;
-             var totalDuration = simulationData.duration || 300;
-             var stepInterval = 2000;
-             var totalSteps = Math.floor(totalDuration * 1000 / stepInterval);
-             var stepSize = Math.max(1, Math.floor(coordinates.length / totalSteps));
-
-             currentRouteIndex = 0;
-
-             simulationInterval = setInterval(function() {
-                 if (currentRouteIndex >= coordinates.length - 1) {
-                     clearInterval(simulationInterval);
-                     stopSirenSound();
-                     updateStatusDisplay('Ambulance arrived');
-                     selectedAmbulance.setPopupContent('🚑 Ambulance Arrived!');
-                     selectedAmbulance.openPopup();
-
-                     if (chatActive) {
-                         addChatMessage('Emergency Dispatcher', '🚑 Ambulance has arrived at your location.', 'dispatcher');
-                     }
-
-                     setTimeout(function() {
-                         alert('🎉 Emergency response completed successfully!');
-                     }, 3000);
-                     return;
-                 }
-
-                 var currentPos = coordinates[currentRouteIndex];
-                 selectedAmbulance.setLatLng([currentPos[0], currentPos[1]]);
-
-                 var remainingCoords = coordinates.slice(currentRouteIndex);
-                 if (routeLine) {
-                     map.removeLayer(routeLine);
-                 }
-                 routeLine = L.polyline(remainingCoords, {
-                     color: '#00c264',
-                     weight: 4,
-                     opacity: 0.7,
-                     dashArray: '5, 10'
-                 }).addTo(map);
-
-                 currentRouteIndex += stepSize;
-             }, stepInterval);
-         }
-
-         function findNearestAmbulanceWithRouting() {
-             playEmergencySound();
-
-             var userPos = userLocationMarker.getLatLng();
-             var routePromises = [];
-
-             ambulanceMarkers.forEach((ambulance, index) => {
-                 var ambulancePos = ambulance.getLatLng();
-                 var promise = new Promise((resolve) => {
-                     getRoute(ambulancePos.lat, ambulancePos.lng, userPos.lat, userPos.lng, (routeData) => {
-                         resolve({
-                             ambulance: ambulance,
-                             routeData: routeData,
-                             index: index
-                         });
-                     });
-                 });
-                 routePromises.push(promise);
-             });
-
-             Promise.all(routePromises).then(results => {
-                 var nearestAmbulance = null;
-                 var shortestRoute = null;
-                 var shortestDistance = Infinity;
-
-                 results.forEach(result => {
-                     if (result.routeData.distance < shortestDistance) {
-                         shortestDistance = result.routeData.distance;
-                         nearestAmbulance = result.ambulance;
-                         shortestRoute = result.routeData;
-                     }
-                 });
-
-                 if (nearestAmbulance && shortestRoute) {
-                     selectedAmbulance = nearestAmbulance;
-                     simulationData = shortestRoute;
-
-                     if (routeLine) {
-                         map.removeLayer(routeLine);
-                     }
-
-                     routeLine = L.polyline(shortestRoute.coordinates, {
-                         color: '#00c264',
-                         weight: 4,
-                         opacity: 0.8
-                     }).addTo(map);
-
-                     nearestAmbulance.openPopup();
-                     nearestAmbulance.setPopupContent('🚑 Nearest Ambulance<br>Distance: ' +
-                         Math.round(shortestDistance) + ' meters');
-
-                     map.fitBounds(routeLine.getBounds(), {padding: [20, 20]});
-                     updateStatusDisplay('Ambulance found', '--', Math.round(shortestDistance) + 'm');
-
-                     if (!chatActive) {
-                         startChatSimulation();
-                     }
-                 }
-             });
-         }
-
-         function findNearestAmbulance() {
-             findNearestAmbulanceWithRouting();
-         }
-
-         function initMap(lat, lng) {
              map = L.map('map').setView([lat, lng], 15);
 
              L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1063,7 +1340,6 @@
                  if (message && chatActive) {
                      addChatMessage('You', message, 'user');
                      input.value = '';
-                     simulateChatResponse(message);
                  }
              });
 
@@ -1090,7 +1366,7 @@
              }
          });
 
-         // Initialize map with default location
+         // Initialize map with geolocation
          initMap(16.606254918019598, 121.18314743041994);
      </script>
 </section>
