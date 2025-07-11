@@ -10,6 +10,9 @@
      <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
      <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 
+     <!-- Add viewport meta tag for mobile rotation support -->
+     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
+
      <!-- Audio elements for sound effects -->
      <audio id="emergencySound" preload="none">
          <source src="../assets/sounds/emergency.mp3" type="audio/mpeg">
@@ -233,6 +236,31 @@
              box-shadow: 0 6px 25px rgba(33,150,243,0.5);
          }
 
+         .floating-recenter-btn {
+             position: fixed;
+             bottom: 220px;
+             right: 20px;
+             width: 60px;
+             height: 60px;
+             border-radius: 50%;
+             background: linear-gradient(45deg, #9c27b0, #673ab7);
+             color: white;
+             border: none;
+             box-shadow: 0 4px 20px rgba(156,39,176,0.3);
+             cursor: pointer;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             font-size: 24px;
+             z-index: 1000;
+             transition: all 0.3s ease;
+         }
+
+         .floating-recenter-btn:hover {
+             transform: scale(1.1);
+             box-shadow: 0 6px 25px rgba(156,39,176,0.5);
+         }
+
          .control-btn.emergency {
              background: linear-gradient(45deg, #00c264, #00a556);
              border-radius: 25px;
@@ -258,12 +286,14 @@
              background: rgba(245, 245, 245, 0.9);
              color: #333;
              border-radius: 20px 20px 20px 5px;
+             align-self: flex-start;
          }
 
          .message.user {
              background: linear-gradient(135deg, #00c264, #00a556);
              color: white;
              border-radius: 20px 20px 5px 20px;
+             align-self: flex-end;
          }
 
          .message.emergency {
@@ -271,6 +301,20 @@
              color: #ffffff;
              animation: messageAlert 1s ease-in-out;
              border-radius: 20px;
+             align-self: center;
+         }
+
+         .message.image {
+             background: rgba(245, 245, 245, 0.9);
+             border-radius: 20px;
+             padding: 8px;
+         }
+
+         .message.image img {
+             max-width: 200px;
+             max-height: 200px;
+             border-radius: 10px;
+             object-fit: cover;
          }
 
          .notification-panel {
@@ -566,6 +610,12 @@
                  font-size: 20px;
                  bottom: 140px;
              }
+             .floating-recenter-btn {
+                 width: 50px;
+                 height: 50px;
+                 font-size: 20px;
+                 bottom: 200px;
+             }
              .leaflet-routing-container {
                  width: calc(100vw - 2rem) !important;
                  max-width: 280px;
@@ -614,6 +664,10 @@
              <div id="map" class="w-full h-full"></div>
 
              <!-- Floating Action Buttons -->
+             <button class="floating-recenter-btn" onclick="recenterMap()" title="Re-center Map">
+                 📍
+             </button>
+
              <button class="floating-chat-btn" onclick="startChat()" title="Emergency Chat">
                  💬
              </button>
@@ -719,7 +773,7 @@
                      </button>
                  </div>
 
-                 <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+                 <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 flex flex-col">
                      <!-- Messages will be added dynamically -->
                  </div>
 
@@ -727,6 +781,10 @@
                      <div class="flex gap-3 items-end">
                          <input type="text" id="chatInput" placeholder="Type your message..."
                                 class="flex-1 px-4 py-3 border border-gray-300 rounded-full outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                         <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                         <button id="attachImage" class="bg-gray-500 text-white p-3 rounded-full hover:bg-gray-600 transition-colors" onclick="document.getElementById('imageInput').click()">
+                             📎
+                         </button>
                          <button id="sendMessage" class="bg-green-500 text-white p-3 rounded-full hover:bg-green-600 transition-colors">
                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                  <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -781,6 +839,12 @@
      </div>
 
      <script>
+         // PHP Debug Variable - Set by server
+         <?php
+         $debugMode = true; // Set this to false in production
+         echo "var DEBUG_MODE = " . ($debugMode ? "true" : "false") . ";\n";
+         ?>
+
          // Enhanced JavaScript functionality
          var map;
          var userLocationMarker;
@@ -796,6 +860,29 @@
          var currentRoute = null;
          var countdownTimer = null;
          var countdownValue = 5;
+
+         // Image upload handler
+         function handleImageUpload(event) {
+             const file = event.target.files[0];
+             if (file && file.type.startsWith('image/')) {
+                 const reader = new FileReader();
+                 reader.onload = function(e) {
+                     addChatMessage('You', '', 'image', e.target.result);
+                 };
+                 reader.readAsDataURL(file);
+             }
+         }
+
+         // Re-center map function
+         function recenterMap() {
+             if (userLocationMarker && map) {
+                 const userPos = userLocationMarker.getLatLng();
+                 map.setView([userPos.lat, userPos.lng], 15, {
+                     animate: true,
+                     duration: 1
+                 });
+             }
+         }
 
          // Geolocation functions
          function getUserLocation() {
@@ -1120,15 +1207,18 @@
 
          // Chat system functionality
          function startChat() {
-             // If chat is already active, just open it
-             if (chatActive) {
-                 const chatSystem = document.getElementById('chatSystem');
-                 chatSystem.classList.remove('hidden');
-                 return;
-             }
+             // Set chat as active and open it directly
+             chatActive = true;
+             const chatSystem = document.getElementById('chatSystem');
+             chatSystem.classList.remove('hidden');
 
-             // First find nearest ambulance before showing chat
-             findNearestAmbulance();
+             // Add initial message from dispatcher only if the chat doesn't have messages yet
+             const chatMessages = document.getElementById('chatMessages');
+             if (chatMessages.children.length === 0) {
+                 setTimeout(function() {
+                     addChatMessage('Emergency Dispatcher', 'Hello! How can we assist you today? Are you experiencing an emergency?', 'dispatcher');
+                 }, 500);
+             }
          }
 
          function closeChatSystem(event) {
@@ -1235,7 +1325,10 @@
              ];
 
              floodLocations.forEach((location, index) => {
-                 var floodMarker = L.marker([location.lat, location.lng], {icon: floodIcon}).addTo(map)
+                 var floodMarker = L.marker([location.lat, location.lng], {
+                     icon: floodIcon,
+                     draggable: DEBUG_MODE
+                 }).addTo(map)
                      .bindPopup(`🌊 Flood Zone ${index + 1}<br>Severity: ${location.severity}<br>⚠️ Avoid this area`);
 
                  floodMarkers.push(floodMarker);
@@ -1266,35 +1359,43 @@
                  className: 'custom-div-icon'
              });
 
-             for (var i = 0; i < 4; i++) {
-                 var angle = Math.random() * 2 * Math.PI;
-                 var distance = Math.random() * distanceInDegrees;
+             // Only create 1 ambulance now
+             var angle = Math.random() * 2 * Math.PI;
+             var distance = Math.random() * distanceInDegrees;
 
-                 var ambulanceLat = centerLat + (distance * Math.cos(angle));
-                 var ambulanceLng = centerLng + (distance * Math.sin(angle));
+             var ambulanceLat = centerLat + (distance * Math.cos(angle));
+             var ambulanceLng = centerLng + (distance * Math.sin(angle));
 
-                 var ambulanceMarker = L.marker([ambulanceLat, ambulanceLng], {icon: ambulanceIcon}).addTo(map)
-                     .bindPopup('Ambulance ' + (i + 1));
+             var ambulanceMarker = L.marker([ambulanceLat, ambulanceLng], {
+                 icon: ambulanceIcon,
+                 draggable: DEBUG_MODE
+             }).addTo(map)
+                 .bindPopup('Ambulance 1');
 
-                 ambulanceMarkers.push(ambulanceMarker);
-             }
+             ambulanceMarkers.push(ambulanceMarker);
          }
 
-         function addChatMessage(sender, message, type = 'user') {
+         function addChatMessage(sender, message, type = 'user', imageData = null) {
              var chatMessages = document.getElementById('chatMessages');
              var messageDiv = document.createElement('div');
 
              messageDiv.classList.add('message', 'fade-in', 'max-w-[85%]', 'py-3', 'px-4', 'text-sm', 'leading-relaxed', 'break-words');
 
              if (type === 'dispatcher') {
-                 messageDiv.classList.add('dispatcher', 'self-start');
+                 messageDiv.classList.add('dispatcher');
              } else if (type === 'emergency') {
-                 messageDiv.classList.add('emergency', 'self-center', 'text-center', 'font-semibold');
+                 messageDiv.classList.add('emergency', 'text-center', 'font-semibold');
+             } else if (type === 'image') {
+                 messageDiv.classList.add('image', 'user');
+                 messageDiv.innerHTML = '<div class="font-semibold mb-1 text-xs opacity-80">' + sender + '</div>' +
+                                      '<img src="' + imageData + '" alt="Uploaded image" style="max-width: 200px; max-height: 200px; border-radius: 10px; object-fit: cover;">';
              } else {
-                 messageDiv.classList.add('user', 'self-end');
+                 messageDiv.classList.add('user');
              }
 
-             messageDiv.innerHTML = '<div class="font-semibold mb-1 text-xs opacity-80">' + sender + '</div>' + message;
+             if (type !== 'image') {
+                 messageDiv.innerHTML = '<div class="font-semibold mb-1 text-xs opacity-80">' + sender + '</div>' + message;
+             }
 
              chatMessages.appendChild(messageDiv);
 
@@ -1324,7 +1425,7 @@
                  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
              }).addTo(map);
 
-             userLocationMarker = L.marker([lat, lng], {draggable: true}).addTo(map)
+             userLocationMarker = L.marker([lat, lng], {draggable: DEBUG_MODE}).addTo(map)
                  .bindPopup('📍 Your Location')
                  .openPopup();
 
