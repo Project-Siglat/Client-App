@@ -20,6 +20,11 @@ switch ($request_uri) {
         echo $env;
         break;
 
+    // siglat
+    case "/siglat":
+        include "./pages/siglat/core.php";
+        break;
+
     // here is the user set
     case "/client":
         include "./pages/client/core.php";
@@ -31,7 +36,7 @@ switch ($request_uri) {
         break;
     default:
         http_response_code(404);
-        include "../pages/error/404.php";
+        include "./pages/error/404.php";
         break;
 }
 
