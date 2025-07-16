@@ -1,634 +1,5 @@
 <section>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-        crossorigin=""></script>
-     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-     <!-- Leaflet Routing Machine for pathfinding -->
-     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
-     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
-
-     <!-- Add viewport meta tag for mobile rotation support -->
-     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
-
-     <!-- Audio elements for sound effects -->
-     <audio id="emergencySound" preload="none">
-         <source src="../assets/sounds/emergency.mp3" type="audio/mpeg">
-         <source src="../assets/sounds/emergency.wav" type="audio/wav">
-     </audio>
-
-     <style>
-         @keyframes emergencyPulse {
-             0%, 100% { box-shadow: 0 4px 15px rgba(0,194,100,0.4); }
-             50% { box-shadow: 0 6px 25px rgba(0,194,100,0.8); }
-         }
-
-         @keyframes messageAlert {
-             0%, 100% { transform: scale(1); }
-             50% { transform: scale(1.02); }
-         }
-
-         @keyframes hazardPulse {
-             0%, 100% {
-                 transform: scale(1);
-                 opacity: 0.8;
-             }
-             50% {
-                 transform: scale(1.2);
-                 opacity: 1;
-             }
-         }
-
-         @keyframes modalSlideIn {
-             from {
-                 transform: translateY(-50px);
-                 opacity: 0;
-             }
-             to {
-                 transform: translateY(0);
-                 opacity: 1;
-             }
-         }
-
-         @keyframes slideIn {
-             from {
-                 transform: translateX(100%);
-                 opacity: 0;
-             }
-             to {
-                 transform: translateX(0);
-                 opacity: 1;
-             }
-         }
-
-         @keyframes slideOut {
-             from {
-                 transform: translateX(0);
-                 opacity: 1;
-             }
-             to {
-                 transform: translateX(100%);
-                 opacity: 0;
-             }
-         }
-
-         @keyframes fadeIn {
-             from { opacity: 0; }
-             to { opacity: 1; }
-         }
-
-         @keyframes spin {
-             0% { transform: rotate(0deg); }
-             100% { transform: rotate(360deg); }
-         }
-
-         @keyframes countdownPulse {
-             0%, 100% {
-                 transform: scale(1);
-                 background: linear-gradient(45deg, #ff4444, #cc0000);
-             }
-             50% {
-                 transform: scale(1.1);
-                 background: linear-gradient(45deg, #ff6666, #ff4444);
-             }
-         }
-
-         .grab-theme {
-             background: linear-gradient(135deg, #00c264 0%, #00a556 100%);
-         }
-
-         .emergency-btn {
-             background: linear-gradient(45deg, #00c264, #00a556);
-             animation: emergencyPulse 2s infinite;
-             border-radius: 50px;
-         }
-
-         .emergency-btn:hover {
-             transform: scale(1.05);
-             box-shadow: 0 8px 25px rgba(0,194,100,0.6);
-         }
-
-         .profile-icon {
-             cursor: pointer;
-             transition: all 0.3s ease;
-         }
-
-         .profile-icon:hover {
-             transform: scale(1.1);
-         }
-
-         .sidebar {
-             position: fixed;
-             top: 0;
-             right: -280px;
-             width: 280px;
-             height: 100vh;
-             background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
-             z-index: 9999;
-             transition: all 0.3s ease;
-             overflow-y: auto;
-         }
-
-         .sidebar.active {
-             right: 0;
-         }
-
-         .sidebar-overlay {
-             position: fixed;
-             top: 0;
-             left: 0;
-             width: 100vw;
-             height: 100vh;
-             background: rgba(0,0,0,0.5);
-             z-index: 9998;
-             opacity: 0;
-             visibility: hidden;
-             transition: all 0.3s ease;
-         }
-
-         .sidebar-overlay.active {
-             opacity: 1;
-             visibility: visible;
-         }
-
-         .floating-action-btn {
-             position: fixed;
-             bottom: 80px;
-             right: 20px;
-             width: 60px;
-             height: 60px;
-             border-radius: 50%;
-             background: linear-gradient(45deg, #ff4444, #cc0000);
-             color: white;
-             border: none;
-             box-shadow: 0 4px 20px rgba(255,68,68,0.3);
-             cursor: pointer;
-             display: flex;
-             align-items: center;
-             justify-content: center;
-             font-size: 24px;
-             z-index: 1000;
-             transition: all 0.3s ease;
-         }
-
-         .floating-action-btn:hover {
-             transform: scale(1.1);
-             box-shadow: 0 6px 25px rgba(255,68,68,0.5);
-         }
-
-         .floating-action-btn.hidden {
-             display: none;
-         }
-
-         .floating-find-btn {
-             position: fixed;
-             bottom: 150px;
-             right: 20px;
-             width: 60px;
-             height: 60px;
-             border-radius: 50%;
-             background: linear-gradient(45deg, #00c264, #00a556);
-             color: white;
-             border: none;
-             box-shadow: 0 4px 20px rgba(0,194,100,0.3);
-             cursor: pointer;
-             display: flex;
-             align-items: center;
-             justify-content: center;
-             font-size: 24px;
-             z-index: 1000;
-             transition: all 0.3s ease;
-         }
-
-         .floating-find-btn:hover {
-             transform: scale(1.1);
-             box-shadow: 0 6px 25px rgba(0,194,100,0.5);
-         }
-
-         .floating-find-btn.hidden {
-             display: none;
-         }
-
-         .floating-chat-btn {
-             position: fixed;
-             bottom: 150px;
-             right: 20px;
-             width: 60px;
-             height: 60px;
-             border-radius: 50%;
-             background: linear-gradient(45deg, #2196f3, #1976d2);
-             color: white;
-             border: none;
-             box-shadow: 0 4px 20px rgba(33,150,243,0.3);
-             cursor: pointer;
-             display: flex;
-             align-items: center;
-             justify-content: center;
-             font-size: 24px;
-             z-index: 1000;
-             transition: all 0.3s ease;
-         }
-
-         .floating-chat-btn:hover {
-             transform: scale(1.1);
-             box-shadow: 0 6px 25px rgba(33,150,243,0.5);
-         }
-
-         .floating-recenter-btn {
-             position: fixed;
-             bottom: 220px;
-             right: 20px;
-             width: 60px;
-             height: 60px;
-             border-radius: 50%;
-             background: linear-gradient(45deg, #9c27b0, #673ab7);
-             color: white;
-             border: none;
-             box-shadow: 0 4px 20px rgba(156,39,176,0.3);
-             cursor: pointer;
-             display: flex;
-             align-items: center;
-             justify-content: center;
-             font-size: 24px;
-             z-index: 1000;
-             transition: all 0.3s ease;
-         }
-
-         .floating-recenter-btn:hover {
-             transform: scale(1.1);
-             box-shadow: 0 6px 25px rgba(156,39,176,0.5);
-         }
-
-         .control-btn.emergency {
-             background: linear-gradient(45deg, #00c264, #00a556);
-             border-radius: 25px;
-         }
-
-         .control-btn.success {
-             background: linear-gradient(45deg, #00c264, #00a556);
-             border-radius: 25px;
-         }
-
-         .control-btn:hover {
-             transform: translateY(-2px);
-             box-shadow: 0 4px 15px rgba(0,194,100,0.3);
-         }
-
-         .control-btn:disabled {
-             opacity: 0.6;
-             cursor: not-allowed;
-             transform: none;
-         }
-
-         .message.dispatcher {
-             background: rgba(245, 245, 245, 0.9);
-             color: #333;
-             border-radius: 20px 20px 20px 5px;
-             align-self: flex-start;
-         }
-
-         .message.user {
-             background: linear-gradient(135deg, #00c264, #00a556);
-             color: white;
-             border-radius: 20px 20px 5px 20px;
-             align-self: flex-end;
-         }
-
-         .message.emergency {
-             background: linear-gradient(135deg, #ff4444, #cc0000);
-             color: #ffffff;
-             animation: messageAlert 1s ease-in-out;
-             border-radius: 20px;
-             align-self: center;
-         }
-
-         .message.image {
-             background: rgba(245, 245, 245, 0.9);
-             border-radius: 20px;
-             padding: 8px;
-         }
-
-         .message.image img {
-             max-width: 200px;
-             max-height: 200px;
-             border-radius: 10px;
-             object-fit: cover;
-         }
-
-         .notification-panel {
-             transform: translateY(-10px);
-             opacity: 0;
-             visibility: hidden;
-             transition: all 0.3s ease;
-             background: linear-gradient(135deg, #1a1a1a, #000000);
-             border: 1px solid #333;
-             border-radius: 15px;
-         }
-
-         .notification-panel.show {
-             transform: translateY(0);
-             opacity: 1;
-             visibility: visible;
-         }
-
-         .notification-item:hover {
-             background: #2a2a2a;
-         }
-
-         .confirmation-modal {
-             opacity: 0;
-             visibility: hidden;
-             transition: all 0.3s ease;
-         }
-
-         .confirmation-modal.show {
-             opacity: 1;
-             visibility: visible;
-         }
-
-         .confirmation-content {
-             animation: modalSlideIn 0.3s ease-out;
-             background: linear-gradient(135deg, #1a1a1a, #000000);
-             border: 1px solid #333;
-             color: #ffffff;
-             border-radius: 20px;
-         }
-
-         .countdown-modal {
-             position: fixed;
-             top: 0;
-             left: 0;
-             width: 100vw;
-             height: 100vh;
-             background: rgba(0,0,0,0.9);
-             z-index: 10002;
-             display: none;
-             align-items: center;
-             justify-content: center;
-         }
-
-         .countdown-modal.show {
-             display: flex;
-         }
-
-         .countdown-content {
-             background: linear-gradient(135deg, #1a1a1a, #000000);
-             border: 1px solid #333;
-             color: #ffffff;
-             border-radius: 20px;
-             padding: 2rem;
-             max-width: 400px;
-             width: 90%;
-             text-align: center;
-             animation: modalSlideIn 0.3s ease-out;
-         }
-
-         .countdown-timer {
-             font-size: 4rem;
-             font-weight: bold;
-             color: #ff4444;
-             animation: countdownPulse 1s infinite;
-             border-radius: 50%;
-             width: 120px;
-             height: 120px;
-             display: flex;
-             align-items: center;
-             justify-content: center;
-             margin: 0 auto 1rem;
-         }
-
-         .confirm-btn {
-             background: linear-gradient(45deg, #00c264, #00a556);
-             border-radius: 25px;
-         }
-
-         .confirm-btn:hover {
-             transform: scale(1.05);
-         }
-
-         .cancel-btn {
-             background: linear-gradient(45deg, #333333, #1a1a1a);
-             border-radius: 25px;
-         }
-
-         .cancel-btn:hover {
-             background: linear-gradient(45deg, #555555, #333333);
-         }
-
-         .logout-btn {
-             background: linear-gradient(45deg, #dc2626, #b91c1c);
-             border-radius: 25px;
-         }
-
-         .logout-btn:hover {
-             background: linear-gradient(45deg, #ef4444, #dc2626);
-         }
-
-         .hazard-point {
-             animation: hazardPulse 2s infinite;
-         }
-
-         .flood-point {
-             background: rgba(33, 150, 243, 0.8);
-             border: 3px solid #2196f3;
-         }
-
-         .priority-high { background: #ff4444; }
-         .priority-medium { background: #ffcc00; }
-         .priority-low { background: #00c264; }
-
-         .slide-in {
-             animation: slideIn 0.3s ease-out;
-         }
-
-         .fade-in {
-             animation: fadeIn 0.5s ease-out;
-         }
-
-         .chat-messages::-webkit-scrollbar {
-             width: 4px;
-         }
-
-         .chat-messages::-webkit-scrollbar-track {
-             background: rgba(0,0,0,0.1);
-         }
-
-         .chat-messages::-webkit-scrollbar-thumb {
-             background: rgba(0,194,100,0.6);
-             border-radius: 2px;
-         }
-
-         .chat-messages::-webkit-scrollbar-thumb:hover {
-             background: rgba(0,194,100,0.8);
-         }
-
-         .notification-list::-webkit-scrollbar {
-             width: 4px;
-         }
-
-         .notification-list::-webkit-scrollbar-track {
-             background: rgba(0,0,0,0.1);
-         }
-
-         .notification-list::-webkit-scrollbar-thumb {
-             background: rgba(0,194,100,0.6);
-             border-radius: 2px;
-         }
-
-         .notification-list::-webkit-scrollbar-thumb:hover {
-             background: rgba(0,194,100,0.8);
-         }
-
-         .main-container {
-             transition: all 0.3s ease;
-         }
-
-         .status-compact {
-             position: fixed;
-             bottom: 20px;
-             left: 20px;
-             background: rgba(0,0,0,0.9);
-             backdrop-filter: blur(10px);
-             border-radius: 15px;
-             padding: 10px 15px;
-             color: white;
-             z-index: 1000;
-             display: none;
-         }
-
-         .loading-overlay {
-             position: fixed;
-             top: 0;
-             left: 0;
-             width: 100vw;
-             height: 100vh;
-             background: rgba(0,0,0,0.8);
-             z-index: 10000;
-             display: none;
-             align-items: center;
-             justify-content: center;
-         }
-
-         .loading-overlay.show {
-             display: flex;
-         }
-
-         .ambulance-finder-modal {
-             position: fixed;
-             top: 0;
-             left: 0;
-             width: 100vw;
-             height: 100vh;
-             background: rgba(0,0,0,0.8);
-             z-index: 10001;
-             display: none;
-             align-items: center;
-             justify-content: center;
-         }
-
-         .ambulance-finder-modal.show {
-             display: flex;
-         }
-
-         .ambulance-finder-content {
-             background: linear-gradient(135deg, #1a1a1a, #000000);
-             border: 1px solid #333;
-             color: #ffffff;
-             border-radius: 20px;
-             padding: 2rem;
-             max-width: 400px;
-             width: 90%;
-             text-align: center;
-             animation: modalSlideIn 0.3s ease-out;
-         }
-
-         .nearest-ambulance {
-             background: linear-gradient(45deg, #00c264, #00a556);
-             border: 3px solid #ffffff;
-             box-shadow: 0 0 20px rgba(0,194,100,0.5);
-             animation: emergencyPulse 2s infinite;
-         }
-
-         /* Custom styling for Leaflet Routing Machine */
-         .leaflet-routing-container {
-             background: rgba(26, 26, 26, 0.95);
-             color: #ffffff;
-             border: 1px solid #333;
-             border-radius: 10px;
-             padding: 10px;
-         }
-
-         .leaflet-routing-container h2,
-         .leaflet-routing-container h3 {
-             color: #00c264;
-         }
-
-         .leaflet-routing-alt {
-             background: rgba(0, 0, 0, 0.1);
-             border-radius: 5px;
-             margin: 5px 0;
-         }
-
-         .leaflet-routing-alt:hover {
-             background: rgba(0, 194, 100, 0.2);
-         }
-
-         .leaflet-routing-geocoders {
-             display: none;
-         }
-
-         .leaflet-routing-container-hide {
-             width: 300px;
-         }
-
-         @media (max-width: 768px) {
-             .notification-panel {
-                 width: calc(100vw - 2rem);
-                 right: 1rem;
-             }
-             .confirmation-modal .confirmation-content {
-                 margin: 1rem;
-                 width: calc(100% - 2rem);
-             }
-             .floating-action-btn {
-                 width: 50px;
-                 height: 50px;
-                 font-size: 20px;
-                 bottom: 80px;
-             }
-             .floating-find-btn {
-                 width: 50px;
-                 height: 50px;
-                 font-size: 20px;
-                 bottom: 140px;
-             }
-             .floating-chat-btn {
-                 width: 50px;
-                 height: 50px;
-                 font-size: 20px;
-                 bottom: 140px;
-             }
-             .floating-recenter-btn {
-                 width: 50px;
-                 height: 50px;
-                 font-size: 20px;
-                 bottom: 200px;
-             }
-             .leaflet-routing-container {
-                 width: calc(100vw - 2rem) !important;
-                 max-width: 280px;
-             }
-         }
-
-         @media (max-width: 640px) {
-             .sidebar {
-                 width: 280px;
-                 right: -280px;
-             }
-         }
-     </style>
+     <?php include "./pages/client/style.php"; ?>
 
      <!-- Mobile-First Layout -->
      <div class="h-screen bg-white overflow-hidden relative">
@@ -648,7 +19,7 @@
                  </button>
 
                  <button class="profile-icon w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center" onclick="toggleSidebar()">
-                     <span class="text-sm font-semibold text-gray-600">JS</span>
+                     <span class="text-sm font-semibold text-gray-600">RA</span>
                  </button>
              </div>
          </header>
@@ -700,11 +71,11 @@
 
                  <div class="flex items-center gap-3 mb-4">
                      <div class="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center">
-                         <span class="text-lg font-bold text-white">JS</span>
+                         <span class="text-lg font-bold text-white">RA</span>
                      </div>
                      <div>
-                         <div class="text-sm font-semibold text-white">John Smith</div>
-                         <div class="text-xs text-gray-400">john.smith@email.com</div>
+                         <div class="text-sm font-semibold text-white">Renz Aspiras</div>
+                         <div class="text-xs text-gray-400">renzaspiras@email.com</div>
                          <div class="text-xs text-green-400">●  Online</div>
                      </div>
                  </div>
@@ -841,7 +212,7 @@
      <script>
          // PHP Debug Variable - Set by server
          <?php
-         $debugMode = true; // Set this to false in production
+         $debugMode = false; // Set this to false in production
          echo "var DEBUG_MODE = " . ($debugMode ? "true" : "false") . ";\n";
          ?>
 
@@ -860,6 +231,100 @@
          var currentRoute = null;
          var countdownTimer = null;
          var countdownValue = 5;
+         var liveLocationInterval = null;
+         var isLiveTrackingActive = false;
+
+         // Create human icon for user location
+         function createHumanIcon() {
+             return L.divIcon({
+                 html: '<div class="w-10 h-10 rounded-full flex items-center justify-center text-2xl" style="background: linear-gradient(45deg, #00c264, #00a556); border: 3px solid #ffffff; box-shadow: 0 0 10px rgba(0,194,100,0.4); animation: userLocationPulse 2s infinite;">🚶</div>',
+                 iconSize: [40, 40],
+                 iconAnchor: [20, 20],
+                 className: 'custom-div-icon'
+             });
+         }
+
+         // Live location tracking functions
+         function startLiveLocationTracking() {
+             if (isLiveTrackingActive) return;
+
+             isLiveTrackingActive = true;
+             console.log('Starting live location tracking every 0.5 seconds...');
+
+             liveLocationInterval = setInterval(() => {
+                 updateUserLocation();
+             }, 500); // Update every 0.5 seconds
+         }
+
+         function stopLiveLocationTracking() {
+             if (liveLocationInterval) {
+                 clearInterval(liveLocationInterval);
+                 liveLocationInterval = null;
+             }
+             isLiveTrackingActive = false;
+             console.log('Live location tracking stopped');
+         }
+
+         function updateUserLocation() {
+             if (!navigator.geolocation) {
+                 console.log('Geolocation not supported');
+                 return;
+             }
+
+             navigator.geolocation.getCurrentPosition(
+                 (position) => {
+                     const newLat = position.coords.latitude;
+                     const newLng = position.coords.longitude;
+
+                     if (userLocationMarker) {
+                         // Smoothly update the marker position
+                         const currentLatLng = userLocationMarker.getLatLng();
+                         const newLatLng = L.latLng(newLat, newLng);
+
+                         // Only update if there's a significant change (more than ~1 meter)
+                         if (currentLatLng.distanceTo(newLatLng) > 1) {
+                             userLocationMarker.setLatLng(newLatLng);
+
+                             // Update popup content with coordinates and timestamp
+                             const timestamp = new Date().toLocaleTimeString();
+                             userLocationMarker.setPopupContent(`
+                                 🚶 Your Location (Live)<br>
+                                 <small>Lat: ${newLat.toFixed(6)}</small><br>
+                                 <small>Lng: ${newLng.toFixed(6)}</small><br>
+                                 <small>Updated: ${timestamp}</small>
+                             `);
+
+                             // Update route if it exists
+                             if (routeControl && nearestAmbulanceMarker) {
+                                 const ambulancePos = nearestAmbulanceMarker.getLatLng();
+                                 updateRoute(newLatLng, ambulancePos);
+                             }
+
+                             console.log(`Location updated: ${newLat}, ${newLng}`);
+                         }
+                     }
+                 },
+                 (error) => {
+                     console.log('Geolocation error:', error.message);
+                     // Don't stop tracking on individual errors, just log them
+                 },
+                 {
+                     enableHighAccuracy: true,
+                     timeout: 5000,
+                     maximumAge: 0 // Always get fresh location
+                 }
+             );
+         }
+
+         // Update route with new waypoints
+         function updateRoute(userPos, ambulancePos) {
+             if (routeControl) {
+                 routeControl.setWaypoints([
+                     L.latLng(userPos.lat, userPos.lng),
+                     L.latLng(ambulancePos.lat, ambulancePos.lng)
+                 ]);
+             }
+         }
 
          // Image upload handler
          function handleImageUpload(event) {
@@ -910,7 +375,7 @@
                      {
                          enableHighAccuracy: true,
                          timeout: 10000,
-                         maximumAge: 600000
+                         maximumAge: 60000
                      }
                  );
              });
@@ -979,6 +444,9 @@
 
          // Logout functionality
          function logout() {
+             // Stop live location tracking
+             stopLiveLocationTracking();
+
              // Close sidebar first
              if (sidebarVisible) {
                  toggleSidebar();
@@ -1191,16 +659,16 @@
                      const routeDistance = currentRoute.summary.totalDistance;
                      const routeTime = currentRoute.summary.totalTime;
 
-                     addChatMessage('Emergency Dispatcher', `Nearest ambulance (${(routeDistance/1000).toFixed(1)}km away via optimal route) has been notified and is en route. ETA: ${Math.ceil(routeTime/60)} minutes. Turn-by-turn directions have been calculated and displayed on your map. How can we assist you further?`, 'dispatcher');
+                     addChatMessage('Emergency Dispatcher', `Nearest ambulance (${(routeDistance/1000).toFixed(1)}km away via optimal route) has been notified and is en route. ETA: ${Math.ceil(routeTime/60)} minutes. Turn-by-turn directions have been calculated and displayed on your map. Your location is being tracked in real-time. How can we assist you further?`, 'dispatcher');
                  } else if (nearestAmbulanceMarker && userLocationMarker) {
                      const userPos = userLocationMarker.getLatLng();
                      const ambulancePos = nearestAmbulanceMarker.getLatLng();
                      const distance = calculateDistance(userPos.lat, userPos.lng, ambulancePos.lat, ambulancePos.lng);
                      const eta = Math.ceil(distance / 833.33);
 
-                     addChatMessage('Emergency Dispatcher', `Nearest ambulance (${(distance/1000).toFixed(1)}km away) has been notified and is en route. ETA: ${eta} minutes. Route has been displayed on your map. How can we assist you further?`, 'dispatcher');
+                     addChatMessage('Emergency Dispatcher', `Nearest ambulance (${(distance/1000).toFixed(1)}km away) has been notified and is en route. ETA: ${eta} minutes. Route has been displayed on your map. Your location is being tracked in real-time. How can we assist you further?`, 'dispatcher');
                  } else {
-                     addChatMessage('Emergency Dispatcher', 'Nearest ambulance has been notified and is en route. How can we assist you further?', 'dispatcher');
+                     addChatMessage('Emergency Dispatcher', 'Nearest ambulance has been notified and is en route. Your location is being tracked in real-time. How can we assist you further?', 'dispatcher');
                  }
              }, 500);
          }
@@ -1212,11 +680,14 @@
              const chatSystem = document.getElementById('chatSystem');
              chatSystem.classList.remove('hidden');
 
+             // Start live location tracking when chat starts
+             startLiveLocationTracking();
+
              // Add initial message from dispatcher only if the chat doesn't have messages yet
              const chatMessages = document.getElementById('chatMessages');
              if (chatMessages.children.length === 0) {
                  setTimeout(function() {
-                     addChatMessage('Emergency Dispatcher', 'Hello! How can we assist you today? Are you experiencing an emergency?', 'dispatcher');
+                     addChatMessage('Emergency Dispatcher', 'Hello! How can we assist you today? Are you experiencing an emergency? Your location is now being tracked in real-time for emergency response.', 'dispatcher');
                  }, 500);
              }
          }
@@ -1226,6 +697,9 @@
 
              const chatSystem = document.getElementById('chatSystem');
              chatSystem.classList.add('hidden');
+
+             // Keep live location tracking active for emergency situations
+             // stopLiveLocationTracking();
          }
 
          // Enhanced notification system
@@ -1327,7 +801,7 @@
              floodLocations.forEach((location, index) => {
                  var floodMarker = L.marker([location.lat, location.lng], {
                      icon: floodIcon,
-                     draggable: DEBUG_MODE
+                     draggable: false
                  }).addTo(map)
                      .bindPopup(`🌊 Flood Zone ${index + 1}<br>Severity: ${location.severity}<br>⚠️ Avoid this area`);
 
@@ -1336,43 +810,7 @@
          }
 
          function addRandomAmbulances(centerLat, centerLng) {
-             var distanceInDegrees = 100 / 111320;
-
-             var ambulanceSvg = `
-                 <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                     <rect x="3" y="12" width="20" height="10" rx="1" fill="#ffffff" stroke="#00c264" stroke-width="2"/>
-                     <rect x="3" y="8" width="8" height="4" rx="1" fill="#ffffff" stroke="#00c264" stroke-width="2"/>
-                     <rect x="4" y="9" width="6" height="2" fill="#87ceeb"/>
-                     <rect x="13" y="13" width="4" height="3" fill="#87ceeb"/>
-                     <rect x="18" y="13" width="4" height="3" fill="#87ceeb"/>
-                     <rect x="14.5" y="17" width="3" height="1" fill="#00c264"/>
-                     <rect x="15.5" y="16" width="1" height="3" fill="#00c264"/>
-                     <circle cx="7" cy="23" r="2" fill="#333333"/>
-                     <circle cx="19" cy="23" r="2" fill="#333333"/>
-                 </svg>
-             `;
-
-             var ambulanceIcon = L.divIcon({
-                 html: ambulanceSvg,
-                 iconSize: [32, 32],
-                 iconAnchor: [16, 16],
-                 className: 'custom-div-icon'
-             });
-
-             // Only create 1 ambulance now
-             var angle = Math.random() * 2 * Math.PI;
-             var distance = Math.random() * distanceInDegrees;
-
-             var ambulanceLat = centerLat + (distance * Math.cos(angle));
-             var ambulanceLng = centerLng + (distance * Math.sin(angle));
-
-             var ambulanceMarker = L.marker([ambulanceLat, ambulanceLng], {
-                 icon: ambulanceIcon,
-                 draggable: DEBUG_MODE
-             }).addTo(map)
-                 .bindPopup('Ambulance 1');
-
-             ambulanceMarkers.push(ambulanceMarker);
+             // Function exists but does not add ambulances to the map
          }
 
          function addChatMessage(sender, message, type = 'user', imageData = null) {
@@ -1425,14 +863,21 @@
                  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
              }).addTo(map);
 
-             userLocationMarker = L.marker([lat, lng], {draggable: DEBUG_MODE}).addTo(map)
-                 .bindPopup('📍 Your Location')
+             // Create user location marker with human icon
+             userLocationMarker = L.marker([lat, lng], {
+                 icon: createHumanIcon(),
+                 draggable: false
+             }).addTo(map)
+                 .bindPopup('🚶 Your Location (Live)')
                  .openPopup();
 
              addRandomAmbulances(lat, lng);
              addFloodPoints(lat, lng);
 
              map.on('click', onMapClick);
+
+             // Start live location tracking immediately
+             startLiveLocationTracking();
 
              // Event listeners
              document.getElementById('sendMessage').addEventListener('click', function() {
