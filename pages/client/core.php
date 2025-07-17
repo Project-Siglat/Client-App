@@ -916,3 +916,25 @@
          initMap(16.606254918019598, 121.18314743041994);
      </script>
 </section>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+// Retrieve token from session storage
+const token = sessionStorage.getItem('token');
+
+if (token) {
+    console.log('Token retrieved:', token);
+    // You can use the token for API calls or authentication
+    // Example: Set authorization header for future AJAX requests
+    $.ajaxSetup({
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        }
+    });
+} else {
+    console.log('No token found in session storage');
+    // Optionally redirect to login if no token is found
+    // window.location.href = '/login';
+}
+
+</script>

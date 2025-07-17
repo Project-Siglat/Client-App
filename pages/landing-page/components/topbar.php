@@ -1,4 +1,4 @@
-  <header class="sticky top-0 z-50 bg-gradient-to-r from-black via-green-950 to-black backdrop-blur-lg border-b border-yellow-500/20">
+  <header class="sticky top-0 z-50 bg-gradient-to-r from-black via-red-950 to-black backdrop-blur-lg border-b border-yellow-500/20">
     <div class="container mx-auto px-4 sm:px-6 py-2">
       <div class="flex items-center justify-between">
         <h1 class="text-lg sm:text-xl font-bold text-white tracking-wide">SIGLAT</h1>
