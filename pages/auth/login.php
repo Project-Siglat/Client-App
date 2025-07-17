@@ -1,3 +1,9 @@
+<?php
+include "./config/env.php";
+
+$API = $_ENV["API"];
+?>
+
 <div class="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900 text-white relative overflow-hidden flex items-center justify-center">
   <!-- Back to Home Button -->
   <a href="/" class="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-gray-800/60 hover:bg-gray-700/80 border border-gray-600/30 rounded-xl transition-all duration-300 text-gray-300 hover:text-white backdrop-blur-lg">
@@ -167,7 +173,7 @@ $(document).ready(function() {
         };
 
         $.ajax({
-            url: 'http://localhost:5069/api/v1/Auth/register',
+            url: '<?php echo $API; ?>/api/v1/Auth/register',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(registrationData),
@@ -206,7 +212,7 @@ $(document).ready(function() {
         };
 
         $.ajax({
-            url: 'http://localhost:5069/api/v1/Auth/login',
+            url: '<?php echo $API; ?>/api/v1/Auth/login',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(loginData),
