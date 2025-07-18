@@ -9,7 +9,7 @@
             <a href="/" class="text-gray-300 hover:text-yellow-400 transition-all duration-300 font-medium">Home</a>
             <a href="/contact" class="text-gray-300 hover:text-yellow-400 transition-all duration-300 font-medium">Contact</a>
           </nav>
-          <a href="/login" class="bg-yellow-500 hover:bg-yellow-600 text-black font-medium px-3 py-1.5 rounded transition-all duration-300">Login / Register</a>
+          <a href="#" onclick="handleLoginClick(event)" class="bg-yellow-500 hover:bg-yellow-600 text-black font-medium px-3 py-1.5 rounded transition-all duration-300">Login / Register</a>
         </div>
 
         <!-- Mobile Menu Button -->
@@ -27,13 +27,23 @@
           <nav class="flex flex-col space-y-2 pt-2">
             <a href="/" class="text-gray-300 hover:text-yellow-400 transition-all duration-300 font-medium transform translate-y-2 opacity-0 transition-all duration-300 delay-75">Home</a>
             <a href="/contact" class="text-gray-300 hover:text-yellow-400 transition-all duration-300 font-medium transform translate-y-2 opacity-0 transition-all duration-300 delay-150">Contact</a>
-            <a href="/login" class="bg-yellow-500 hover:bg-yellow-600 text-black font-medium px-3 py-1.5 rounded transition-all duration-300 text-center transform translate-y-2 opacity-0 transition-all duration-300 delay-200">Login / Register</a>
+            <a href="#" onclick="handleLoginClick(event)" class="bg-yellow-500 hover:bg-yellow-600 text-black font-medium px-3 py-1.5 rounded transition-all duration-300 text-center transform translate-y-2 opacity-0 transition-all duration-300 delay-200">Login / Register</a>
           </nav>
         </div>
       </div>
     </div>
   </header>
   <script>
+  function handleLoginClick(event) {
+    event.preventDefault();
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      window.location.href = "/login";
+    } else {
+      window.location.href = "/client";
+    }
+  }
+
   function toggleMobileMenu() {
     const mobileMenu = document.getElementById('mobileMenu');
     const hamburger = document.getElementById('hamburger');

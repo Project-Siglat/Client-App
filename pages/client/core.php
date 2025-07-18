@@ -1,35 +1,49 @@
 <section>
      <?php include "./pages/client/style.php"; ?>
 
+     <script>
+      // Check for authentication token
+     const authToken = sessionStorage.getItem('token');
+     if (!authToken) {
+         window.location.href = '/login';
+     }
+     </script>
+
      <!-- Mobile-First Layout -->
-     <div class="h-screen bg-white overflow-hidden relative">
+     <div class="h-screen bg-black overflow-hidden relative">
          <!-- Header -->
-         <header class="bg-white shadow-sm border-b border-gray-200 px-4 py-3 flex items-center justify-between relative z-50">
+         <header class="bg-black shadow-sm border-b border-red-600 px-4 py-3 flex items-center justify-between relative z-50">
              <div class="flex items-center gap-3">
-                 <div class="text-lg font-bold text-gray-800">EmergencyGo</div>
+                 <div class="text-lg font-bold text-yellow-400">EmergencyGo</div>
              </div>
 
              <div class="flex items-center gap-3">
-                 <button class="relative p-2 rounded-full hover:bg-gray-100" onclick="toggleNotifications()">
-                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2">
+                 <button class="relative p-2 rounded-full hover:bg-gray-800" onclick="toggleWeatherPanel()">
+                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFF00" stroke-width="2">
+                         <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                     </svg>
+                 </button>
+
+                 <!-- <button class="relative p-2 rounded-full hover:bg-gray-800" onclick="toggleNotifications()">
+                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFF00" stroke-width="2">
                          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                      </svg>
                      <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center font-bold">3</span>
-                 </button>
+                 </button> -->
 
-                 <button class="profile-icon w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center" onclick="toggleSidebar()">
-                     <span class="text-sm font-semibold text-gray-600">RA</span>
+                 <button class="profile-icon w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center" onclick="toggleSidebar()">
+                     <span class="text-sm font-semibold text-yellow-400">RA</span>
                  </button>
              </div>
          </header>
 
          <!-- Main Map Area -->
          <main class="relative flex-1 h-[calc(100vh-64px)]">
-             <div id="loading" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-lg p-6 z-50">
+             <div id="loading" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black border border-red-600 rounded-xl shadow-lg p-6 z-50">
                  <div class="flex items-center gap-3">
-                     <div class="w-6 h-6 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin"></div>
-                     <span class="text-gray-700">Loading map...</span>
+                     <div class="w-6 h-6 border-2 border-gray-300 border-t-yellow-400 rounded-full animate-spin"></div>
+                     <span class="text-yellow-400">Loading map...</span>
                  </div>
              </div>
              <div id="map" class="w-full h-full"></div>
@@ -58,10 +72,10 @@
          <!-- Sidebar -->
          <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
          <aside class="sidebar" id="sidebar">
-             <div class="p-4 border-b border-gray-700">
+             <div class="p-4 border-b border-red-600">
                  <div class="flex items-center justify-between mb-4">
-                     <h2 class="text-lg font-bold text-white">Profile</h2>
-                     <button class="text-gray-400 hover:text-white" onclick="toggleSidebar()">
+                     <h2 class="text-lg font-bold text-yellow-400">Profile</h2>
+                     <button class="text-gray-400 hover:text-yellow-400" onclick="toggleSidebar()">
                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                              <line x1="18" y1="6" x2="6" y2="18"></line>
                              <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -70,20 +84,20 @@
                  </div>
 
                  <div class="flex items-center gap-3 mb-4">
-                     <div class="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center">
-                         <span class="text-lg font-bold text-white">RA</span>
+                     <div class="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center">
+                         <span class="text-lg font-bold text-yellow-400">RA</span>
                      </div>
                      <div>
-                         <div class="text-sm font-semibold text-white">Renz Aspiras</div>
+                         <div class="text-sm font-semibold text-yellow-400">Renz Aspiras</div>
                          <div class="text-xs text-gray-400">renzaspiras@email.com</div>
-                         <div class="text-xs text-green-400">●  Online</div>
+                         <div class="text-xs text-yellow-400">●  Online</div>
                      </div>
                  </div>
              </div>
 
              <!-- Logout Button -->
-             <div class="p-4 border-t border-gray-700">
-                 <button class="logout-btn w-full py-2 px-3 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-white" onclick="logout()">
+             <div class="p-4 border-t border-red-600">
+                 <button class="logout-btn w-full py-2 px-3 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-yellow-400" onclick="logout()">
                      🚪 Logout
                  </button>
              </div>
@@ -93,12 +107,12 @@
          <div id="countdownModal" class="countdown-modal">
              <div class="countdown-content">
                  <div class="text-2xl font-bold text-red-400 mb-4">🚨 Emergency Alert</div>
-                 <div class="text-lg text-gray-300 mb-4">Emergency services will be contacted in:</div>
+                 <div class="text-lg text-yellow-400 mb-4">Emergency services will be contacted in:</div>
                  <div id="countdownTimer" class="countdown-timer">5</div>
                  <div class="text-sm text-gray-400 mb-6">Press Cancel to abort</div>
                  <div class="flex gap-4 justify-center">
-                     <button class="cancel-btn py-3 px-8 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-white" onclick="cancelCountdown()">Cancel</button>
-                     <button class="confirm-btn py-3 px-8 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-white" onclick="confirmCountdown()">Confirm Now</button>
+                     <button class="cancel-btn py-3 px-8 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-yellow-400" onclick="cancelCountdown()">Cancel</button>
+                     <button class="confirm-btn py-3 px-8 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-black bg-red-500" onclick="confirmCountdown()">Confirm Now</button>
                  </div>
              </div>
          </div>
@@ -106,22 +120,22 @@
          <!-- Ambulance Finder Modal -->
          <div id="ambulanceFinderModal" class="ambulance-finder-modal">
              <div class="ambulance-finder-content">
-                 <div class="text-2xl font-bold text-green-400 mb-4">🚑 Finding Nearest Ambulance</div>
+                 <div class="text-2xl font-bold text-yellow-400 mb-4">🚑 Finding Nearest Ambulance</div>
                  <div class="flex items-center gap-3 justify-center mb-4">
-                     <div class="w-6 h-6 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin"></div>
-                     <span class="text-gray-300">Locating ambulances...</span>
+                     <div class="w-6 h-6 border-2 border-gray-300 border-t-yellow-400 rounded-full animate-spin"></div>
+                     <span class="text-yellow-400">Locating ambulances...</span>
                  </div>
                  <div id="ambulanceFinderStatus" class="text-sm text-gray-400 mb-4">
                      Scanning emergency vehicles in your area...
                  </div>
                  <div id="ambulanceFinderResult" class="hidden">
-                     <div class="text-lg font-semibold text-green-400 mb-2">🚑 Nearest Ambulance Found!</div>
-                     <div class="text-sm text-gray-300 mb-4">
+                     <div class="text-lg font-semibold text-yellow-400 mb-2">🚑 Nearest Ambulance Found!</div>
+                     <div class="text-sm text-yellow-400 mb-4">
                          <div id="ambulanceDistance" class="font-semibold"></div>
                          <div id="ambulanceETA" class="text-xs opacity-75"></div>
-                         <div id="routeDetails" class="text-xs text-blue-400 mt-2"></div>
+                         <div id="routeDetails" class="text-xs text-red-400 mt-2"></div>
                      </div>
-                     <button class="confirm-btn py-2 px-6 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-white" onclick="proceedToChat()">
+                     <button class="confirm-btn py-2 px-6 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-black bg-red-500" onclick="proceedToChat()">
                          Proceed to Chat
                      </button>
                  </div>
@@ -130,14 +144,14 @@
 
          <!-- Chat System (Modal) -->
          <div id="chatSystem" class="fixed inset-0 bg-opacity-50 z-[9999] hidden" onclick="closeChatSystem(event)">
-             <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[80vh] flex flex-col" onclick="event.stopPropagation()">
-                 <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+             <div class="absolute bottom-0 left-0 right-0 bg-black border-t border-red-600 rounded-t-3xl max-h-[80vh] flex flex-col" onclick="event.stopPropagation()">
+                 <div class="p-4 border-b border-red-600 flex items-center justify-between">
                      <div>
-                         <div class="text-lg font-semibold text-gray-800">Emergency Chat</div>
-                         <div class="text-sm text-green-600">● Live Support</div>
+                         <div class="text-lg font-semibold text-yellow-400">Emergency Chat</div>
+                         <div class="text-sm text-yellow-400">● Live Support</div>
                      </div>
-                     <button class="p-2 hover:bg-gray-100 rounded-full" onclick="closeChatSystem()">
-                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2">
+                     <button class="p-2 hover:bg-gray-800 rounded-full" onclick="closeChatSystem()">
+                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFF00" stroke-width="2">
                              <line x1="18" y1="6" x2="6" y2="18"></line>
                              <line x1="6" y1="6" x2="18" y2="18"></line>
                          </svg>
@@ -148,15 +162,15 @@
                      <!-- Messages will be added dynamically -->
                  </div>
 
-                 <div class="p-4 border-t border-gray-200">
+                 <div class="p-4 border-t border-red-600">
                      <div class="flex gap-3 items-end">
                          <input type="text" id="chatInput" placeholder="Type your message..."
-                                class="flex-1 px-4 py-3 border border-gray-300 rounded-full outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                class="flex-1 px-4 py-3 border border-red-600 bg-black text-yellow-400 rounded-full outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent">
                          <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
-                         <button id="attachImage" class="bg-gray-500 text-white p-3 rounded-full hover:bg-gray-600 transition-colors" onclick="document.getElementById('imageInput').click()">
+                         <button id="attachImage" class="bg-gray-800 text-yellow-400 p-3 rounded-full hover:bg-gray-700 transition-colors" onclick="document.getElementById('imageInput').click()">
                              📎
                          </button>
-                         <button id="sendMessage" class="bg-green-500 text-white p-3 rounded-full hover:bg-green-600 transition-colors">
+                         <button id="sendMessage" class="bg-red-500 text-black p-3 rounded-full hover:bg-red-600 transition-colors">
                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                  <line x1="22" y1="2" x2="11" y2="13"></line>
                                  <polygon points="22,2 15,22 11,13 2,9 22,2"></polygon>
@@ -168,43 +182,62 @@
          </div>
      </div>
 
+     <!-- Weather Panel -->
+     <div class="weather-panel fixed top-16 right-4 w-96 shadow-2xl z-[2000] max-h-[500px] overflow-hidden rounded-lg" id="weatherPanel" style="display: none;">
+         <div class="py-4 px-5 bg-gradient-to-r from-red-500 to-red-600 text-yellow-400 font-semibold">
+             🌤️ Weather Forecast - Villaverde
+         </div>
+         <div class="h-[400px] bg-black" id="weatherFrameContainer">
+             <iframe
+                 id="weatherFrame"
+                 src="https://www.accuweather.com/en/ph/villaverde/265132/hourly-weather-forecast/265132"
+                 width="100%"
+                 height="100%"
+                 frameborder="0"
+                 style="border: none;"
+                 title="Weather Forecast"
+                 loading="lazy">
+             </iframe>
+         </div>
+     </div>
+
      <!-- Notification Panel -->
-     <div class="notification-panel fixed top-16 right-4 w-80 shadow-2xl z-[2000] max-h-96 overflow-hidden" id="notificationPanel">
-         <div class="py-4 px-5 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold">
+     <!-- <div class="notification-panel fixed top-16 right-4 w-80 shadow-2xl z-[2000] max-h-96 overflow-hidden" id="notificationPanel">
+         <div class="py-4 px-5 bg-gradient-to-r from-red-500 to-red-600 text-yellow-400 font-semibold">
              Emergency Notifications
          </div>
          <div class="max-h-72 overflow-y-auto bg-gradient-to-br from-gray-900 to-black">
-             <div class="py-4 px-5 border-b border-gray-700 cursor-pointer transition-all duration-300 relative text-white hover:bg-gray-800/50">
+             <div class="py-4 px-5 border-b border-red-600 cursor-pointer transition-all duration-300 relative text-yellow-400 hover:bg-gray-800/50">
                  <div class="absolute top-4 right-4 w-2 h-2 rounded-full priority-high"></div>
                  <div class="font-semibold text-red-400 mb-1 text-sm">🌪️ Typhoon Warning</div>
-                 <div class="text-gray-300 text-xs leading-relaxed mb-1">Typhoon approaching your area. Seek shelter immediately.</div>
+                 <div class="text-yellow-400 text-xs leading-relaxed mb-1">Typhoon approaching your area. Seek shelter immediately.</div>
                  <div class="text-gray-500 text-xs">Just now</div>
              </div>
-             <div class="py-4 px-5 border-b border-gray-700 cursor-pointer transition-all duration-300 relative text-white hover:bg-gray-800/50">
+             <div class="py-4 px-5 border-b border-red-600 cursor-pointer transition-all duration-300 relative text-yellow-400 hover:bg-gray-800/50">
                  <div class="absolute top-4 right-4 w-2 h-2 rounded-full priority-medium"></div>
                  <div class="font-semibold text-yellow-400 mb-1 text-sm">📍 Location Services Active</div>
-                 <div class="text-gray-300 text-xs leading-relaxed mb-1">Your location is being shared with emergency services</div>
+                 <div class="text-yellow-400 text-xs leading-relaxed mb-1">Your location is being shared with emergency services</div>
                  <div class="text-gray-500 text-xs">5 minutes ago</div>
              </div>
-             <div class="py-4 px-5 cursor-pointer transition-all duration-300 relative text-white hover:bg-gray-800/50">
+             <div class="py-4 px-5 cursor-pointer transition-all duration-300 relative text-yellow-400 hover:bg-gray-800/50">
                  <div class="absolute top-4 right-4 w-2 h-2 rounded-full priority-low"></div>
-                 <div class="font-semibold text-green-400 mb-1 text-sm">✅ System Ready</div>
-                 <div class="text-gray-300 text-xs leading-relaxed mb-1">Emergency response system is online</div>
+                 <div class="font-semibold text-yellow-400 mb-1 text-sm">✅ System Ready</div>
+                 <div class="text-yellow-400 text-xs leading-relaxed mb-1">Emergency response system is online</div>
                  <div class="text-gray-500 text-xs">10 minutes ago</div>
              </div>
          </div>
-     </div>
+     </div> -->
 
      <!-- Confirmation Modal -->
      <div class="confirmation-modal fixed inset-0 bg-black/80 flex items-center justify-center z-[3000]" id="confirmationModal">
          <div class="confirmation-content p-8 max-w-sm w-11/12 text-center shadow-2xl">
-             <div class="text-2xl font-bold text-green-400 mb-4">⚠️ Confirm Emergency</div>
-             <div class="text-base text-gray-300 mb-5 leading-relaxed">
+             <div class="text-2xl font-bold text-red-400 mb-4">⚠️ Confirm Emergency</div>
+             <div class="text-base text-yellow-400 mb-5 leading-relaxed">
                  Are you sure you want to request emergency assistance? This will alert emergency services immediately.
              </div>
              <div class="flex gap-4 justify-center">
-                 <button class="cancel-btn py-3 px-8 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-white" onclick="cancelDispatch()">Cancel</button>
-                 <button class="confirm-btn py-3 px-8 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-white" onclick="confirmDispatch()">Confirm</button>
+                 <button class="cancel-btn py-3 px-8 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-yellow-400" onclick="cancelDispatch()">Cancel</button>
+                 <button class="confirm-btn py-3 px-8 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-black bg-red-500" onclick="confirmDispatch()">Confirm</button>
              </div>
          </div>
      </div>
@@ -224,6 +257,7 @@
          var chatActive = false;
          var audioInitialized = false;
          var notificationVisible = false;
+         var weatherVisible = false;
          var sidebarVisible = false;
          var nearestAmbulanceMarker = null;
          var ambulanceFindingInProgress = false;
@@ -234,10 +268,35 @@
          var liveLocationInterval = null;
          var isLiveTrackingActive = false;
 
+         // Weather panel functionality
+         function toggleWeatherPanel() {
+             const panel = document.getElementById('weatherPanel');
+             // const notifPanel = document.getElementById('notificationPanel');
+             weatherVisible = !weatherVisible;
+
+             if (weatherVisible) {
+                 // Hide notification panel if open
+                 // if (notificationVisible) {
+                 //     notifPanel.classList.remove('show');
+                 //     notificationVisible = false;
+                 // }
+                 panel.style.display = 'block';
+
+                 setTimeout(() => {
+                     panel.classList.add('show');
+                 }, 10);
+             } else {
+                 panel.classList.remove('show');
+                 setTimeout(() => {
+                     panel.style.display = 'none';
+                 }, 300);
+             }
+         }
+
          // Create human icon for user location
          function createHumanIcon() {
              return L.divIcon({
-                 html: '<div class="w-10 h-10 rounded-full flex items-center justify-center text-2xl" style="background: linear-gradient(45deg, #00c264, #00a556); border: 3px solid #ffffff; box-shadow: 0 0 10px rgba(0,194,100,0.4); animation: userLocationPulse 2s infinite;">🚶</div>',
+                 html: '<div class="w-10 h-10 rounded-full flex items-center justify-center text-2xl" style="background: linear-gradient(45deg, #dc2626, #fbbf24); border: 3px solid #ffffff; box-shadow: 0 0 10px rgba(220,38,38,0.4); animation: userLocationPulse 2s infinite;">🚶</div>',
                  iconSize: [40, 40],
                  iconAnchor: [20, 20],
                  className: 'custom-div-icon'
@@ -505,7 +564,7 @@
                  },
                  lineOptions: {
                      styles: [{
-                         color: '#00c264',
+                         color: '#dc2626',
                          weight: 6,
                          opacity: 0.8
                      }]
@@ -703,16 +762,25 @@
          }
 
          // Enhanced notification system
-         function toggleNotifications() {
-             const panel = document.getElementById('notificationPanel');
-             notificationVisible = !notificationVisible;
+         // function toggleNotifications() {
+         //     const panel = document.getElementById('notificationPanel');
+         //     const weatherPanel = document.getElementById('weatherPanel');
+         //     notificationVisible = !notificationVisible;
 
-             if (notificationVisible) {
-                 panel.classList.add('show');
-             } else {
-                 panel.classList.remove('show');
-             }
-         }
+         //     if (notificationVisible) {
+         //         // Hide weather panel if open
+         //         if (weatherVisible) {
+         //             weatherPanel.classList.remove('show');
+         //             setTimeout(() => {
+         //                 weatherPanel.style.display = 'none';
+         //             }, 300);
+         //             weatherVisible = false;
+         //         }
+         //         panel.classList.add('show');
+         //     } else {
+         //         panel.classList.remove('show');
+         //     }
+         // }
 
          function showConfirmationModal() {
              const modal = document.getElementById('confirmationModal');
@@ -902,13 +970,19 @@
              }, 100);
          }
 
-         // Close notifications and sidebar when clicking outside
+         // Close notifications, weather, and sidebar when clicking outside
          document.addEventListener('click', function(event) {
-             const panel = document.getElementById('notificationPanel');
-             const notifButton = event.target.closest('[onclick="toggleNotifications()"]');
+             // const notifPanel = document.getElementById('notificationPanel');
+             const weatherPanel = document.getElementById('weatherPanel');
+             // const notifButton = event.target.closest('[onclick="toggleNotifications()"]');
+             const weatherButton = event.target.closest('[onclick="toggleWeatherPanel()"]');
 
-             if (notificationVisible && !panel.contains(event.target) && !notifButton) {
-                 toggleNotifications();
+             // if (notificationVisible && !notifPanel.contains(event.target) && !notifButton) {
+             //     toggleNotifications();
+             // }
+
+             if (weatherVisible && !weatherPanel.contains(event.target) && !weatherButton) {
+                 toggleWeatherPanel();
              }
          });
 
