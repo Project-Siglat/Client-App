@@ -2,6 +2,10 @@
 include "./config/env.php";
 
 $API = $_ENV["API"];
+
+// Get the 'what' parameter from URL
+$what = isset($_GET["what"]) ? $_GET["what"] : "login";
+$isRegister = $what === "register";
 ?>
 
 <div class="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900 text-white relative overflow-hidden flex items-center justify-center">
@@ -38,17 +42,39 @@ $API = $_ENV["API"];
     <div class="w-full">
       <div class="bg-gradient-to-r from-gray-800/60 to-gray-900/60 p-1.5 sm:p-2 rounded-2xl backdrop-blur-lg border border-gray-600/30">
         <div class="flex" role="tablist">
-          <button id="registerTab" class="flex-1 py-2 sm:py-3 px-2 sm:px-4 text-center font-semibold rounded-xl transition-all duration-300 bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg text-sm sm:text-base" role="tab" aria-selected="true">
-            Register
-          </button>
-          <button id="loginTab" class="flex-1 py-2 sm:py-3 px-2 sm:px-4 text-center font-semibold rounded-xl transition-all duration-300 text-gray-300 hover:text-white hover:bg-gray-700/30 text-sm sm:text-base" role="tab" aria-selected="false">
+          <button id="loginTab" class="flex-1 py-2 sm:py-3 px-2 sm:px-4 text-center font-semibold rounded-xl transition-all duration-300 <?php echo !$isRegister
+              ? "bg-gradient-to-r from-yellow-600 to-yellow-700 text-white shadow-lg"
+              : "text-gray-300 hover:text-white hover:bg-gray-700/30"; ?> text-sm sm:text-base" role="tab" aria-selected="<?php echo !$isRegister
+     ? "true"
+     : "false"; ?>">
             Login
+          </button>
+          <button id="registerTab" class="flex-1 py-2 sm:py-3 px-2 sm:px-4 text-center font-semibold rounded-xl transition-all duration-300 <?php echo $isRegister
+              ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg"
+              : "text-gray-300 hover:text-white hover:bg-gray-700/30"; ?> text-sm sm:text-base" role="tab" aria-selected="<?php echo $isRegister
+     ? "true"
+     : "false"; ?>">
+            Register
           </button>
         </div>
       </div>
 
       <!-- Tab Content -->
-      <div id="registerPanel" class="mt-4 sm:mt-6 bg-gradient-to-b from-gray-800/40 to-gray-900/40 p-4 sm:p-6 rounded-2xl backdrop-blur-lg border border-gray-600/20" role="tabpanel">
+      <div id="loginPanel" class="mt-4 sm:mt-6 bg-gradient-to-b from-gray-800/40 to-gray-900/40 p-6 sm:p-8 rounded-2xl backdrop-blur-lg border border-gray-600/20 <?php echo $isRegister
+          ? "hidden"
+          : ""; ?>" role="tabpanel">
+        <form id="loginForm" class="space-y-4">
+          <input type="email" id="loginEmail" placeholder="Email Address" class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:border-yellow-500 focus:outline-none transition-colors">
+          <input type="password" id="loginPassword" placeholder="Password" class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:border-yellow-500 focus:outline-none transition-colors">
+          <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-yellow-500/40 transform hover:-translate-y-1">
+            Sign In
+          </button>
+        </form>
+      </div>
+
+      <div id="registerPanel" class="mt-4 sm:mt-6 bg-gradient-to-b from-gray-800/40 to-gray-900/40 p-4 sm:p-6 rounded-2xl backdrop-blur-lg border border-gray-600/20 <?php echo !$isRegister
+          ? "hidden"
+          : ""; ?>" role="tabpanel">
         <form id="registerForm" class="space-y-3">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input type="text" id="firstName" placeholder="First Name" class="px-3 py-2.5 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:border-red-500 focus:outline-none transition-colors text-sm">
@@ -61,7 +87,6 @@ $API = $_ENV["API"];
               <option value="" disabled selected class="text-gray-400">Gender</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
-              <option value="other">Other</option>
             </select>
             <input type="date" id="dateOfBirth" placeholder="Birthdate" class="px-3 py-2.5 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:border-red-500 focus:outline-none transition-colors text-sm">
           </div>
@@ -69,16 +94,6 @@ $API = $_ENV["API"];
           <input type="password" id="password" placeholder="Password" class="w-full px-3 py-2.5 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:border-red-500 focus:outline-none transition-colors text-sm">
           <button type="submit" class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-red-500/40 transform hover:-translate-y-1 mt-4 text-sm sm:text-base">
             Create Account
-          </button>
-        </form>
-      </div>
-
-      <div id="loginPanel" class="mt-4 sm:mt-6 bg-gradient-to-b from-gray-800/40 to-gray-900/40 p-6 sm:p-8 rounded-2xl backdrop-blur-lg border border-gray-600/20 hidden" role="tabpanel">
-        <form id="loginForm" class="space-y-4">
-          <input type="email" id="loginEmail" placeholder="Email Address" class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:border-yellow-500 focus:outline-none transition-colors">
-          <input type="password" id="loginPassword" placeholder="Password" class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:border-yellow-500 focus:outline-none transition-colors">
-          <button type="submit" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-yellow-500/40 transform hover:-translate-y-1">
-            Sign In
           </button>
         </form>
       </div>
@@ -122,7 +137,17 @@ $(document).ready(function() {
         }, 5000);
     }
 
+    // Function to update URL parameter
+    function updateURLParam(param, value) {
+        const url = new URL(window.location);
+        url.searchParams.set(param, value);
+        window.history.pushState({}, '', url);
+    }
+
     registerTab.on('click', function() {
+        // Update URL parameter
+        updateURLParam('what', 'register');
+
         // Update tabs
         registerTab.addClass('bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg');
         registerTab.removeClass('text-gray-300 hover:text-white hover:bg-gray-700/30');
@@ -139,6 +164,9 @@ $(document).ready(function() {
     });
 
     loginTab.on('click', function() {
+        // Update URL parameter
+        updateURLParam('what', 'login');
+
         // Update tabs
         loginTab.addClass('bg-gradient-to-r from-yellow-600 to-yellow-700 text-white shadow-lg');
         loginTab.removeClass('text-gray-300 hover:text-white hover:bg-gray-700/30');
