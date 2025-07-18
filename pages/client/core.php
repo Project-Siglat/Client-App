@@ -14,7 +14,7 @@
          <!-- Header -->
          <header class="bg-black shadow-sm border-b border-red-600 px-4 py-3 flex items-center justify-between relative z-50">
              <div class="flex items-center gap-3">
-                 <div class="text-lg font-bold text-yellow-400">EmergencyGo</div>
+                 <div class="text-lg font-bold text-yellow-400">Siglat</div>
              </div>
 
              <div class="flex items-center gap-3">
