@@ -183,11 +183,11 @@
      </div>
 
      <!-- Weather Panel -->
-     <div class="weather-panel fixed top-16 right-4 w-96 shadow-2xl z-[2000] max-h-[500px] overflow-hidden rounded-lg" id="weatherPanel" style="display: none;">
-         <div class="py-4 px-5 bg-gradient-to-r from-red-500 to-red-600 text-yellow-400 font-semibold">
+     <div class="weather-panel fixed top-16 left-2 right-2 md:left-auto md:right-4 md:w-96 w-auto shadow-2xl z-[2000] max-h-[70vh] md:max-h-[500px] overflow-hidden rounded-lg" id="weatherPanel" style="display: none;">
+         <div class="py-3 px-4 md:py-4 md:px-5 bg-gradient-to-r from-red-500 to-red-600 text-yellow-400 font-semibold text-sm md:text-base">
              🌤️ Weather Forecast - Villaverde
          </div>
-         <div class="h-[400px] bg-black" id="weatherFrameContainer">
+         <div class="h-[60vh] md:h-[400px] bg-black" id="weatherFrameContainer">
              <iframe
                  id="weatherFrame"
                  src="https://www.accuweather.com/en/ph/villaverde/265132/hourly-weather-forecast/265132"
