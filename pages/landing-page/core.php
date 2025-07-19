@@ -5,7 +5,8 @@
   <!-- Hero Section -->
   <section class="py-24 px-6 bg-gradient-to-b from-transparent via-red-950/10 to-transparent">
     <div class="container mx-auto text-center">
-      <h2 class="text-6xl font-bold mb-6 text-white leading-tight">Emergency Response System</h2>
+        <img src="./assets/siglat.png" alt="" class="rounded-3xl mx-auto">
+      <!-- <h2 class="text-6xl font-bold mb-6 text-white leading-tight">Emergency Response System</h2> -->
       <p class="text-xl mb-10 text-gray-300 max-w-2xl mx-auto leading-relaxed">
         SIGLAT provides immediate emergency rescue services 24/7 in Villaverde, Nueva Vizcaya. When disaster strikes, we're here to help.
       </p>
