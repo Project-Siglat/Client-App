@@ -744,7 +744,7 @@ document.addEventListener('DOMContentLoaded', function() {
 const token = sessionStorage.getItem('token');
 
 if (token) {
-    console.log('Token retrieved:', token);
+    // console.log('Token retrieved:', token);
     // You can use the token for API calls or authentication
     // Example: Set authorization header for future AJAX requests
     $.ajaxSetup({

@@ -1,7 +1,6 @@
 <?php
 include "./config/env.php";
 $API = $_ENV["API"];
-echo "<script>console.log('" . $API . "');</script>";
 ?>
 
 <!-- Sidebar Component -->

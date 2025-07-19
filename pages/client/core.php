@@ -7,6 +7,25 @@
     if (!authToken) {
         window.location.href = '/login';
     }
+
+    // Weather panel functions
+    function toggleWeatherPanel() {
+        const panel = document.getElementById('weatherPanel');
+
+        if (panel.style.display === 'none' || panel.style.display === '') {
+            panel.style.display = 'block';
+        } else {
+            panel.style.display = 'none';
+        }
+    }
+
+    // Initialize weather panel on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const weatherPanel = document.getElementById('weatherPanel');
+        if (weatherPanel) {
+            weatherPanel.style.display = 'none';
+        }
+    });
     </script>
 
     <!-- Mobile-First Layout -->
@@ -82,8 +101,24 @@
     </div>
 
     <!-- Weather Panel -->
-    <div class="weather-panel fixed top-16 left-2 right-2 md:left-auto md:right-4 md:w-96 w-auto shadow-2xl z-[2000] max-h-[70vh] md:max-h-[500px] overflow-hidden rounded-lg" id="weatherPanel" style="display: none;">
-        <!-- ... existing weather content ... -->
+    <div class="weather-panel fixed top-16 left-2 right-2 md:left-auto md:right-4 md:w-96 w-auto shadow-2xl z-[2000] max-h-[85vh] md:max-h-[700px] overflow-hidden rounded-lg bg-black border border-red-600" id="weatherPanel" style="display: none;">
+        <div class="p-3 border-b border-red-600 bg-black">
+            <div class="flex items-center justify-between">
+                <h3 class="text-yellow-400 font-semibold">Weather Forecast</h3>
+                <button onclick="toggleWeatherPanel()" class="text-red-600 hover:text-red-400 text-xl">&times;</button>
+            </div>
+        </div>
+        <div class="h-[calc(100%-60px)]">
+            <iframe
+                id="weatherIframe"
+                src="https://www.accuweather.com/en/ph/villaverde/265132/weather-forecast/265132"
+                class="w-full h-96 border-0"
+                loading="lazy"
+                title="Weather Forecast"
+                sandbox="allow-scripts allow-same-origin allow-popups"
+                allowfullscreen>
+            </iframe>
+        </div>
     </div>
 
     <!-- Confirmation Modal -->
