@@ -1,3 +1,8 @@
+<?php
+include "./config/env.php";
+$API = $_ENV["API"];
+?>
+
 <!-- Sidebar Component -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="Sidebar.toggle()"></div>
 <aside class="sidebar" id="sidebar">
