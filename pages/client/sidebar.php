@@ -1,6 +1,7 @@
 <?php
 include "./config/env.php";
 $API = $_ENV["API"];
+echo "<script>console.log('" . $API . "');</script>";
 ?>
 
 <!-- Sidebar Component -->
@@ -176,7 +177,7 @@ const Sidebar = (function() {
                 throw new Error('No token found');
             }
 
-            const response = await fetch('http://localhost:5069/api/v1/IAM', {
+            const response = await fetch(`<?php echo $API; ?>/api/v1/IAM`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
