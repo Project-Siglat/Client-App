@@ -1,7 +1,6 @@
 <?php
 include "./config/env.php";
 $API = $_ENV["API"];
-echo "<script>console.log('" . $API . "');</script>";
 ?>
 
 <!-- Sidebar Component -->
@@ -26,6 +25,10 @@ echo "<script>console.log('" . $API . "');</script>";
                 <div id="sidebarUserName" class="text-sm font-semibold text-yellow-400">Loading...</div>
                 <div id="sidebarUserEmail" class="text-xs text-gray-400">Loading...</div>
                 <div class="text-xs text-yellow-400">●  <span id="sidebarStatus">Online</span></div>
+                <div class="flex items-center gap-1 mt-1">
+                    <span id="accountVerificationBadge" class="text-xs">⏳</span>
+                    <span id="accountValidationText" class="text-xs text-gray-400">Loading...</span>
+                </div>
             </div>
         </div>
     </div>
@@ -33,15 +36,13 @@ echo "<script>console.log('" . $API . "');</script>";
     <!-- Navigation Menu -->
     <div class="p-4 border-b border-red-600">
         <div class="space-y-2">
-            <button class="w-full text-left py-2 px-3 rounded-lg hover:bg-gray-800 text-yellow-400 text-sm flex items-center gap-2" onclick="Sidebar.showProfile()">
-                👤 View Profile
-            </button>
-            <button class="w-full text-left py-2 px-3 rounded-lg hover:bg-gray-800 text-yellow-400 text-sm flex items-center gap-2" onclick="Sidebar.showSettings()">
+            <?php include "./pages/client/profile.php"; ?>
+            <!-- <button class="w-full text-left py-2 px-3 rounded-lg hover:bg-gray-800 text-yellow-400 text-sm flex items-center gap-2" onclick="Sidebar.showSettings()">
                 ⚙️ Settings
             </button>
             <button class="w-full text-left py-2 px-3 rounded-lg hover:bg-gray-800 text-yellow-400 text-sm flex items-center gap-2" onclick="Sidebar.showHelp()">
                 ❓ Help & Support
-            </button>
+            </button> -->
         </div>
     </div>
 
@@ -171,6 +172,9 @@ const Sidebar = (function() {
     }
 
     async function loadUserData() {
+        // Initialize with loading state
+        updateAccountValidationUI(null);
+
         try {
             const token = sessionStorage.getItem('token');
             if (!token) {
@@ -191,15 +195,94 @@ const Sidebar = (function() {
 
             userData = await response.json();
             updateUserInterface();
+
+            // Fetch verification status separately
+            loadVerificationStatus();
         } catch (error) {
             console.error('Sidebar: Failed to load user data:', error);
             // Fallback to default values
             userData = {
                 firstName: 'User',
                 lastName: '',
-                email: 'user@example.com'
+                email: 'user@example.com',
+                verified: false
             };
             updateUserInterface();
+        }
+    }
+
+    async function loadVerificationStatus() {
+        try {
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                throw new Error('No token found');
+            }
+
+            const response = await fetch(`<?php echo $API; ?>/api/v1/IAM/verified`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Get the response as text since it's a raw string, not JSON
+            const verificationData = await response.text();
+            console.log('Full verification response:', verificationData);
+
+            // The response is already a string, so use it directly
+            let verificationStatus = verificationData.trim() || 'none';
+
+            console.log('Extracted verification status:', verificationStatus);
+            updateAccountValidationUI(verificationStatus);
+        } catch (error) {
+            console.error('Sidebar: Failed to load verification status:', error);
+            // Fallback to none status
+            updateAccountValidationUI('none');
+        }
+    }
+
+    function updateAccountValidationUI(verificationStatus) {
+        console.log('Updating account validation UI with status:', verificationStatus);
+        const accountBadge = document.getElementById('accountVerificationBadge');
+        const accountText = document.getElementById('accountValidationText');
+
+        if (accountBadge && accountText) {
+            if (verificationStatus === null) {
+                // Loading state
+                accountBadge.textContent = '⏳';
+                accountText.textContent = 'Loading...';
+                accountText.className = 'text-xs text-gray-400';
+            } else if (verificationStatus === 'accepted') {
+                // Accepted state
+                accountBadge.textContent = '✅';
+                accountText.textContent = 'Accepted';
+                accountText.className = 'text-xs text-green-400';
+            } else if (verificationStatus === 'rejected') {
+                // Rejected state
+                accountBadge.textContent = '❌';
+                accountText.textContent = 'Rejected';
+                accountText.className = 'text-xs text-red-400';
+            } else if (verificationStatus === 'pending') {
+                // Pending state
+                accountBadge.textContent = '⏳';
+                accountText.textContent = 'Pending';
+                accountText.className = 'text-xs text-orange-400';
+            } else if (verificationStatus === 'none') {
+                // None state
+                accountBadge.textContent = '⚪';
+                accountText.textContent = 'Not Started';
+                accountText.className = 'text-xs text-gray-400';
+            } else {
+                // Default fallback to none
+                accountBadge.textContent = '⚪';
+                accountText.textContent = 'Not Started';
+                accountText.className = 'text-xs text-gray-400';
+            }
         }
     }
 
@@ -303,20 +386,17 @@ const Sidebar = (function() {
             return isVisible;
         },
 
-        showProfile: function() {
-            alert('Profile view would open here');
-            // You can implement profile modal or navigation here
-        },
 
-        showSettings: function() {
-            alert('Settings would open here');
-            // You can implement settings modal or navigation here
-        },
 
-        showHelp: function() {
-            alert('Help & Support would open here');
-            // You can implement help modal or navigation here
-        },
+        // showSettings: function() {
+        //     alert('Settings would open here');
+        //     // You can implement settings modal or navigation here
+        // },
+
+        // showHelp: function() {
+        //     alert('Help & Support would open here');
+        //     // You can implement help modal or navigation here
+        // },
 
         logout: function() {
             console.log('Sidebar: Logging out...');
@@ -342,6 +422,7 @@ const Sidebar = (function() {
         },
 
         updateStatus: function(status) {
+            console.log('Updating status:', status);
             const statusElement = document.getElementById('sidebarStatus');
             if (statusElement) {
                 statusElement.textContent = status;
