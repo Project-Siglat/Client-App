@@ -1,5 +1,9 @@
 <section>
     <?php include "./pages/client/style.php"; ?>
+    <?php
+    include "./config/env.php";
+    $API = $_ENV["API"];
+    ?>
 
     <script>
      // Check for authentication token
@@ -19,12 +23,53 @@
         }
     }
 
-    // Initialize weather panel on page load
+    // Function to send coordinates to API
+    function sendCoordinates(latitude, longitude) {
+        const token = sessionStorage.getItem('token');
+        if (!token) return;
+
+        fetch('<?php echo $API; ?>/api/v1/User/coordinates', {
+            method: 'POST',
+            headers: {
+                'accept': '*/*',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                "latitude": latitude.toString(),
+                "longitude": longitude.toString()
+            })
+        }).catch(error => {
+            console.error('Error sending coordinates:', error);
+        });
+    }
+
+    // Function to get current position and send coordinates
+    function updateCoordinates() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    sendCoordinates(latitude, longitude);
+                },
+                function(error) {
+                    console.error('Error getting location:', error);
+                }
+            );
+        }
+    }
+
+    // Initialize weather panel on page load and start coordinate updates
     document.addEventListener('DOMContentLoaded', function() {
         const weatherPanel = document.getElementById('weatherPanel');
         if (weatherPanel) {
             weatherPanel.style.display = 'none';
         }
+
+        // Start sending coordinates every 0.5 seconds
+        setInterval(updateCoordinates, 500);
     });
     </script>
 

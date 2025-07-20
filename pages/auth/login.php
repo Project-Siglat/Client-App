@@ -85,11 +85,12 @@ $isRegister = $what === "register";
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <select id="gender" class="px-3 py-2.5 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white focus:border-red-500 focus:outline-none transition-colors text-sm">
               <option value="" disabled selected class="text-gray-400">Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
             </select>
             <input type="date" id="dateOfBirth" placeholder="Birthdate" class="px-3 py-2.5 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:border-red-500 focus:outline-none transition-colors text-sm">
           </div>
+          <input type="tel" id="phoneNumber" placeholder="Phone Number" class="w-full px-3 py-2.5 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:border-red-500 focus:outline-none transition-colors text-sm">
           <input type="email" id="email" placeholder="Email Address" class="w-full px-3 py-2.5 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:border-red-500 focus:outline-none transition-colors text-sm">
           <input type="password" id="password" placeholder="Password" class="w-full px-3 py-2.5 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:border-red-500 focus:outline-none transition-colors text-sm">
           <button type="submit" class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-red-500/40 transform hover:-translate-y-1 mt-4 text-sm sm:text-base">
@@ -192,6 +193,8 @@ $(document).ready(function() {
             middleName: $('#middleName').val() || '',
             lastName: $('#lastName').val(),
             address: $('#address').val(),
+            gender: $('#gender').val(),
+            phoneNumber: $('#phoneNumber').val(),
             role: 'User',
             dateOfBirth: $('#dateOfBirth').val(),
             email: $('#email').val(),
