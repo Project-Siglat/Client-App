@@ -1,5 +1,23 @@
 <?php
-include "./pages/siglat/topbar.php"; ?>
+include "./pages/siglat/topbar.php";
+include "./config/env.php";
+$API = $_ENV["API"];
+
+// Check current page/route to determine what to display
+$current_page = $_GET["where"] ?? "dashboard";
+
+if ($current_page === "verification") {
+    include "./pages/siglat/users/verification.php";
+    exit();
+}
+
+if ($current_page === "user-list") {
+    include "./pages/siglat/users/user.php";
+    exit();
+}
+
+// Only display dashboard if not on verification or users page
+if ($current_page === "dashboard") { ?>
 
 <div class="dashboard-container">
     <!-- Leaflet CSS -->
@@ -21,7 +39,7 @@ include "./pages/siglat/topbar.php"; ?>
                 </iframe>
             </div>
 
-            <div class="panel-item">
+            <!-- <div class="panel-item">
                 <h3>📊 Incident Statistics</h3>
                 <div class="stats-grid compact">
                     <div class="stat-box">
@@ -41,7 +59,7 @@ include "./pages/siglat/topbar.php"; ?>
                         <label>Critical</label>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Contact Management -->
             <div class="panel-item">
@@ -56,7 +74,6 @@ include "./pages/siglat/topbar.php"; ?>
                         <table class="contacts-table">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
                                     <th>Label</th>
                                     <th>Type</th>
                                     <th>Information</th>
@@ -64,56 +81,7 @@ include "./pages/siglat/topbar.php"; ?>
                                 </tr>
                             </thead>
                             <tbody id="contactsTableBody">
-                                <tr>
-                                    <td>001</td>
-                                    <td>Fire Department</td>
-                                    <td>phone</td>
-                                    <td>911</td>
-                                    <td class="action-buttons">
-                                        <button class="btn-icon btn-edit" onclick="editContact('001', 'Fire Department', 'phone', '911')">✏️</button>
-                                        <button class="btn-icon btn-delete" onclick="deleteContact('001')">🗑️</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>002</td>
-                                    <td>Police Station</td>
-                                    <td>phone</td>
-                                    <td>117</td>
-                                    <td class="action-buttons">
-                                        <button class="btn-icon btn-edit" onclick="editContact('002', 'Police Station', 'phone', '117')">✏️</button>
-                                        <button class="btn-icon btn-delete" onclick="deleteContact('002')">🗑️</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>003</td>
-                                    <td>Medical Emergency</td>
-                                    <td>phone</td>
-                                    <td>911</td>
-                                    <td class="action-buttons">
-                                        <button class="btn-icon btn-edit" onclick="editContact('003', 'Medical Emergency', 'phone', '911')">✏️</button>
-                                        <button class="btn-icon btn-delete" onclick="deleteContact('003')">🗑️</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>004</td>
-                                    <td>Disaster Response</td>
-                                    <td>phone</td>
-                                    <td>(02) 8911-1406</td>
-                                    <td class="action-buttons">
-                                        <button class="btn-icon btn-edit" onclick="editContact('004', 'Disaster Response', 'phone', '(02) 8911-1406')">✏️</button>
-                                        <button class="btn-icon btn-delete" onclick="deleteContact('004')">🗑️</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>005</td>
-                                    <td>Red Cross</td>
-                                    <td>email</td>
-                                    <td>contact@redcross.ph</td>
-                                    <td class="action-buttons">
-                                        <button class="btn-icon btn-edit" onclick="editContact('005', 'Red Cross', 'email', 'contact@redcross.ph')">✏️</button>
-                                        <button class="btn-icon btn-delete" onclick="deleteContact('005')">🗑️</button>
-                                    </td>
-                                </tr>
+                                <!-- Contacts will be loaded from API -->
                             </tbody>
                         </table>
                     </div>
@@ -141,7 +109,7 @@ include "./pages/siglat/topbar.php"; ?>
                 <span class="close" onclick="closeContactModal()">&times;</span>
             </div>
             <form id="contactForm" onsubmit="saveContact(event)">
-                <div class="form-group">
+                <div class="form-group" style="display: none;">
                     <label for="contactId">ID:</label>
                     <input type="text" id="contactId" name="contactId" required>
                 </div>
@@ -694,6 +662,41 @@ include "./pages/siglat/topbar.php"; ?>
         let isEditMode = false;
         let editingContactId = null;
         let contactIdCounter = 6; // Start from 6 since we have 5 sample contacts
+        const API_BASE = '<?php echo $API; ?>';
+
+        function generateGuid() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Load contacts from API
+        async function loadContacts() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/Admin/contact`, {
+                    method: 'GET',
+                    headers: {
+                        'accept': '*/*',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const contacts = await response.json();
+                    const tbody = document.getElementById('contactsTableBody');
+                    tbody.innerHTML = '';
+
+                    contacts.forEach(contact => {
+                        addContactToTable(contact.id, contact.label, contact.contactType, contact.contactInformation);
+                    });
+                } else {
+                    console.error('Failed to load contacts');
+                }
+            } catch (error) {
+                console.error('Error loading contacts:', error);
+            }
+        }
 
         function openContactModal(id = null, label = '', type = '', information = '') {
             const modal = document.getElementById('contactModal');
@@ -716,8 +719,9 @@ include "./pages/siglat/topbar.php"; ?>
                 editingContactId = null;
                 title.textContent = 'Add Contact';
                 form.reset();
-                document.getElementById('contactId').value = String(contactIdCounter).padStart(3, '0');
-                document.getElementById('contactId').disabled = false;
+                document.getElementById('contactId').value = generateGuid();
+                document.getElementById('contactLabel').value = '';
+                document.getElementById('contactId').disabled = true;
             }
 
             modal.style.display = 'block';
@@ -731,7 +735,7 @@ include "./pages/siglat/topbar.php"; ?>
             editingContactId = null;
         }
 
-        function saveContact(event) {
+        async function saveContact(event) {
             event.preventDefault();
 
             const id = document.getElementById('contactId').value;
@@ -739,13 +743,40 @@ include "./pages/siglat/topbar.php"; ?>
             const type = document.getElementById('contactType').value;
             const information = document.getElementById('contactInformation').value;
 
-            if (isEditMode) {
-                // Update existing contact
-                updateContactInTable(id, label, type, information);
-            } else {
-                // Add new contact
-                addContactToTable(id, label, type, information);
-                contactIdCounter++;
+            try {
+                const contactData = {
+                    id: id,
+                    label: label,
+                    contactType: type,
+                    contactInformation: information,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                const response = await fetch(`${API_BASE}/api/v1/Admin/contact`, {
+                    method: 'POST',
+                    headers: {
+                        'accept': '*/*',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(contactData)
+                });
+
+                if (response.ok) {
+                    if (isEditMode) {
+                        updateContactInTable(id, label, type, information);
+                        alert('Contact updated successfully!');
+                    } else {
+                        addContactToTable(id, label, type, information);
+                        contactIdCounter++;
+                        alert('Contact added successfully!');
+                    }
+                } else {
+                    alert('Failed to save contact. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error saving contact:', error);
+                alert('Error saving contact. Please try again.');
             }
 
             closeContactModal();
@@ -754,9 +785,9 @@ include "./pages/siglat/topbar.php"; ?>
         function addContactToTable(id, label, type, information) {
             const tbody = document.getElementById('contactsTableBody');
             const row = document.createElement('tr');
+            row.setAttribute('data-id', id);
 
             row.innerHTML = `
-                <td>${id}</td>
                 <td>${label}</td>
                 <td>${type}</td>
                 <td>${information}</td>
@@ -774,11 +805,11 @@ include "./pages/siglat/topbar.php"; ?>
             const rows = tbody.getElementsByTagName('tr');
 
             for (let row of rows) {
-                if (row.cells[0].textContent === id) {
-                    row.cells[1].textContent = label;
-                    row.cells[2].textContent = type;
-                    row.cells[3].textContent = information;
-                    row.cells[4].innerHTML = `
+                if (row.getAttribute('data-id') === id) {
+                    row.cells[0].textContent = label;
+                    row.cells[1].textContent = type;
+                    row.cells[2].textContent = information;
+                    row.cells[3].innerHTML = `
                         <button class="btn-icon btn-edit" onclick="editContact('${id}', '${label}', '${type}', '${information}')">✏️</button>
                         <button class="btn-icon btn-delete" onclick="deleteContact('${id}')">🗑️</button>
                     `;
@@ -791,16 +822,33 @@ include "./pages/siglat/topbar.php"; ?>
             openContactModal(id, label, type, information);
         }
 
-        function deleteContact(id) {
+        async function deleteContact(id) {
             if (confirm('Are you sure you want to delete this contact?')) {
-                const tbody = document.getElementById('contactsTableBody');
-                const rows = tbody.getElementsByTagName('tr');
+                try {
+                    const response = await fetch(`${API_BASE}/api/v1/Admin/contact?Id=${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'accept': '*/*'
+                        }
+                    });
 
-                for (let i = 0; i < rows.length; i++) {
-                    if (rows[i].cells[0].textContent === id) {
-                        tbody.removeChild(rows[i]);
-                        break;
+                    if (response.ok) {
+                        const tbody = document.getElementById('contactsTableBody');
+                        const rows = tbody.getElementsByTagName('tr');
+
+                        for (let i = 0; i < rows.length; i++) {
+                            if (rows[i].getAttribute('data-id') === id) {
+                                tbody.removeChild(rows[i]);
+                                break;
+                            }
+                        }
+                        alert('Contact deleted successfully!');
+                    } else {
+                        alert('Failed to delete contact. Please try again.');
                     }
+                } catch (error) {
+                    console.error('Error deleting contact:', error);
+                    alert('Error deleting contact. Please try again.');
                 }
             }
         }
@@ -815,8 +863,11 @@ include "./pages/siglat/topbar.php"; ?>
 
         // Initialize Leaflet map
         document.addEventListener('DOMContentLoaded', function() {
+            // Load contacts on page load
+            loadContacts();
+
             // Initialize the map
-            var map = L.map('map').setView([14.5995, 120.9842], 100); // Manila, Philippines coordinates
+            var map = L.map('map').setView([16.606254918019598, 121.18314743041994], 100);
 
             // Add OpenStreetMap tile layer
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -866,3 +917,6 @@ include "./pages/siglat/topbar.php"; ?>
         });
     </script>
 </div>
+
+<?php }
+?>
