@@ -1,96 +1,24 @@
+<?php
+include "./pages/siglat/topbar.php"; ?>
+
 <div class="dashboard-container">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin=""/>
 
-    <h1>Emergency Management Dashboard</h1>
 
     <div class="main-content">
         <!-- Sidebar -->
         <div class="sidebar">
-            <!-- Ambulance Management -->
-            <div class="panel-item">
-                <h3>🚑 Ambulance Management</h3>
-                <div class="button-group">
-                    <button class="btn btn-primary">
-                        Add Ambulance
-                    </button>
-                    <button class="btn btn-danger">
-                        Remove Ambulance
-                    </button>
-                </div>
-            </div>
-
-            <!-- Weather Forecast -->
-            <div class="panel-item">
-                <h3>🌤️ Weather Forecast</h3>
-                <div class="weather-forecast">
-                    <div class="weather-today">
-                        <div class="weather-icon">☀️</div>
-                        <div class="weather-temp">24°C</div>
-                        <div class="weather-condition">Sunny</div>
-                    </div>
-                    <div class="weather-details">
-                        <div class="weather-detail">
-                            <span class="detail-label">Humidity:</span>
-                            <span class="detail-value">65%</span>
-                        </div>
-                        <div class="weather-detail">
-                            <span class="detail-label">Wind:</span>
-                            <span class="detail-value">12 km/h</span>
-                        </div>
-                        <div class="weather-detail">
-                            <span class="detail-label">Pressure:</span>
-                            <span class="detail-value">1013 hPa</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Statistics Grid -->
-            <div class="panel-item">
-                <h3>🌊 Flood Statistics</h3>
-                <div class="stats-grid compact">
-                    <div class="stat-box">
-                        <span class="stat-value flood-stats">3</span>
-                        <label>Active Alerts</label>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-value flood-stats">7</span>
-                        <label>Areas Affected</label>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-value flood-stats">2.3m</span>
-                        <label>Water Level</label>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-value risk-high">High</span>
-                        <label>Risk Level</label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="panel-item">
-                <h3>🌀 Typhoon Statistics</h3>
-                <div class="stats-grid compact">
-                    <div class="stat-box">
-                        <span class="stat-value typhoon-stats">1</span>
-                        <label>Active Alerts</label>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-value typhoon-stats">185 km/h</span>
-                        <label>Wind Speed</label>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-value typhoon-stats">5</span>
-                        <label>Provinces</label>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-value risk-critical">Critical</span>
-                        <label>Severity</label>
-                    </div>
-                </div>
+            <div class="panel-item weather-iframe-container">
+                <h3>🌀 Hourly Weather Forecast</h3>
+                <iframe
+                    src="https://www.accuweather.com/en/ph/villaverde/265132/hourly-weather-forecast/265132"
+                    class="weather-iframe"
+                    frameborder="0"
+                    allowfullscreen>
+                </iframe>
             </div>
 
             <div class="panel-item">
@@ -114,6 +42,83 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Contact Management -->
+            <div class="panel-item">
+                <h3>📞 Contact Management</h3>
+                <div class="contact-crud-controls">
+                    <button class="btn btn-primary btn-small" onclick="openContactModal()">
+                        Add Contact
+                    </button>
+                </div>
+                <div class="contacts-container">
+                    <div class="table-responsive">
+                        <table class="contacts-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Label</th>
+                                    <th>Type</th>
+                                    <th>Information</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contactsTableBody">
+                                <tr>
+                                    <td>001</td>
+                                    <td>Fire Department</td>
+                                    <td>phone</td>
+                                    <td>911</td>
+                                    <td class="action-buttons">
+                                        <button class="btn-icon btn-edit" onclick="editContact('001', 'Fire Department', 'phone', '911')">✏️</button>
+                                        <button class="btn-icon btn-delete" onclick="deleteContact('001')">🗑️</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>002</td>
+                                    <td>Police Station</td>
+                                    <td>phone</td>
+                                    <td>117</td>
+                                    <td class="action-buttons">
+                                        <button class="btn-icon btn-edit" onclick="editContact('002', 'Police Station', 'phone', '117')">✏️</button>
+                                        <button class="btn-icon btn-delete" onclick="deleteContact('002')">🗑️</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>003</td>
+                                    <td>Medical Emergency</td>
+                                    <td>phone</td>
+                                    <td>911</td>
+                                    <td class="action-buttons">
+                                        <button class="btn-icon btn-edit" onclick="editContact('003', 'Medical Emergency', 'phone', '911')">✏️</button>
+                                        <button class="btn-icon btn-delete" onclick="deleteContact('003')">🗑️</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>004</td>
+                                    <td>Disaster Response</td>
+                                    <td>phone</td>
+                                    <td>(02) 8911-1406</td>
+                                    <td class="action-buttons">
+                                        <button class="btn-icon btn-edit" onclick="editContact('004', 'Disaster Response', 'phone', '(02) 8911-1406')">✏️</button>
+                                        <button class="btn-icon btn-delete" onclick="deleteContact('004')">🗑️</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>005</td>
+                                    <td>Red Cross</td>
+                                    <td>email</td>
+                                    <td>contact@redcross.ph</td>
+                                    <td class="action-buttons">
+                                        <button class="btn-icon btn-edit" onclick="editContact('005', 'Red Cross', 'email', 'contact@redcross.ph')">✏️</button>
+                                        <button class="btn-icon btn-delete" onclick="deleteContact('005')">🗑️</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Main Content Area -->
@@ -125,47 +130,43 @@
                     <!-- Leaflet map will be initialized here -->
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Bottom Content -->
-            <div class="bottom-content">
-                <!-- User Accounts -->
-                <div class="panel-item">
-                    <h3>👥 User Accounts</h3>
-                    <div class="user-list">
-                        <div class="table-responsive">
-                            <table class="user-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Username</th>
-                                        <th>Role</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>001</td>
-                                        <td>admin</td>
-                                        <td>Administrator</td>
-                                        <td><span class="status-active">Active</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Logs -->
-                <div class="panel-item">
-                    <h3>📋 System Logs</h3>
-                    <div class="logs-container">
-                        <div class="log-entry">10:00:00 - User login: admin</div>
-                        <div class="log-entry">09:45:00 - Ambulance dispatched to location</div>
-                        <div class="log-entry">09:30:00 - Flood alert activated</div>
-                        <div class="log-entry">09:15:00 - Typhoon warning issued</div>
-                    </div>
-                </div>
+    <!-- Contact Modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add Contact</h3>
+                <span class="close" onclick="closeContactModal()">&times;</span>
             </div>
+            <form id="contactForm" onsubmit="saveContact(event)">
+                <div class="form-group">
+                    <label for="contactId">ID:</label>
+                    <input type="text" id="contactId" name="contactId" required>
+                </div>
+                <div class="form-group">
+                    <label for="contactLabel">Contact Label:</label>
+                    <input type="text" id="contactLabel" name="contactLabel" required>
+                </div>
+                <div class="form-group">
+                    <label for="contactType">Contact Type:</label>
+                    <select id="contactType" name="contactType" required>
+                        <option value="">Select Contact Type</option>
+                        <option value="phone">Phone</option>
+                        <option value="email">Email</option>
+                        <option value="facebook">Facebook</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="contactInformation">Contact Information:</label>
+                    <input type="text" id="contactInformation" name="contactInformation" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeContactModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -182,126 +183,168 @@
         .dashboard-container {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             margin: 0;
-            padding: 16px;
-            background: #f8fafc;
+            padding: 20px;
+            padding-top: 70px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             height: 100vh;
             overflow: hidden;
         }
 
         .dashboard-container h1 {
-            color: #1f2937;
+            color: white;
             text-align: center;
-            margin-bottom: 24px;
-            font-size: 1.875rem;
-            font-weight: 600;
+            margin-bottom: 30px;
+            font-size: 2.25rem;
+            font-weight: 700;
             margin-top: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
         .main-content {
             display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 16px;
-            max-width: 1400px;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            max-width: 1600px;
             margin: 0 auto;
-            height: calc(100vh - 120px);
+            height: calc(100vh - 190px);
         }
 
         .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 16px;
             overflow-y: auto;
-            padding-right: 8px;
+            padding-right: 12px;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
         }
 
         .main-area {
             display: flex;
             flex-direction: column;
-            gap: 16px;
             overflow: hidden;
         }
 
         .map-section {
             background: white;
-            border-radius: 8px;
-            padding: 16px;
-            border: 1px solid #e5e7eb;
-            flex: 1;
+            border-radius: 12px;
+            padding: 20px;
+            border: none;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            height: 100%;
             min-height: 0;
         }
 
         .map-section h2 {
             margin-top: 0;
             color: #374151;
-            font-size: 1.25rem;
-            margin-bottom: 16px;
-            font-weight: 500;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-weight: 600;
         }
 
         .map-container {
-            height: 100%;
+            height: calc(100% - 60px);
             width: 100%;
-            border-radius: 6px;
+            border-radius: 8px;
             overflow: hidden;
             background: #f3f4f6;
-            border: 1px solid #e5e7eb;
-        }
-
-        .bottom-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            flex-shrink: 0;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .panel-item {
             background: white;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
         }
 
         .panel-item h3 {
             margin-top: 0;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             color: #374151;
-            font-size: 0.95rem;
-            font-weight: 500;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .weather-iframe-container {
+            height: 400px;
+        }
+
+        .weather-iframe {
+            width: 100%;
+            height: 350px;
+            border: none;
+            border-radius: 8px;
+            background: #f9fafb;
         }
 
         .button-group {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             flex-direction: column;
         }
 
         .btn {
-            padding: 8px 16px;
+            padding: 10px 18px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 0.875rem;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .btn-primary {
-            background: #3b82f6;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
         }
 
         .btn-primary:hover {
-            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(107, 114, 128, 0.4);
         }
 
         .btn-danger {
-            background: #ef4444;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
         }
 
         .btn-danger:hover {
-            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-small {
+            padding: 8px 14px;
+            font-size: 0.8rem;
         }
 
         .weather-forecast {
@@ -309,97 +352,223 @@
         }
 
         .weather-today {
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
 
         .weather-icon {
-            font-size: 2rem;
-            margin-bottom: 4px;
+            font-size: 2.5rem;
+            margin-bottom: 8px;
         }
 
         .weather-temp {
-            font-size: 1.5rem;
-            font-weight: 600;
+            font-size: 1.75rem;
+            font-weight: 700;
             color: #374151;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
         .weather-condition {
             font-size: 0.875rem;
             color: #6b7280;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            font-weight: 500;
         }
 
         .weather-details {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
 
         .weather-detail {
             display: flex;
             justify-content: space-between;
             font-size: 0.8rem;
-            padding: 2px 0;
+            padding: 4px 0;
+            border-bottom: 1px solid #f3f4f6;
         }
 
         .detail-label {
             color: #6b7280;
+            font-weight: 500;
         }
 
         .detail-value {
             color: #374151;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .table-responsive {
             overflow-x: auto;
         }
 
-        .user-table {
+        .contacts-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.875rem;
         }
 
-        .user-table th {
-            padding: 8px 12px;
-            background: #f9fafb;
+        .contacts-table th {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
             color: #374151;
-            font-weight: 500;
+            font-weight: 600;
             text-align: left;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 2px solid #e5e7eb;
         }
 
-        .user-table td {
-            padding: 8px 12px;
+        .contacts-table td {
+            padding: 12px 16px;
             border-bottom: 1px solid #f3f4f6;
         }
 
-        .status-active {
-            background: #10b981;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
+        .contacts-table th:last-child,
+        .contacts-table td:last-child {
+            width: 100px;
+            text-align: center;
         }
 
-        .logs-container {
-            height: 120px;
+        .contact-crud-controls {
+            margin-bottom: 16px;
+        }
+
+        .contacts-container {
+            height: 180px;
             overflow-y: auto;
             border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            padding: 12px;
+            border-radius: 8px;
             background: #f9fafb;
         }
 
-        .log-entry {
-            margin-bottom: 6px;
-            font-size: 0.875rem;
-            color: #6b7280;
+        .contacts-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .contacts-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        .contacts-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
             padding: 6px;
-            background: white;
-            border-radius: 4px;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit:hover {
+            background: #e0f2fe;
+            transform: scale(1.1);
+        }
+
+        .btn-delete:hover {
+            background: #fee2e2;
+            transform: scale(1.1);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 8% auto;
+            padding: 0;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #374151;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .close {
+            color: #6b7280;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+
+        .close:hover {
+            color: #374151;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+
+        .form-group:first-of-type {
+            margin-top: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 20px;
+            border-top: 1px solid #e5e7eb;
         }
 
         .stats-grid {
@@ -450,15 +619,12 @@
             .main-content {
                 grid-template-columns: 250px 1fr;
             }
-
-            .bottom-content {
-                grid-template-columns: 1fr;
-            }
         }
 
         @media (max-width: 768px) {
             .dashboard-container {
                 padding: 12px;
+                padding-top: 70px;
                 height: auto;
                 overflow: visible;
             }
@@ -507,18 +673,146 @@
                 height: 250px;
             }
 
-            .logs-container {
-                height: 100px;
+            .contacts-container {
+                height: 120px;
             }
 
-            .user-table th,
-            .user-table td {
+            .contacts-table th,
+            .contacts-table td {
                 padding: 6px 8px;
+            }
+
+            .modal-content {
+                margin: 5% auto;
+                width: 95%;
             }
         }
     </style>
 
     <script>
+        // Contact CRUD operations
+        let isEditMode = false;
+        let editingContactId = null;
+        let contactIdCounter = 6; // Start from 6 since we have 5 sample contacts
+
+        function openContactModal(id = null, label = '', type = '', information = '') {
+            const modal = document.getElementById('contactModal');
+            const title = document.getElementById('modalTitle');
+            const form = document.getElementById('contactForm');
+
+            if (id) {
+                // Edit mode
+                isEditMode = true;
+                editingContactId = id;
+                title.textContent = 'Edit Contact';
+                document.getElementById('contactId').value = id;
+                document.getElementById('contactLabel').value = label;
+                document.getElementById('contactType').value = type;
+                document.getElementById('contactInformation').value = information;
+                document.getElementById('contactId').disabled = true;
+            } else {
+                // Add mode
+                isEditMode = false;
+                editingContactId = null;
+                title.textContent = 'Add Contact';
+                form.reset();
+                document.getElementById('contactId').value = String(contactIdCounter).padStart(3, '0');
+                document.getElementById('contactId').disabled = false;
+            }
+
+            modal.style.display = 'block';
+        }
+
+        function closeContactModal() {
+            const modal = document.getElementById('contactModal');
+            modal.style.display = 'none';
+            document.getElementById('contactForm').reset();
+            isEditMode = false;
+            editingContactId = null;
+        }
+
+        function saveContact(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('contactId').value;
+            const label = document.getElementById('contactLabel').value;
+            const type = document.getElementById('contactType').value;
+            const information = document.getElementById('contactInformation').value;
+
+            if (isEditMode) {
+                // Update existing contact
+                updateContactInTable(id, label, type, information);
+            } else {
+                // Add new contact
+                addContactToTable(id, label, type, information);
+                contactIdCounter++;
+            }
+
+            closeContactModal();
+        }
+
+        function addContactToTable(id, label, type, information) {
+            const tbody = document.getElementById('contactsTableBody');
+            const row = document.createElement('tr');
+
+            row.innerHTML = `
+                <td>${id}</td>
+                <td>${label}</td>
+                <td>${type}</td>
+                <td>${information}</td>
+                <td class="action-buttons">
+                    <button class="btn-icon btn-edit" onclick="editContact('${id}', '${label}', '${type}', '${information}')">✏️</button>
+                    <button class="btn-icon btn-delete" onclick="deleteContact('${id}')">🗑️</button>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+        }
+
+        function updateContactInTable(id, label, type, information) {
+            const tbody = document.getElementById('contactsTableBody');
+            const rows = tbody.getElementsByTagName('tr');
+
+            for (let row of rows) {
+                if (row.cells[0].textContent === id) {
+                    row.cells[1].textContent = label;
+                    row.cells[2].textContent = type;
+                    row.cells[3].textContent = information;
+                    row.cells[4].innerHTML = `
+                        <button class="btn-icon btn-edit" onclick="editContact('${id}', '${label}', '${type}', '${information}')">✏️</button>
+                        <button class="btn-icon btn-delete" onclick="deleteContact('${id}')">🗑️</button>
+                    `;
+                    break;
+                }
+            }
+        }
+
+        function editContact(id, label, type, information) {
+            openContactModal(id, label, type, information);
+        }
+
+        function deleteContact(id) {
+            if (confirm('Are you sure you want to delete this contact?')) {
+                const tbody = document.getElementById('contactsTableBody');
+                const rows = tbody.getElementsByTagName('tr');
+
+                for (let i = 0; i < rows.length; i++) {
+                    if (rows[i].cells[0].textContent === id) {
+                        tbody.removeChild(rows[i]);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('contactModal');
+            if (event.target === modal) {
+                closeContactModal();
+            }
+        }
+
         // Initialize Leaflet map
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize the map
