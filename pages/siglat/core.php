@@ -53,79 +53,25 @@ if ($current_page === "dashboard") { ?>
     <div class="main-content">
         <!-- Sidebar -->
         <div class="sidebar">
-            <!-- Weather Card -->
+            <!-- Weather Card (Modal) -->
             <div class="panel-item weather-card">
                 <div class="weather-header">
                     <span class="weather-icon animated-icon">🌀</span>
                     <h3 class="panel-title">Hourly Weather Forecast</h3>
-                </div>
-                <div class="weather-iframe-container">
-                    <iframe
-                        src="https://www.accuweather.com/en/ph/villaverde/265132/hourly-weather-forecast/265132"
-                        class="weather-iframe"
-                        frameborder="0"
-                        allowfullscreen>
-                    </iframe>
+                    <button class="btn btn-gradient btn-small weather-modal-btn" onclick="openWeatherModal()" title="Show Weather">
+                        <i class="bi bi-cloud-sun"></i>
+                    </button>
                 </div>
             </div>
 
-            <!-- Incident Statistics -->
-            <div class="panel-item stats-card">
-                <h3 class="panel-title"><i class="bi bi-bar-chart-line-fill"></i> Incident Statistics</h3>
-                <div class="stats-grid compact">
-                    <div class="stat-box stat-total">
-                        <span class="stat-value incident-stats"><i class="bi bi-calendar-day"></i> 12</span>
-                        <label>Total Today</label>
-                    </div>
-                    <div class="stat-box stat-success">
-                        <span class="stat-value success"><i class="bi bi-check-circle-fill"></i> 8</span>
-                        <label>Resolved</label>
-                    </div>
-                    <div class="stat-box stat-warning">
-                        <span class="stat-value warning"><i class="bi bi-hourglass-split"></i> 4</span>
-                        <label>Pending</label>
-                    </div>
-                    <div class="stat-box stat-danger">
-                        <span class="stat-value danger"><i class="bi bi-exclamation-triangle-fill"></i> 2</span>
-                        <label>Critical</label>
-                    </div>
-                </div>
-                <div class="stats-progress">
-                    <div class="progress-bar">
-                        <div class="progress-resolved" style="width: 66%"></div>
-                        <div class="progress-pending" style="width: 22%"></div>
-                        <div class="progress-critical" style="width: 12%"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contact Management -->
+            <!-- Contact Management (Modal) -->
             <div class="panel-item contact-card">
                 <div class="contact-header">
                     <span class="contact-icon animated-icon">📞</span>
                     <h3 class="panel-title">Contact Management</h3>
-                </div>
-                <div class="contact-crud-controls">
-                    <button class="btn btn-gradient btn-small" onclick="openContactModal()">
-                        <i class="bi bi-plus-circle"></i> Add Contact
+                    <button class="btn btn-gradient btn-small contact-modal-btn" onclick="openContactListModal()" title="Show Contacts">
+                        <i class="bi bi-people"></i>
                     </button>
-                </div>
-                <div class="contacts-container">
-                    <div class="table-responsive">
-                        <table class="contacts-table">
-                            <thead>
-                                <tr>
-                                    <th><i class="bi bi-tag"></i> Label</th>
-                                    <th><i class="bi bi-telephone"></i> Type</th>
-                                    <th><i class="bi bi-info-circle"></i> Information</th>
-                                    <th><i class="bi bi-tools"></i> Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="contactsTableBody">
-                                <!-- Contacts will be loaded from API -->
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </div>
         </div>
@@ -148,6 +94,57 @@ if ($current_page === "dashboard") { ?>
                         <div class="loader-spinner"></div>
                         <span>Loading Map...</span>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weather Modal -->
+    <div id="weatherModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3><i class="bi bi-cloud-sun"></i> Hourly Weather Forecast</h3>
+                <span class="close" onclick="closeWeatherModal()">&times;</span>
+            </div>
+            <div class="weather-iframe-container" style="height: 200px;">
+                <iframe
+                    src="https://www.accuweather.com/en/ph/villaverde/265132/hourly-weather-forecast/265132"
+                    class="weather-iframe"
+                    frameborder="0"
+                    allowfullscreen
+                    style="height:180px;">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact List Modal -->
+    <div id="contactListModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="bi bi-people"></i> Contact Management</h3>
+                <span class="close" onclick="closeContactListModal()">&times;</span>
+            </div>
+            <div class="contact-crud-controls" id="contactCrudControls" style="margin-bottom:8px; display:flex; justify-content:flex-end;">
+                <button class="btn btn-gradient btn-small" onclick="openContactModal()">
+                    <i class="bi bi-plus-circle"></i> Add Contact
+                </button>
+            </div>
+            <div class="contacts-container" id="contactsContainer" style="height:160px; overflow-y:auto;">
+                <div class="table-responsive">
+                    <table class="contacts-table">
+                        <thead>
+                            <tr>
+                                <th><i class="bi bi-tag"></i> Label</th>
+                                <th><i class="bi bi-telephone"></i> Type</th>
+                                <th><i class="bi bi-info-circle"></i> Information</th>
+                                <th><i class="bi bi-tools"></i> Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contactsTableBody">
+                            <!-- Contacts will be loaded from API -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -205,42 +202,42 @@ if ($current_page === "dashboard") { ?>
             font-family: 'Inter', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             margin: 0;
             padding: 0;
-            background: radial-gradient(circle at 60% 40%, #a1c4fd 0%, #c2e9fb 40%, #667eea 100%);
+            background: #111;
             min-height: 100vh;
             height: 100vh;
             overflow: hidden;
         }
 
         .ultra-glass {
-            background: rgba(255,255,255,0.22);
-            border-radius: 32px;
-            box-shadow: 0 16px 64px rgba(76,130,255,0.22), 0 2px 8px rgba(0,0,0,0.08);
-            backdrop-filter: blur(24px) saturate(200%);
-            border: 2px solid rgba(255,255,255,0.28);
+            background: rgba(0,0,0,0.85);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(255,0,0,0.10), 0 2px 8px rgba(0,0,0,0.18);
+            backdrop-filter: blur(12px) saturate(180%);
+            border: 2px solid #222;
         }
 
         .dashboard-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 40px 60px;
-            margin-bottom: 40px;
-            background: linear-gradient(90deg, rgba(76,130,255,0.08) 0%, rgba(124,58,237,0.08) 100%);
+            padding: 16px 18px;
+            margin-bottom: 12px;
+            background: linear-gradient(90deg, rgba(0,0,0,0.95) 0%, rgba(40,40,40,0.95) 100%);
         }
 
         .dashboard-title {
             display: flex;
             align-items: center;
-            gap: 28px;
+            gap: 12px;
         }
 
         .dashboard-logo {
-            width: 72px;
-            height: 72px;
-            border-radius: 20px;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.12);
-            background: white;
-            border: 3px solid #7c3aed;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+            background: #222;
+            border: 2px solid #dc2626;
             transition: transform 0.2s;
         }
         .dashboard-logo:hover {
@@ -249,15 +246,15 @@ if ($current_page === "dashboard") { ?>
 
         .dashboard-header h1 {
             color: #fff;
-            font-size: 3.2rem;
-            font-weight: 800;
+            font-size: 1.2rem;
+            font-weight: 700;
             margin: 0;
-            letter-spacing: 2px;
-            text-shadow: 0 4px 24px rgba(76,130,255,0.28);
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px #dc2626;
         }
 
         .gradient-text {
-            background: linear-gradient(90deg, #4f8cff 0%, #7c3aed 100%);
+            background: linear-gradient(90deg, #dc2626 0%, #facc15 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -265,245 +262,172 @@ if ($current_page === "dashboard") { ?>
 
         .dashboard-actions {
             display: flex;
-            gap: 24px;
+            gap: 8px;
         }
 
         .btn-gradient {
-            background: linear-gradient(90deg, #4f8cff 0%, #7c3aed 100%);
-            color: #fff;
+            background: linear-gradient(90deg, #dc2626 0%, #facc15 100%);
+            color: #111;
             border: none;
-            border-radius: 16px;
-            padding: 16px 36px;
-            font-size: 1.2rem;
-            font-weight: 800;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 1rem;
+            font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 4px 24px rgba(76, 130, 255, 0.22);
+            box-shadow: 0 2px 8px rgba(255,0,0,0.10);
             transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 6px;
         }
         .btn-gradient:hover, .btn-gradient:focus {
-            transform: translateY(-2px) scale(1.08);
-            box-shadow: 0 12px 48px rgba(76, 130, 255, 0.32);
-            background: linear-gradient(90deg, #7c3aed 0%, #4f8cff 100%);
+            transform: translateY(-1px) scale(1.06);
+            box-shadow: 0 6px 24px rgba(255,0,0,0.18);
+            background: linear-gradient(90deg, #facc15 0%, #dc2626 100%);
+            color: #fff;
         }
         .btn-action {
-            padding: 16px 20px;
-            font-size: 1.5rem;
+            padding: 8px 10px;
+            font-size: 1.2rem;
             border-radius: 50%;
-            min-width: 56px;
-            min-height: 56px;
+            min-width: 32px;
+            min-height: 32px;
             justify-content: center;
-            box-shadow: 0 2px 12px rgba(76,130,255,0.18);
+            box-shadow: 0 1px 6px rgba(255,0,0,0.10);
         }
 
         .main-content {
             display: grid;
-            grid-template-columns: 420px 1fr;
-            gap: 44px;
-            max-width: 1920px;
+            grid-template-columns: 180px 1fr;
+            gap: 12px;
+            max-width: 100vw;
             margin: 0 auto;
-            height: calc(100vh - 260px);
+            height: calc(100vh - 60px);
         }
 
         .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 40px;
+            gap: 12px;
             overflow-y: auto;
-            padding-right: 32px;
+            padding-right: 4px;
         }
 
         .sidebar::-webkit-scrollbar {
-            width: 12px;
+            width: 6px;
         }
         .sidebar::-webkit-scrollbar-thumb {
-            background: rgba(120,120,255,0.28);
-            border-radius: 8px;
+            background: #222;
+            border-radius: 4px;
         }
 
         .panel-item {
-            background: rgba(255,255,255,0.32);
-            padding: 40px 32px;
-            border-radius: 28px;
-            box-shadow: 0 12px 48px rgba(76,130,255,0.18);
-            backdrop-filter: blur(24px) saturate(180%);
-            border: 2px solid rgba(255,255,255,0.28);
+            background: #181818;
+            padding: 10px 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(255,0,0,0.10);
+            border: 1px solid #222;
             position: relative;
             transition: box-shadow 0.2s, transform 0.2s;
         }
         .panel-item:hover {
-            box-shadow: 0 24px 72px rgba(76,130,255,0.32);
-            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 8px 24px #dc2626;
+            transform: translateY(-1px) scale(1.02);
         }
 
         .panel-title {
             font-family: 'Montserrat', 'Inter', sans-serif;
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: #7c3aed;
-            margin-bottom: 16px;
-            letter-spacing: 1px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #facc15;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
         }
 
         .weather-card .weather-header,
         .contact-card .contact-header {
             display: flex;
             align-items: center;
-            gap: 16px;
-            margin-bottom: 18px;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .weather-modal-btn,
+        .contact-modal-btn {
+            margin-left: auto;
+            padding: 4px 8px;
+            font-size: 1rem;
+            border-radius: 6px;
+            background: linear-gradient(90deg, #dc2626 0%, #facc15 100%);
+            color: #111;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .weather-modal-btn:hover,
+        .contact-modal-btn:hover {
+            background: linear-gradient(90deg, #facc15 0%, #dc2626 100%);
+            color: #fff;
         }
         .weather-icon, .contact-icon, .animated-icon {
-            font-size: 3rem;
-            background: linear-gradient(135deg, #4f8cff 0%, #7c3aed 100%);
-            color: #fff;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #dc2626 0%, #facc15 100%);
+            color: #111;
             border-radius: 50%;
-            padding: 14px;
-            box-shadow: 0 4px 24px rgba(76, 130, 255, 0.22);
+            padding: 4px;
+            box-shadow: 0 2px 8px #dc2626;
             animation: bounce 1.8s infinite;
         }
         @keyframes bounce {
             0%, 100% { transform: translateY(0);}
-            50% { transform: translateY(-10px);}
+            50% { transform: translateY(-4px);}
         }
 
         .weather-iframe-container {
-            height: 460px;
-            border-radius: 18px;
+            height: 120px;
+            border-radius: 6px;
             overflow: hidden;
-            background: #f9fafb;
-            box-shadow: 0 4px 24px rgba(76,130,255,0.14);
+            background: #222;
+            box-shadow: 0 2px 8px #dc2626;
         }
 
         .weather-iframe {
             width: 100%;
-            height: 400px;
+            height: 100px;
             border: none;
-            border-radius: 18px;
-            background: #f9fafb;
-        }
-
-        .stats-card h3 {
-            margin-bottom: 22px;
-            font-size: 1.4rem;
-            color: #4f8cff;
-            font-weight: 800;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 22px;
-        }
-        .stats-grid.compact {
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
-        }
-        .stat-box {
-            padding: 28px 18px;
-            background: linear-gradient(135deg, #f9fafb 60%, #e0e7ff 100%);
-            border-radius: 18px;
-            text-align: center;
-            border: 2px solid #e0e7ff;
-            box-shadow: 0 4px 24px rgba(76, 130, 255, 0.14);
-            transition: box-shadow 0.2s, transform 0.2s;
-            position: relative;
-        }
-        .stat-box:hover {
-            box-shadow: 0 12px 36px rgba(76,130,255,0.22);
-            transform: scale(1.06);
-        }
-        .stat-box label {
-            display: block;
-            font-size: 1rem;
-            color: #6b7280;
-            margin-top: 10px;
-            font-weight: 600;
-        }
-        .stat-value {
-            font-weight: 800;
-            display: block;
-            font-size: 2rem;
-            margin-bottom: 2px;
-            letter-spacing: 1.5px;
-        }
-        .incident-stats { color: #4f8cff; }
-        .stat-value.success { color: #059669; }
-        .stat-value.warning { color: #d97706; }
-        .stat-value.danger { color: #dc2626; }
-
-        .stat-total { border-left: 7px solid #4f8cff; }
-        .stat-success { border-left: 7px solid #059669; }
-        .stat-warning { border-left: 7px solid #d97706; }
-        .stat-danger { border-left: 7px solid #dc2626; }
-
-        .stats-progress {
-            margin-top: 22px;
-            margin-bottom: 10px;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 18px;
-            background: #e0e7ff;
-            border-radius: 10px;
-            position: relative;
-            overflow: hidden;
-        }
-        .progress-resolved {
-            background: linear-gradient(90deg, #059669 0%, #4f8cff 100%);
-            height: 100%;
-            border-radius: 10px 0 0 10px;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-        .progress-pending {
-            background: linear-gradient(90deg, #d97706 0%, #fbbf24 100%);
-            height: 100%;
-            position: absolute;
-            left: 66%;
-            top: 0;
-        }
-        .progress-critical {
-            background: linear-gradient(90deg, #dc2626 0%, #f87171 100%);
-            height: 100%;
-            border-radius: 0 10px 10px 0;
-            position: absolute;
-            left: 88%;
-            top: 0;
+            border-radius: 6px;
+            background: #222;
         }
 
         .contact-crud-controls {
-            margin-bottom: 22px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: flex-end;
         }
 
         .btn-small {
-            padding: 10px 20px;
-            font-size: 1rem;
+            padding: 4px 8px;
+            font-size: 0.9rem;
             font-weight: 700;
-            border-radius: 10px;
+            border-radius: 6px;
         }
 
         .contacts-container {
-            height: 260px;
+            height: 80px;
             overflow-y: auto;
-            border: 2px solid #e0e7ff;
-            border-radius: 14px;
-            background: #f9fafb;
-            box-shadow: 0 4px 16px rgba(76, 130, 255, 0.10);
+            border: 1px solid #dc2626;
+            border-radius: 6px;
+            background: #222;
+            box-shadow: 0 2px 8px #dc2626;
         }
         .contacts-container::-webkit-scrollbar {
-            width: 8px;
+            width: 4px;
         }
         .contacts-container::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
+            background: #dc2626;
+            border-radius: 2px;
         }
 
         .table-responsive {
@@ -513,32 +437,32 @@ if ($current_page === "dashboard") { ?>
         .contacts-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 1.05rem;
+            font-size: 0.9rem;
         }
         .contacts-table th {
-            padding: 18px 22px;
-            background: linear-gradient(135deg, #f9fafb, #e0e7ff);
-            color: #4f8cff;
-            font-weight: 800;
+            padding: 4px 6px;
+            background: linear-gradient(135deg, #222, #181818);
+            color: #facc15;
+            font-weight: 700;
             text-align: left;
-            border-bottom: 2px solid #e0e7ff;
-            font-size: 1.1rem;
+            border-bottom: 1px solid #dc2626;
+            font-size: 0.9rem;
         }
         .contacts-table td {
-            padding: 18px 22px;
-            border-bottom: 1px solid #e0e7ff;
-            color: #374151;
-            font-size: 1.05rem;
+            padding: 4px 6px;
+            border-bottom: 1px solid #222;
+            color: #fff;
+            font-size: 0.9rem;
         }
         .contacts-table th:last-child,
         .contacts-table td:last-child {
-            width: 140px;
+            width: 60px;
             text-align: center;
         }
 
         .action-buttons {
             display: flex;
-            gap: 14px;
+            gap: 4px;
             justify-content: center;
         }
 
@@ -546,18 +470,21 @@ if ($current_page === "dashboard") { ?>
             background: none;
             border: none;
             cursor: pointer;
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 1.3rem;
+            padding: 2px;
+            border-radius: 4px;
+            font-size: 1rem;
             transition: all 0.2s ease;
+            color: #facc15;
         }
         .btn-edit:hover {
-            background: #e0f2fe;
-            transform: scale(1.16);
+            background: #facc15;
+            color: #dc2626;
+            transform: scale(1.12);
         }
         .btn-delete:hover {
-            background: #fee2e2;
-            transform: scale(1.16);
+            background: #dc2626;
+            color: #fff;
+            transform: scale(1.12);
         }
 
         /* Map Section */
@@ -567,54 +494,54 @@ if ($current_page === "dashboard") { ?>
             overflow: hidden;
         }
         .map-section {
-            background: rgba(255,255,255,0.28);
-            border-radius: 24px;
-            padding: 40px 36px;
-            box-shadow: 0 12px 48px rgba(0,0,0,0.12);
+            background: #181818;
+            border-radius: 8px;
+            padding: 8px 6px;
+            box-shadow: 0 2px 8px #dc2626;
             height: 100%;
             min-height: 0;
-            border: 2px solid rgba(255,255,255,0.22);
-            backdrop-filter: blur(18px);
+            border: 1px solid #dc2626;
+            backdrop-filter: blur(6px);
             position: relative;
         }
         .map-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 24px;
+            margin-bottom: 8px;
         }
         .map-section h2 {
             margin: 0;
-            color: #4f8cff;
-            font-size: 2rem;
-            font-weight: 800;
+            color: #facc15;
+            font-size: 1rem;
+            font-weight: 700;
         }
         .map-legend {
             display: flex;
-            gap: 24px;
-            background: rgba(76,130,255,0.12);
-            border-radius: 10px;
-            padding: 10px 20px;
-            font-size: 1.05rem;
-            color: #374151;
+            gap: 8px;
+            background: #222;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            color: #facc15;
             font-weight: 600;
         }
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 2px;
         }
         .legend-icon {
-            font-size: 1.4rem;
+            font-size: 1rem;
         }
         .map-container {
-            height: calc(100% - 70px);
+            height: calc(100% - 30px);
             width: 100%;
-            border-radius: 16px;
+            border-radius: 6px;
             overflow: hidden;
-            background: #f3f4f6;
+            background: #222;
             border: none;
-            box-shadow: 0 6px 24px rgba(76,130,255,0.14);
+            box-shadow: 0 2px 8px #dc2626;
             position: relative;
         }
         .map-loader {
@@ -626,13 +553,13 @@ if ($current_page === "dashboard") { ?>
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 4px;
         }
         .loader-spinner {
-            width: 40px;
-            height: 40px;
-            border: 5px solid #e0e7ff;
-            border-top: 5px solid #4f8cff;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #222;
+            border-top: 3px solid #dc2626;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -650,105 +577,96 @@ if ($current_page === "dashboard") { ?>
             top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(76,130,255,0.22);
-            backdrop-filter: blur(12px);
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
         }
         .modal-content {
-            background: linear-gradient(135deg, #fff 80%, #e0e7ff 100%);
-            margin: 6% auto;
+            background: linear-gradient(135deg, #181818 80%, #222 100%);
+            margin: 10% auto;
             padding: 0;
-            border-radius: 24px;
-            width: 97%;
-            max-width: 560px;
-            box-shadow: 0 24px 72px rgba(76,130,255,0.28);
-            border: 2px solid #e0e7ff;
+            border-radius: 8px;
+            width: 99%;
+            max-width: 320px;
+            box-shadow: 0 8px 32px #dc2626;
+            border: 1px solid #dc2626;
         }
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 32px 36px;
-            border-bottom: 2px solid #e0e7ff;
+            padding: 8px 12px;
+            border-bottom: 1px solid #dc2626;
         }
         .modal-header h3 {
             margin: 0;
-            color: #4f8cff;
-            font-size: 1.5rem;
-            font-weight: 800;
+            color: #facc15;
+            font-size: 1rem;
+            font-weight: 700;
         }
         .close {
-            color: #7c3aed;
-            font-size: 40px;
+            color: #dc2626;
+            font-size: 24px;
             font-weight: bold;
             cursor: pointer;
             line-height: 1;
             transition: color 0.2s ease;
         }
         .close:hover {
-            color: #4f8cff;
+            color: #facc15;
         }
         .form-group {
-            margin-bottom: 28px;
-            padding: 0 36px;
+            margin-bottom: 8px;
+            padding: 0 12px;
         }
         .form-group:first-of-type {
-            margin-top: 28px;
+            margin-top: 8px;
         }
         .form-group label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 4px;
             font-weight: 700;
-            color: #374151;
-            font-size: 1.05rem;
+            color: #facc15;
+            font-size: 0.9rem;
         }
         .form-group input, .form-group select {
             width: 100%;
-            padding: 12px 18px;
-            border: 2px solid #e0e7ff;
-            border-radius: 10px;
-            font-size: 1.1rem;
+            padding: 6px 8px;
+            border: 1px solid #dc2626;
+            border-radius: 4px;
+            font-size: 0.9rem;
             transition: border-color 0.2s;
-            background: #f9fafb;
+            background: #222;
+            color: #fff;
         }
         .form-group input:focus, .form-group select:focus {
             outline: none;
-            border-color: #4f8cff;
-            box-shadow: 0 0 0 4px rgba(76,130,255,0.12);
+            border-color: #facc15;
+            box-shadow: 0 0 0 2px #facc15;
         }
         .form-actions {
             display: flex;
             justify-content: flex-end;
-            gap: 18px;
-            padding: 24px 36px;
-            border-top: 2px solid #e0e7ff;
+            gap: 6px;
+            padding: 8px 12px;
+            border-top: 1px solid #dc2626;
         }
         .btn-secondary {
-            background: #e0e7ff;
-            color: #4f8cff;
+            background: #222;
+            color: #facc15;
             border: none;
-            border-radius: 10px;
-            padding: 10px 20px;
-            font-size: 1rem;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.9rem;
             font-weight: 700;
             cursor: pointer;
             transition: background 0.2s, color 0.2s;
         }
         .btn-secondary:hover {
-            background: #4f8cff;
-            color: #fff;
+            background: #facc15;
+            color: #dc2626;
         }
 
         /* Responsive Design */
-        @media (max-width: 1400px) {
-            .main-content {
-                grid-template-columns: 320px 1fr;
-            }
-            .dashboard-header {
-                flex-direction: column;
-                gap: 24px;
-                padding: 24px 16px;
-            }
-        }
         @media (max-width: 1000px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -763,67 +681,64 @@ if ($current_page === "dashboard") { ?>
                 order: 1;
             }
             .map-container {
-                height: 360px;
+                height: 120px;
             }
             .panel-item {
-                padding: 18px;
-            }
-            .stats-grid {
-                grid-template-columns: 1fr;
+                padding: 6px;
             }
         }
         @media (max-width: 700px) {
             .dashboard-header h1 {
-                font-size: 1.7rem;
+                font-size: 1rem;
             }
             .dashboard-logo {
-                width: 44px;
-                height: 44px;
+                width: 20px;
+                height: 20px;
             }
             .main-content {
-                gap: 16px;
+                gap: 4px;
             }
             .map-container {
-                height: 240px;
+                height: 80px;
             }
             .contacts-container {
-                height: 140px;
+                height: 40px;
             }
             .contacts-table th,
             .contacts-table td {
-                padding: 10px 8px;
+                padding: 2px 2px;
             }
             .modal-content {
-                margin: 5% auto;
+                margin: 2% auto;
                 width: 99%;
             }
         }
         @media (max-width: 500px) {
             .dashboard-header {
-                padding: 10px 4px;
+                padding: 4px 2px;
             }
             .dashboard-header h1 {
-                font-size: 1.1rem;
+                font-size: 0.8rem;
             }
             .dashboard-logo {
-                width: 28px;
-                height: 28px;
+                width: 12px;
+                height: 12px;
             }
             .main-content {
-                gap: 8px;
+                gap: 2px;
             }
             .map-container {
-                height: 120px;
+                height: 40px;
             }
             .contacts-container {
-                height: 80px;
+                height: 20px;
             }
             .contacts-table th,
             .contacts-table td {
-                padding: 4px 2px;
+                padding: 1px 1px;
             }
             .modal-content {
-                margin: 2% auto;
+                margin: 1% auto;
                 width: 100%;
             }
         }
@@ -1040,10 +955,34 @@ if ($current_page === "dashboard") { ?>
             }, 2200);
         }
 
-        // Close modal when clicking outside of it
+        // Modal open/close logic for weather
+        function openWeatherModal() {
+            document.getElementById('weatherModal').style.display = 'block';
+        }
+        function closeWeatherModal() {
+            document.getElementById('weatherModal').style.display = 'none';
+        }
+
+        // Modal open/close logic for contact list
+        function openContactListModal() {
+            document.getElementById('contactListModal').style.display = 'block';
+        }
+        function closeContactListModal() {
+            document.getElementById('contactListModal').style.display = 'none';
+        }
+
+        // Close modals when clicking outside
         window.onclick = function(event) {
-            const modal = document.getElementById('contactModal');
-            if (event.target === modal) {
+            const weatherModal = document.getElementById('weatherModal');
+            const contactListModal = document.getElementById('contactListModal');
+            const contactModal = document.getElementById('contactModal');
+            if (event.target === weatherModal) {
+                closeWeatherModal();
+            }
+            if (event.target === contactListModal) {
+                closeContactListModal();
+            }
+            if (event.target === contactModal) {
                 closeContactModal();
             }
         }
@@ -1064,19 +1003,19 @@ if ($current_page === "dashboard") { ?>
             // Add emergency markers
             var emergencyIcon = L.divIcon({
                 html: '🚨',
-                iconSize: [40, 40],
+                iconSize: [24, 24],
                 className: 'emergency-marker'
             });
 
             var ambulanceIcon = L.divIcon({
                 html: '🚑',
-                iconSize: [40, 40],
+                iconSize: [24, 24],
                 className: 'ambulance-marker'
             });
 
             var floodIcon = L.divIcon({
                 html: '🌊',
-                iconSize: [40, 40],
+                iconSize: [24, 24],
                 className: 'flood-marker'
             });
 
@@ -1087,36 +1026,33 @@ if ($current_page === "dashboard") { ?>
 
             L.marker([14.6042, 120.9822], {icon: ambulanceIcon})
                 .addTo(map)
-                .bindPopup('<b>🚑 Ambulance Unit A-01</b><br>Status: <span style="color:#059669;font-weight:600;">Available</span>');
+                .bindPopup('<b>🚑 Ambulance Unit A-01</b><br>Status: <span style="color:#facc15;font-weight:600;">Available</span>');
 
             L.marker([14.5955, 120.9862], {icon: floodIcon})
                 .addTo(map)
-                .bindPopup('<b>🌊 Flood Alert Area</b><br>Water Level: <span style="color:#0891b2;font-weight:600;">2.3m</span>');
+                .bindPopup('<b>🌊 Flood Alert Area</b><br>Water Level: <span style="color:#facc15;font-weight:600;">2.3m</span>');
 
             L.marker([14.5935, 120.9802], {icon: ambulanceIcon})
                 .addTo(map)
-                .bindPopup('<b>🚑 Ambulance Unit A-02</b><br>Status: <span style="color:#d97706;font-weight:600;">En Route</span>');
+                .bindPopup('<b>🚑 Ambulance Unit A-02</b><br>Status: <span style="color:#dc2626;font-weight:600;">En Route</span>');
 
-            // Handle map resize
-            setTimeout(function() {
-                map.invalidateSize();
-            }, 100);
+            // No dropdowns to collapse by default anymore
         });
     </script>
     <style>
         /* Toast styles */
         .toast {
             position: fixed;
-            bottom: 40px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%) scale(0.97);
-            background: linear-gradient(90deg, #4f8cff 0%, #7c3aed 100%);
-            color: #fff;
-            padding: 20px 40px;
-            border-radius: 16px;
-            font-size: 1.15rem;
+            background: linear-gradient(90deg, #dc2626 0%, #facc15 100%);
+            color: #111;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
             font-weight: 700;
-            box-shadow: 0 8px 32px rgba(76,130,255,0.22);
+            box-shadow: 0 4px 16px #dc2626;
             opacity: 0;
             pointer-events: none;
             z-index: 9999;
@@ -1128,10 +1064,12 @@ if ($current_page === "dashboard") { ?>
             pointer-events: auto;
         }
         .toast.success {
-            background: linear-gradient(90deg, #059669 0%, #4f8cff 100%);
+            background: linear-gradient(90deg, #facc15 0%, #dc2626 100%);
+            color: #111;
         }
         .toast.error {
-            background: linear-gradient(90deg, #dc2626 0%, #7c3aed 100%);
+            background: linear-gradient(90deg, #dc2626 0%, #facc15 100%);
+            color: #fff;
         }
     </style>
 </div>
