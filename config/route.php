@@ -21,7 +21,7 @@ switch ($request_uri) {
 
     // here is the user set
     case "/client":
-        include "./pages/client/core.php";
+        include "./pages/client/index.php";
         break;
 
     // here is the ambulance set
