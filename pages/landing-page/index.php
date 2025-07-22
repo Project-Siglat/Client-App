@@ -8,21 +8,21 @@
      crossorigin=""></script>
 
   <!-- Header -->
-  <?php include "./pages/landing-page/components/topbar.php"; ?>
+  <?php include "./pages/landing-page/components/titlebar.php"; ?>
 
   <!-- Hero Section -->
   <section class="py-24 px-6 bg-gradient-to-b from-transparent via-red-950/10 to-transparent">
     <div class="container mx-auto text-center">
         <img src="./assets/siglat.png" alt="" class="rounded-3xl mx-auto">
-      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white leading-tight">EmergencyMap</h1>
-      <p class="text-xl mb-10 text-gray-300 max-w-2xl mx-auto leading-relaxed">
-        SIGLAT provides immediate emergency rescue services 24/7 in Villaverde, Nueva Vizcaya. Your reliable emergency response platform with real-time disaster forecasting, instant emergency services, and community safety - all in one app.
-      </p>
-      <div class="flex flex-wrap justify-center gap-4">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white leading-tight">Siglat</h1>
+        <p class="text-xl mb-10 text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            SIGLAT provides immediate emergency rescue services 24/7 in Villaverde, Nueva Vizcaya. Your reliable emergency response platform with real-time disaster forecasting, instant emergency services, and community safety - all in one app.
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
           <a href="/client" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-4 px-10 rounded-xl transition-all duration-300 shadow-lg hover:shadow-red-500/30">
             Emergency Alert
           </a>
-      </div>
+        </div>
     </div>
   </section>
 
@@ -305,7 +305,7 @@ function renderDefaultContacts() {
 
 function initMap(lat, lng) {
     // Initialize the map
-    var map = L.map('map').setView([lat, lng], 13);
+    var map = L.map('map').setView([lat, lng], 50);
 
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

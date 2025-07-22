@@ -4,7 +4,7 @@ $request_uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 switch ($request_uri) {
     // here is the landing page
     case "/":
-        include "./pages/landing-page/core.php";
+        include "./pages/landing-page/index.php";
         break;
     case "/about":
         include "./pages/landing-page/about.php";
