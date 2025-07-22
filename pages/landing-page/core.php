@@ -152,6 +152,11 @@
   </footer>
 </div>
 
+<?php
+include "./config/env.php";
+$API = $_ENV["API"];
+?>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     fetchContacts();
@@ -159,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function fetchContacts() {
-    fetch('http://localhost:5069/api/v1/Admin/contact')
+    fetch('<?php echo $API; ?>/api/v1/Admin/contact')
         .then(response => response.json())
         .then(contacts => {
             renderContacts(contacts);

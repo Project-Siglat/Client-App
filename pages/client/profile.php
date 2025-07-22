@@ -342,6 +342,8 @@ function hideVerificationForm() {
 async function submitVerification() {
     const documentType = document.getElementById('documentType').value;
     const documentPhoto = document.getElementById('documentPhoto').files[0];
+    // remarks is always set to empty string
+    const remarks = "";
     const verificationError = document.getElementById('verificationError');
 
     // Validate form
@@ -383,6 +385,7 @@ async function submitVerification() {
 
         const formData = new FormData();
         formData.append('image', documentPhoto);
+        // remarks is not appended to formData
 
         // Update button to show loading state
         const submitBtn = document.getElementById('submitVerificationBtn');
