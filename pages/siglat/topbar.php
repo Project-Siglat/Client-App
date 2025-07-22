@@ -3,7 +3,7 @@
         <a href="/siglat" style="color: #333; text-decoration: none;">Dashboard</a>
     </div>
     <div style="display: flex; align-items: center; gap: 20px;">
-        <a href="/dashboard?where=user-list" style="color: #666; text-decoration: none; font-size: 14px;">User</a>
-        <a href="/dashboard?where=verification" style="color: #666; text-decoration: none; font-size: 14px;">Verification</a>
+        <a href="/siglat?where=user-list" style="color: #666; text-decoration: none; font-size: 14px;">User</a>
+        <a href="/siglat?where=verification" style="color: #666; text-decoration: none; font-size: 14px;">Verification</a>
     </div>
 </div>

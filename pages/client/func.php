@@ -176,8 +176,8 @@ window.App = (function() {
                     console.log('Geolocation error:', error);
                     // Fallback to default location
                     resolve({
-                        lat: 16.606254918019598,
-                        lng: 121.18314743041994
+                        lat: 17.606254918019599,
+                        lng: 125.18314743041994
                     });
                 },
                 {
@@ -454,22 +454,23 @@ window.App = (function() {
 
     // Chat system functionality
     function startChat() {
-        // Set chat as active and open it directly
-        chatActive = true;
-        const chatSystem = document.getElementById('chatSystem');
-        chatSystem.classList.remove('hidden');
+        const chatMessages = document.getElementById("chatMessages");
 
-        // Start live location tracking when chat starts
-        startLiveLocationTracking();
-
-        // Add initial message from dispatcher only if the chat doesn't have messages yet
-        const chatMessages = document.getElementById('chatMessages');
-        if (chatMessages.children.length === 0) {
-            setTimeout(function() {
-                addChatMessage('Emergency Dispatcher', 'Hello! How can we assist you today? Are you experiencing an emergency? Your location is now being tracked in real-time for emergency response.', 'dispatcher');
-            }, 500);
+        if (!chatMessages) {
+            console.error("chatMessages element not found.");
+            return;
         }
+
+        while (chatMessages.children.length > 1) {
+            chatMessages.removeChild(chatMessages.lastChild);
+        }
+
+        // Simulate incoming message
+        const message = document.createElement("div");
+        message.textContent = "Hello from Chat!";
+        chatMessages.appendChild(message);
     }
+
 
     function closeChatSystem(event) {
         if (event && event.target !== event.currentTarget) return;
@@ -500,7 +501,7 @@ window.App = (function() {
     }
 
     function triggerEmergency() {
-        playEmergencySound();
+        // playEmergencySound();
 
         if (chatActive) {
             addChatMessage('System', '🚨 EMERGENCY BUTTON ACTIVATED - STARTING EMERGENCY PROTOCOL', 'emergency');
@@ -527,18 +528,18 @@ window.App = (function() {
         }
     }
 
-    function playEmergencySound() {
-        try {
-            initializeAudio();
-            var sound = document.getElementById('emergencySound');
-            if (sound.readyState >= 2) {
-                sound.volume = 0.7;
-                sound.play().catch(e => console.log('Could not play emergency sound:', e));
-            }
-        } catch (e) {
-            console.log('Emergency sound not available:', e);
-        }
-    }
+    // function playEmergencySound() {
+    //     try {
+    //         initializeAudio();
+    //         var sound = document.getElementById('emergencySound');
+    //         if (sound.readyState >= 2) {
+    //             sound.volume = 0.7;
+    //             sound.play().catch(e => console.log('Could not play emergency sound:', e));
+    //         }
+    //     } catch (e) {
+    //         console.log('Emergency sound not available:', e);
+    //     }
+    // }
 
     function hideLoading() {
         document.getElementById('loading').style.display = 'none';
@@ -577,8 +578,59 @@ window.App = (function() {
     }
 
     function addRandomAmbulances(centerLat, centerLng) {
-        // Function exists but does not add ambulances to the map
+        const token = sessionStorage.getItem('token');
+        if (!token) {
+            console.error("Token not found");
+            return;
+        }
+
+        fetch('<?php echo $API; ?>/api/v1/Ambulance', {
+            method: 'GET',
+            headers: {
+                'accept': '*/*',
+                'Authorization': 'Bearer ' + token
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!Array.isArray(data)) {
+                console.error('Unexpected response:', data);
+                return;
+            }
+
+            // Clear existing ambulance markers
+            ambulanceMarkers.forEach(marker => map.removeLayer(marker));
+            ambulanceMarkers = [];
+
+            const ambulanceIcon = L.divIcon({
+                html: `<div class="w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M10 10H6"/><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/>
+                        <path d="M19 18h2a1 1 0 0 0 1-1v-3.28a1 1 0 0 0-.684-.948l-1.923-.641a1 1 0 0 1-.578-.502l-1.539-3.076A1 1 0 0 0 16.382 8H14"/>
+                        <path d="M8 8v4"/><path d="M9 18h6"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>
+                    </svg>
+                </div>`,
+                iconSize: [40, 40],
+                iconAnchor: [20, 20],
+                className: 'custom-div-icon'
+            });
+
+            data.forEach(item => {
+                const lat = parseFloat(item.latitude);
+                const lng = parseFloat(item.longitude);
+                const marker = L.marker([lat, lng], {
+                    icon: ambulanceIcon,
+                    draggable: false
+                }).addTo(map).bindPopup(`🚑 Ambulance<br>ID: ${item.id}`);
+
+                ambulanceMarkers.push(marker);
+            });
+        })
+        .catch(error => {
+            console.error('Failed to fetch ambulances:', error);
+        });
     }
+
 
     function addChatMessage(sender, message, type = 'user', imageData = null) {
         var chatMessages = document.getElementById('chatMessages');
@@ -666,6 +718,13 @@ window.App = (function() {
 
         setTimeout(function() {
             map.invalidateSize();
+        }, 100);
+
+        setInterval(() => {
+            if (map) {
+                const center = map.getCenter();
+                addRandomAmbulances(center.lat, center.lng);
+            }
         }, 100);
     }
 

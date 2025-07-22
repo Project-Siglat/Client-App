@@ -1,5 +1,27 @@
 <?php
-include "./pages/siglat/topbar.php"; ?>
+include "./pages/siglat/topbar.php";
+include "./config/env.php";
+$API = $_ENV["API"];
+
+// Check current page/route to determine what to display
+$current_page = $_GET["where"] ?? "dashboard";
+
+if ($current_page === "verification") {
+    include "./pages/siglat/users/verification.php";
+    exit();
+}
+
+if ($current_page === "user-list") {
+    include "./pages/siglat/users/user.php";
+    exit();
+}
+
+// Only display dashboard if not on verification or users page
+if ($current_page === "dashboard") { ?>
+
+<!-- Google Fonts for modern look -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
 <div class="dashboard-container">
     <!-- Leaflet CSS -->
@@ -7,116 +29,49 @@ include "./pages/siglat/topbar.php"; ?>
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin=""/>
 
+    <!-- Ultra Glassmorphism Header -->
+    <div class="dashboard-header ultra-glass">
+        <div class="dashboard-title">
+            <img src="https://cdn-icons-png.flaticon.com/512/484/484167.png" alt="Logo" class="dashboard-logo">
+            <h1>
+                <span class="gradient-text">Disaster Response Dashboard</span>
+            </h1>
+        </div>
+        <div class="dashboard-actions">
+            <button class="btn btn-gradient btn-action" onclick="window.location.reload()" title="Refresh">
+                <i class="bi bi-arrow-repeat"></i>
+            </button>
+            <button class="btn btn-gradient btn-action" onclick="window.location.href='?where=user-list'" title="Users">
+                <i class="bi bi-people"></i>
+            </button>
+            <button class="btn btn-gradient btn-action" onclick="window.location.href='?where=verification'" title="Verification">
+                <i class="bi bi-shield-check"></i>
+            </button>
+        </div>
+    </div>
 
     <div class="main-content">
         <!-- Sidebar -->
         <div class="sidebar">
-            <div class="panel-item weather-iframe-container">
-                <h3>🌀 Hourly Weather Forecast</h3>
-                <iframe
-                    src="https://www.accuweather.com/en/ph/villaverde/265132/hourly-weather-forecast/265132"
-                    class="weather-iframe"
-                    frameborder="0"
-                    allowfullscreen>
-                </iframe>
-            </div>
-
-            <div class="panel-item">
-                <h3>📊 Incident Statistics</h3>
-                <div class="stats-grid compact">
-                    <div class="stat-box">
-                        <span class="stat-value incident-stats">12</span>
-                        <label>Total Today</label>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-value success">8</span>
-                        <label>Resolved</label>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-value warning">4</span>
-                        <label>Pending</label>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-value danger">2</span>
-                        <label>Critical</label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contact Management -->
-            <div class="panel-item">
-                <h3>📞 Contact Management</h3>
-                <div class="contact-crud-controls">
-                    <button class="btn btn-primary btn-small" onclick="openContactModal()">
-                        Add Contact
+            <!-- Weather Card (Modal) -->
+            <div class="panel-item weather-card">
+                <div class="weather-header">
+                    <span class="weather-icon animated-icon">🌀</span>
+                    <h3 class="panel-title">Hourly Weather Forecast</h3>
+                    <button class="btn btn-gradient btn-small weather-modal-btn" onclick="openWeatherModal()" title="Show Weather">
+                        <i class="bi bi-cloud-sun"></i>
                     </button>
                 </div>
-                <div class="contacts-container">
-                    <div class="table-responsive">
-                        <table class="contacts-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Label</th>
-                                    <th>Type</th>
-                                    <th>Information</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="contactsTableBody">
-                                <tr>
-                                    <td>001</td>
-                                    <td>Fire Department</td>
-                                    <td>phone</td>
-                                    <td>911</td>
-                                    <td class="action-buttons">
-                                        <button class="btn-icon btn-edit" onclick="editContact('001', 'Fire Department', 'phone', '911')">✏️</button>
-                                        <button class="btn-icon btn-delete" onclick="deleteContact('001')">🗑️</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>002</td>
-                                    <td>Police Station</td>
-                                    <td>phone</td>
-                                    <td>117</td>
-                                    <td class="action-buttons">
-                                        <button class="btn-icon btn-edit" onclick="editContact('002', 'Police Station', 'phone', '117')">✏️</button>
-                                        <button class="btn-icon btn-delete" onclick="deleteContact('002')">🗑️</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>003</td>
-                                    <td>Medical Emergency</td>
-                                    <td>phone</td>
-                                    <td>911</td>
-                                    <td class="action-buttons">
-                                        <button class="btn-icon btn-edit" onclick="editContact('003', 'Medical Emergency', 'phone', '911')">✏️</button>
-                                        <button class="btn-icon btn-delete" onclick="deleteContact('003')">🗑️</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>004</td>
-                                    <td>Disaster Response</td>
-                                    <td>phone</td>
-                                    <td>(02) 8911-1406</td>
-                                    <td class="action-buttons">
-                                        <button class="btn-icon btn-edit" onclick="editContact('004', 'Disaster Response', 'phone', '(02) 8911-1406')">✏️</button>
-                                        <button class="btn-icon btn-delete" onclick="deleteContact('004')">🗑️</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>005</td>
-                                    <td>Red Cross</td>
-                                    <td>email</td>
-                                    <td>contact@redcross.ph</td>
-                                    <td class="action-buttons">
-                                        <button class="btn-icon btn-edit" onclick="editContact('005', 'Red Cross', 'email', 'contact@redcross.ph')">✏️</button>
-                                        <button class="btn-icon btn-delete" onclick="deleteContact('005')">🗑️</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+            </div>
+
+            <!-- Contact Management (Modal) -->
+            <div class="panel-item contact-card">
+                <div class="contact-header">
+                    <span class="contact-icon animated-icon">📞</span>
+                    <h3 class="panel-title">Contact Management</h3>
+                    <button class="btn btn-gradient btn-small contact-modal-btn" onclick="openContactListModal()" title="Show Contacts">
+                        <i class="bi bi-people"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -125,9 +80,71 @@ include "./pages/siglat/topbar.php"; ?>
         <div class="main-area">
             <!-- Map Section -->
             <div class="map-section">
-                <h2>Map View</h2>
+                <div class="map-header">
+                    <h2><span class="animated-icon">🗺️</span> <span class="gradient-text">Map View</span></h2>
+                    <div class="map-legend">
+                        <span class="legend-item"><span class="legend-icon">🚨</span> Emergency</span>
+                        <span class="legend-item"><span class="legend-icon">🚑</span> Ambulance</span>
+                        <span class="legend-item"><span class="legend-icon">🌊</span> Flood</span>
+                    </div>
+                </div>
                 <div id="map" class="map-container">
                     <!-- Leaflet map will be initialized here -->
+                    <div class="map-loader" id="mapLoader">
+                        <div class="loader-spinner"></div>
+                        <span>Loading Map...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weather Modal -->
+    <div id="weatherModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3><i class="bi bi-cloud-sun"></i> Hourly Weather Forecast</h3>
+                <span class="close" onclick="closeWeatherModal()">&times;</span>
+            </div>
+            <div class="weather-iframe-container" style="height: 200px;">
+                <iframe
+                    src="https://www.accuweather.com/en/ph/villaverde/265132/hourly-weather-forecast/265132"
+                    class="weather-iframe"
+                    frameborder="0"
+                    allowfullscreen
+                    style="height:180px;">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact List Modal -->
+    <div id="contactListModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="bi bi-people"></i> Contact Management</h3>
+                <span class="close" onclick="closeContactListModal()">&times;</span>
+            </div>
+            <div class="contact-crud-controls" id="contactCrudControls" style="margin-bottom:8px; display:flex; justify-content:flex-end;">
+                <button class="btn btn-gradient btn-small" onclick="openContactModal()">
+                    <i class="bi bi-plus-circle"></i> Add Contact
+                </button>
+            </div>
+            <div class="contacts-container" id="contactsContainer" style="height:160px; overflow-y:auto;">
+                <div class="table-responsive">
+                    <table class="contacts-table">
+                        <thead>
+                            <tr>
+                                <th><i class="bi bi-tag"></i> Label</th>
+                                <th><i class="bi bi-telephone"></i> Type</th>
+                                <th><i class="bi bi-info-circle"></i> Information</th>
+                                <th><i class="bi bi-tools"></i> Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contactsTableBody">
+                            <!-- Contacts will be loaded from API -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -137,20 +154,20 @@ include "./pages/siglat/topbar.php"; ?>
     <div id="contactModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle">Add Contact</h3>
+                <h3 id="modalTitle"><i class="bi bi-person-plus"></i> Add Contact</h3>
                 <span class="close" onclick="closeContactModal()">&times;</span>
             </div>
             <form id="contactForm" onsubmit="saveContact(event)">
-                <div class="form-group">
+                <div class="form-group" style="display: none;">
                     <label for="contactId">ID:</label>
                     <input type="text" id="contactId" name="contactId" required>
                 </div>
                 <div class="form-group">
-                    <label for="contactLabel">Contact Label:</label>
-                    <input type="text" id="contactLabel" name="contactLabel" required>
+                    <label for="contactLabel"><i class="bi bi-tag"></i> Contact Label:</label>
+                    <input type="text" id="contactLabel" name="contactLabel" required placeholder="e.g. Police Station">
                 </div>
                 <div class="form-group">
-                    <label for="contactType">Contact Type:</label>
+                    <label for="contactType"><i class="bi bi-telephone"></i> Contact Type:</label>
                     <select id="contactType" name="contactType" required>
                         <option value="">Select Contact Type</option>
                         <option value="phone">Phone</option>
@@ -159,12 +176,12 @@ include "./pages/siglat/topbar.php"; ?>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="contactInformation">Contact Information:</label>
-                    <input type="text" id="contactInformation" name="contactInformation" required>
+                    <label for="contactInformation"><i class="bi bi-info-circle"></i> Contact Information:</label>
+                    <input type="text" id="contactInformation" name="contactInformation" required placeholder="e.g. 0917-123-4567">
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeContactModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeContactModal()"><i class="bi bi-x-circle"></i> Cancel</button>
+                    <button type="submit" class="btn btn-gradient"><i class="bi bi-save"></i> Save</button>
                 </div>
             </form>
         </div>
@@ -175,227 +192,242 @@ include "./pages/siglat/topbar.php"; ?>
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""></script>
 
+    <!-- Enhanced UI Styles -->
     <style>
         * {
             box-sizing: border-box;
         }
 
-        .dashboard-container {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        body, .dashboard-container {
+            font-family: 'Inter', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             margin: 0;
-            padding: 20px;
-            padding-top: 70px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 0;
+            background: #111;
             min-height: 100vh;
             height: 100vh;
             overflow: hidden;
         }
 
-        .dashboard-container h1 {
-            color: white;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.25rem;
+        .ultra-glass {
+            background: rgba(0,0,0,0.85);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(255,0,0,0.10), 0 2px 8px rgba(0,0,0,0.18);
+            backdrop-filter: blur(12px) saturate(180%);
+            border: 2px solid #222;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 18px;
+            margin-bottom: 12px;
+            background: linear-gradient(90deg, rgba(0,0,0,0.95) 0%, rgba(40,40,40,0.95) 100%);
+        }
+
+        .dashboard-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dashboard-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+            background: #222;
+            border: 2px solid #dc2626;
+            transition: transform 0.2s;
+        }
+        .dashboard-logo:hover {
+            transform: scale(1.08) rotate(-8deg);
+        }
+
+        .dashboard-header h1 {
+            color: #fff;
+            font-size: 1.2rem;
             font-weight: 700;
-            margin-top: 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            margin: 0;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px #dc2626;
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #dc2626 0%, #facc15 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .dashboard-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(90deg, #dc2626 0%, #facc15 100%);
+            color: #111;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(255,0,0,0.10);
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-gradient:hover, .btn-gradient:focus {
+            transform: translateY(-1px) scale(1.06);
+            box-shadow: 0 6px 24px rgba(255,0,0,0.18);
+            background: linear-gradient(90deg, #facc15 0%, #dc2626 100%);
+            color: #fff;
+        }
+        .btn-action {
+            padding: 8px 10px;
+            font-size: 1.2rem;
+            border-radius: 50%;
+            min-width: 32px;
+            min-height: 32px;
+            justify-content: center;
+            box-shadow: 0 1px 6px rgba(255,0,0,0.10);
         }
 
         .main-content {
             display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 20px;
-            max-width: 1600px;
+            grid-template-columns: 180px 1fr;
+            gap: 12px;
+            max-width: 100vw;
             margin: 0 auto;
-            height: calc(100vh - 190px);
+            height: calc(100vh - 60px);
         }
 
         .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
             overflow-y: auto;
-            padding-right: 12px;
+            padding-right: 4px;
         }
 
         .sidebar::-webkit-scrollbar {
             width: 6px;
         }
-
-        .sidebar::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-        }
-
         .sidebar::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.3);
-            border-radius: 3px;
-        }
-
-        .main-area {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .map-section {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            border: none;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            height: 100%;
-            min-height: 0;
-        }
-
-        .map-section h2 {
-            margin-top: 0;
-            color: #374151;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-
-        .map-container {
-            height: calc(100% - 60px);
-            width: 100%;
-            border-radius: 8px;
-            overflow: hidden;
-            background: #f3f4f6;
-            border: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: #222;
+            border-radius: 4px;
         }
 
         .panel-item {
-            background: white;
-            padding: 16px;
-            border-radius: 12px;
-            border: none;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
+            background: #181818;
+            padding: 10px 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(255,0,0,0.10);
+            border: 1px solid #222;
+            position: relative;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .panel-item:hover {
+            box-shadow: 0 8px 24px #dc2626;
+            transform: translateY(-1px) scale(1.02);
         }
 
-        .panel-item h3 {
-            margin-top: 0;
-            margin-bottom: 16px;
-            color: #374151;
-            font-size: 1.1rem;
-            font-weight: 600;
+        .panel-title {
+            font-family: 'Montserrat', 'Inter', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #facc15;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .weather-card .weather-header,
+        .contact-card .contact-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .weather-modal-btn,
+        .contact-modal-btn {
+            margin-left: auto;
+            padding: 4px 8px;
+            font-size: 1rem;
+            border-radius: 6px;
+            background: linear-gradient(90deg, #dc2626 0%, #facc15 100%);
+            color: #111;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .weather-modal-btn:hover,
+        .contact-modal-btn:hover {
+            background: linear-gradient(90deg, #facc15 0%, #dc2626 100%);
+            color: #fff;
+        }
+        .weather-icon, .contact-icon, .animated-icon {
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #dc2626 0%, #facc15 100%);
+            color: #111;
+            border-radius: 50%;
+            padding: 4px;
+            box-shadow: 0 2px 8px #dc2626;
+            animation: bounce 1.8s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0);}
+            50% { transform: translateY(-4px);}
         }
 
         .weather-iframe-container {
-            height: 400px;
+            height: 120px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #222;
+            box-shadow: 0 2px 8px #dc2626;
         }
 
         .weather-iframe {
             width: 100%;
-            height: 350px;
+            height: 100px;
             border: none;
-            border-radius: 8px;
-            background: #f9fafb;
+            border-radius: 6px;
+            background: #222;
         }
 
-        .button-group {
+        .contact-crud-controls {
+            margin-bottom: 8px;
             display: flex;
-            gap: 10px;
-            flex-direction: column;
-        }
-
-        .btn {
-            padding: 10px 18px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.875rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #6b7280, #4b5563);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(107, 114, 128, 0.4);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+            justify-content: flex-end;
         }
 
         .btn-small {
-            padding: 8px 14px;
-            font-size: 0.8rem;
-        }
-
-        .weather-forecast {
-            text-align: center;
-        }
-
-        .weather-today {
-            margin-bottom: 16px;
-        }
-
-        .weather-icon {
-            font-size: 2.5rem;
-            margin-bottom: 8px;
-        }
-
-        .weather-temp {
-            font-size: 1.75rem;
+            padding: 4px 8px;
+            font-size: 0.9rem;
             font-weight: 700;
-            color: #374151;
-            margin-bottom: 4px;
+            border-radius: 6px;
         }
 
-        .weather-condition {
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin-bottom: 12px;
-            font-weight: 500;
+        .contacts-container {
+            height: 80px;
+            overflow-y: auto;
+            border: 1px solid #dc2626;
+            border-radius: 6px;
+            background: #222;
+            box-shadow: 0 2px 8px #dc2626;
         }
-
-        .weather-details {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+        .contacts-container::-webkit-scrollbar {
+            width: 4px;
         }
-
-        .weather-detail {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            padding: 4px 0;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .detail-label {
-            color: #6b7280;
-            font-weight: 500;
-        }
-
-        .detail-value {
-            color: #374151;
-            font-weight: 600;
+        .contacts-container::-webkit-scrollbar-thumb {
+            background: #dc2626;
+            border-radius: 2px;
         }
 
         .table-responsive {
@@ -405,58 +437,32 @@ include "./pages/siglat/topbar.php"; ?>
         .contacts-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.875rem;
+            font-size: 0.9rem;
         }
-
         .contacts-table th {
-            padding: 12px 16px;
-            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
-            color: #374151;
-            font-weight: 600;
+            padding: 4px 6px;
+            background: linear-gradient(135deg, #222, #181818);
+            color: #facc15;
+            font-weight: 700;
             text-align: left;
-            border-bottom: 2px solid #e5e7eb;
+            border-bottom: 1px solid #dc2626;
+            font-size: 0.9rem;
         }
-
         .contacts-table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f3f4f6;
+            padding: 4px 6px;
+            border-bottom: 1px solid #222;
+            color: #fff;
+            font-size: 0.9rem;
         }
-
         .contacts-table th:last-child,
         .contacts-table td:last-child {
-            width: 100px;
+            width: 60px;
             text-align: center;
-        }
-
-        .contact-crud-controls {
-            margin-bottom: 16px;
-        }
-
-        .contacts-container {
-            height: 180px;
-            overflow-y: auto;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            background: #f9fafb;
-        }
-
-        .contacts-container::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .contacts-container::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 3px;
-        }
-
-        .contacts-container::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
         }
 
         .action-buttons {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             justify-content: center;
         }
 
@@ -464,20 +470,102 @@ include "./pages/siglat/topbar.php"; ?>
             background: none;
             border: none;
             cursor: pointer;
-            padding: 6px;
-            border-radius: 6px;
+            padding: 2px;
+            border-radius: 4px;
             font-size: 1rem;
             transition: all 0.2s ease;
+            color: #facc15;
         }
-
         .btn-edit:hover {
-            background: #e0f2fe;
-            transform: scale(1.1);
+            background: #facc15;
+            color: #dc2626;
+            transform: scale(1.12);
+        }
+        .btn-delete:hover {
+            background: #dc2626;
+            color: #fff;
+            transform: scale(1.12);
         }
 
-        .btn-delete:hover {
-            background: #fee2e2;
-            transform: scale(1.1);
+        /* Map Section */
+        .main-area {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .map-section {
+            background: #181818;
+            border-radius: 8px;
+            padding: 8px 6px;
+            box-shadow: 0 2px 8px #dc2626;
+            height: 100%;
+            min-height: 0;
+            border: 1px solid #dc2626;
+            backdrop-filter: blur(6px);
+            position: relative;
+        }
+        .map-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .map-section h2 {
+            margin: 0;
+            color: #facc15;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .map-legend {
+            display: flex;
+            gap: 8px;
+            background: #222;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            color: #facc15;
+            font-weight: 600;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .legend-icon {
+            font-size: 1rem;
+        }
+        .map-container {
+            height: calc(100% - 30px);
+            width: 100%;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #222;
+            border: none;
+            box-shadow: 0 2px 8px #dc2626;
+            position: relative;
+        }
+        .map-loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .loader-spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #222;
+            border-top: 3px solid #dc2626;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg);}
+            100% { transform: rotate(360deg);}
         }
 
         /* Modal Styles */
@@ -489,202 +577,169 @@ include "./pages/siglat/topbar.php"; ?>
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
         }
-
         .modal-content {
-            background-color: white;
-            margin: 8% auto;
+            background: linear-gradient(135deg, #181818 80%, #222 100%);
+            margin: 10% auto;
             padding: 0;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            width: 99%;
+            max-width: 320px;
+            box-shadow: 0 8px 32px #dc2626;
+            border: 1px solid #dc2626;
         }
-
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 24px;
-            border-bottom: 1px solid #e5e7eb;
+            padding: 8px 12px;
+            border-bottom: 1px solid #dc2626;
         }
-
         .modal-header h3 {
             margin: 0;
-            color: #374151;
-            font-size: 1.25rem;
-            font-weight: 600;
+            color: #facc15;
+            font-size: 1rem;
+            font-weight: 700;
         }
-
         .close {
-            color: #6b7280;
-            font-size: 32px;
+            color: #dc2626;
+            font-size: 24px;
             font-weight: bold;
             cursor: pointer;
             line-height: 1;
             transition: color 0.2s ease;
         }
-
         .close:hover {
-            color: #374151;
+            color: #facc15;
         }
-
         .form-group {
-            margin-bottom: 20px;
-            padding: 0 20px;
+            margin-bottom: 8px;
+            padding: 0 12px;
         }
-
         .form-group:first-of-type {
-            margin-top: 20px;
+            margin-top: 8px;
         }
-
         .form-group label {
             display: block;
-            margin-bottom: 6px;
-            font-weight: 500;
-            color: #374151;
-            font-size: 0.875rem;
+            margin-bottom: 4px;
+            font-weight: 700;
+            color: #facc15;
+            font-size: 0.9rem;
         }
-
         .form-group input, .form-group select {
             width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 0.875rem;
+            padding: 6px 8px;
+            border: 1px solid #dc2626;
+            border-radius: 4px;
+            font-size: 0.9rem;
             transition: border-color 0.2s;
+            background: #222;
+            color: #fff;
         }
-
         .form-group input:focus, .form-group select:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: #facc15;
+            box-shadow: 0 0 0 2px #facc15;
         }
-
         .form-actions {
             display: flex;
             justify-content: flex-end;
-            gap: 12px;
-            padding: 16px 20px;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .stats-grid.compact {
-            grid-template-columns: 1fr 1fr;
             gap: 6px;
+            padding: 8px 12px;
+            border-top: 1px solid #dc2626;
         }
-
-        .stat-box {
-            padding: 8px;
-            background: #f9fafb;
-            border-radius: 6px;
-            text-align: center;
-            border: 1px solid #f3f4f6;
+        .btn-secondary {
+            background: #222;
+            color: #facc15;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
         }
-
-        .stat-box label {
-            display: block;
-            font-size: 0.7rem;
-            color: #6b7280;
-            margin-top: 4px;
-            font-weight: 500;
+        .btn-secondary:hover {
+            background: #facc15;
+            color: #dc2626;
         }
-
-        .stat-value {
-            font-weight: 600;
-            display: block;
-            font-size: 1rem;
-        }
-
-        .flood-stats { color: #0891b2; }
-        .typhoon-stats { color: #7c3aed; }
-        .incident-stats { color: #3b82f6; }
-
-        .stat-value.success { color: #059669; }
-        .stat-value.warning { color: #d97706; }
-        .stat-value.danger { color: #dc2626; }
-        .stat-value.risk-high { color: #ea580c; }
-        .stat-value.risk-critical { color: #dc2626; }
 
         /* Responsive Design */
-        @media (max-width: 1024px) {
-            .main-content {
-                grid-template-columns: 250px 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-container {
-                padding: 12px;
-                padding-top: 70px;
-                height: auto;
-                overflow: visible;
-            }
-
-            .dashboard-container h1 {
-                font-size: 1.5rem;
-            }
-
+        @media (max-width: 1000px) {
             .main-content {
                 grid-template-columns: 1fr;
                 height: auto;
             }
-
             .sidebar {
                 order: 2;
                 overflow-y: visible;
+                padding-right: 0;
             }
-
             .main-area {
                 order: 1;
             }
-
             .map-container {
-                height: 300px;
-            }
-
-            .panel-item {
-                padding: 12px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .button-group {
-                flex-direction: column;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .dashboard-container h1 {
-                font-size: 1.25rem;
-            }
-
-            .map-container {
-                height: 250px;
-            }
-
-            .contacts-container {
                 height: 120px;
             }
-
+            .panel-item {
+                padding: 6px;
+            }
+        }
+        @media (max-width: 700px) {
+            .dashboard-header h1 {
+                font-size: 1rem;
+            }
+            .dashboard-logo {
+                width: 20px;
+                height: 20px;
+            }
+            .main-content {
+                gap: 4px;
+            }
+            .map-container {
+                height: 80px;
+            }
+            .contacts-container {
+                height: 40px;
+            }
             .contacts-table th,
             .contacts-table td {
-                padding: 6px 8px;
+                padding: 2px 2px;
             }
-
             .modal-content {
-                margin: 5% auto;
-                width: 95%;
+                margin: 2% auto;
+                width: 99%;
+            }
+        }
+        @media (max-width: 500px) {
+            .dashboard-header {
+                padding: 4px 2px;
+            }
+            .dashboard-header h1 {
+                font-size: 0.8rem;
+            }
+            .dashboard-logo {
+                width: 12px;
+                height: 12px;
+            }
+            .main-content {
+                gap: 2px;
+            }
+            .map-container {
+                height: 40px;
+            }
+            .contacts-container {
+                height: 20px;
+            }
+            .contacts-table th,
+            .contacts-table td {
+                padding: 1px 1px;
+            }
+            .modal-content {
+                margin: 1% auto;
+                width: 100%;
             }
         }
     </style>
@@ -694,6 +749,41 @@ include "./pages/siglat/topbar.php"; ?>
         let isEditMode = false;
         let editingContactId = null;
         let contactIdCounter = 6; // Start from 6 since we have 5 sample contacts
+        const API_BASE = '<?php echo $API; ?>';
+
+        function generateGuid() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Load contacts from API
+        async function loadContacts() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/Admin/contact`, {
+                    method: 'GET',
+                    headers: {
+                        'accept': '*/*',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const contacts = await response.json();
+                    const tbody = document.getElementById('contactsTableBody');
+                    tbody.innerHTML = '';
+
+                    contacts.forEach(contact => {
+                        addContactToTable(contact.id, contact.label, contact.contactType, contact.contactInformation);
+                    });
+                } else {
+                    console.error('Failed to load contacts');
+                }
+            } catch (error) {
+                console.error('Error loading contacts:', error);
+            }
+        }
 
         function openContactModal(id = null, label = '', type = '', information = '') {
             const modal = document.getElementById('contactModal');
@@ -716,8 +806,9 @@ include "./pages/siglat/topbar.php"; ?>
                 editingContactId = null;
                 title.textContent = 'Add Contact';
                 form.reset();
-                document.getElementById('contactId').value = String(contactIdCounter).padStart(3, '0');
-                document.getElementById('contactId').disabled = false;
+                document.getElementById('contactId').value = generateGuid();
+                document.getElementById('contactLabel').value = '';
+                document.getElementById('contactId').disabled = true;
             }
 
             modal.style.display = 'block';
@@ -731,7 +822,7 @@ include "./pages/siglat/topbar.php"; ?>
             editingContactId = null;
         }
 
-        function saveContact(event) {
+        async function saveContact(event) {
             event.preventDefault();
 
             const id = document.getElementById('contactId').value;
@@ -739,13 +830,40 @@ include "./pages/siglat/topbar.php"; ?>
             const type = document.getElementById('contactType').value;
             const information = document.getElementById('contactInformation').value;
 
-            if (isEditMode) {
-                // Update existing contact
-                updateContactInTable(id, label, type, information);
-            } else {
-                // Add new contact
-                addContactToTable(id, label, type, information);
-                contactIdCounter++;
+            try {
+                const contactData = {
+                    id: id,
+                    label: label,
+                    contactType: type,
+                    contactInformation: information,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                const response = await fetch(`${API_BASE}/api/v1/Admin/contact`, {
+                    method: 'POST',
+                    headers: {
+                        'accept': '*/*',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(contactData)
+                });
+
+                if (response.ok) {
+                    if (isEditMode) {
+                        updateContactInTable(id, label, type, information);
+                        showToast('Contact updated successfully!', 'success');
+                    } else {
+                        addContactToTable(id, label, type, information);
+                        contactIdCounter++;
+                        showToast('Contact added successfully!', 'success');
+                    }
+                } else {
+                    showToast('Failed to save contact. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving contact:', error);
+                showToast('Error saving contact. Please try again.', 'error');
             }
 
             closeContactModal();
@@ -754,15 +872,15 @@ include "./pages/siglat/topbar.php"; ?>
         function addContactToTable(id, label, type, information) {
             const tbody = document.getElementById('contactsTableBody');
             const row = document.createElement('tr');
+            row.setAttribute('data-id', id);
 
             row.innerHTML = `
-                <td>${id}</td>
                 <td>${label}</td>
                 <td>${type}</td>
                 <td>${information}</td>
                 <td class="action-buttons">
-                    <button class="btn-icon btn-edit" onclick="editContact('${id}', '${label}', '${type}', '${information}')">✏️</button>
-                    <button class="btn-icon btn-delete" onclick="deleteContact('${id}')">🗑️</button>
+                    <button class="btn-icon btn-edit" title="Edit" onclick="editContact('${id}', '${label}', '${type}', '${information}')">✏️</button>
+                    <button class="btn-icon btn-delete" title="Delete" onclick="deleteContact('${id}')">🗑️</button>
                 </td>
             `;
 
@@ -774,13 +892,13 @@ include "./pages/siglat/topbar.php"; ?>
             const rows = tbody.getElementsByTagName('tr');
 
             for (let row of rows) {
-                if (row.cells[0].textContent === id) {
-                    row.cells[1].textContent = label;
-                    row.cells[2].textContent = type;
-                    row.cells[3].textContent = information;
-                    row.cells[4].innerHTML = `
-                        <button class="btn-icon btn-edit" onclick="editContact('${id}', '${label}', '${type}', '${information}')">✏️</button>
-                        <button class="btn-icon btn-delete" onclick="deleteContact('${id}')">🗑️</button>
+                if (row.getAttribute('data-id') === id) {
+                    row.cells[0].textContent = label;
+                    row.cells[1].textContent = type;
+                    row.cells[2].textContent = information;
+                    row.cells[3].innerHTML = `
+                        <button class="btn-icon btn-edit" title="Edit" onclick="editContact('${id}', '${label}', '${type}', '${information}')">✏️</button>
+                        <button class="btn-icon btn-delete" title="Delete" onclick="deleteContact('${id}')">🗑️</button>
                     `;
                     break;
                 }
@@ -791,32 +909,91 @@ include "./pages/siglat/topbar.php"; ?>
             openContactModal(id, label, type, information);
         }
 
-        function deleteContact(id) {
+        async function deleteContact(id) {
             if (confirm('Are you sure you want to delete this contact?')) {
-                const tbody = document.getElementById('contactsTableBody');
-                const rows = tbody.getElementsByTagName('tr');
+                try {
+                    const response = await fetch(`${API_BASE}/api/v1/Admin/contact?Id=${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'accept': '*/*'
+                        }
+                    });
 
-                for (let i = 0; i < rows.length; i++) {
-                    if (rows[i].cells[0].textContent === id) {
-                        tbody.removeChild(rows[i]);
-                        break;
+                    if (response.ok) {
+                        const tbody = document.getElementById('contactsTableBody');
+                        const rows = tbody.getElementsByTagName('tr');
+
+                        for (let i = 0; i < rows.length; i++) {
+                            if (rows[i].getAttribute('data-id') === id) {
+                                tbody.removeChild(rows[i]);
+                                break;
+                            }
+                        }
+                        showToast('Contact deleted successfully!', 'success');
+                    } else {
+                        showToast('Failed to delete contact. Please try again.', 'error');
                     }
+                } catch (error) {
+                    console.error('Error deleting contact:', error);
+                    showToast('Error deleting contact. Please try again.', 'error');
                 }
             }
         }
 
-        // Close modal when clicking outside of it
+        // Toast notification
+        function showToast(message, type = 'info') {
+            let toast = document.createElement('div');
+            toast.className = 'toast ' + type;
+            toast.innerHTML = `<span>${message}</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => document.body.removeChild(toast), 400);
+            }, 2200);
+        }
+
+        // Modal open/close logic for weather
+        function openWeatherModal() {
+            document.getElementById('weatherModal').style.display = 'block';
+        }
+        function closeWeatherModal() {
+            document.getElementById('weatherModal').style.display = 'none';
+        }
+
+        // Modal open/close logic for contact list
+        function openContactListModal() {
+            document.getElementById('contactListModal').style.display = 'block';
+        }
+        function closeContactListModal() {
+            document.getElementById('contactListModal').style.display = 'none';
+        }
+
+        // Close modals when clicking outside
         window.onclick = function(event) {
-            const modal = document.getElementById('contactModal');
-            if (event.target === modal) {
+            const weatherModal = document.getElementById('weatherModal');
+            const contactListModal = document.getElementById('contactListModal');
+            const contactModal = document.getElementById('contactModal');
+            if (event.target === weatherModal) {
+                closeWeatherModal();
+            }
+            if (event.target === contactListModal) {
+                closeContactListModal();
+            }
+            if (event.target === contactModal) {
                 closeContactModal();
             }
         }
 
         // Initialize Leaflet map
         document.addEventListener('DOMContentLoaded', function() {
+            // Load contacts on page load
+            loadContacts();
+
             // Initialize the map
-            var map = L.map('map').setView([14.5995, 120.9842], 100); // Manila, Philippines coordinates
+            var map = L.map('map').setView([16.606254918019598, 121.18314743041994], 100);
 
             // Add OpenStreetMap tile layer
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -826,43 +1003,76 @@ include "./pages/siglat/topbar.php"; ?>
             // Add emergency markers
             var emergencyIcon = L.divIcon({
                 html: '🚨',
-                iconSize: [30, 30],
+                iconSize: [24, 24],
                 className: 'emergency-marker'
             });
 
             var ambulanceIcon = L.divIcon({
                 html: '🚑',
-                iconSize: [30, 30],
+                iconSize: [24, 24],
                 className: 'ambulance-marker'
             });
 
             var floodIcon = L.divIcon({
                 html: '🌊',
-                iconSize: [30, 30],
+                iconSize: [24, 24],
                 className: 'flood-marker'
             });
 
             // Add sample markers
             L.marker([14.5995, 120.9842], {icon: emergencyIcon})
                 .addTo(map)
-                .bindPopup('Emergency Incident #001<br>Status: Active');
+                .bindPopup('<b>🚨 Emergency Incident #001</b><br>Status: <span style="color:#dc2626;font-weight:600;">Active</span>');
 
             L.marker([14.6042, 120.9822], {icon: ambulanceIcon})
                 .addTo(map)
-                .bindPopup('Ambulance Unit A-01<br>Status: Available');
+                .bindPopup('<b>🚑 Ambulance Unit A-01</b><br>Status: <span style="color:#facc15;font-weight:600;">Available</span>');
 
             L.marker([14.5955, 120.9862], {icon: floodIcon})
                 .addTo(map)
-                .bindPopup('Flood Alert Area<br>Water Level: 2.3m');
+                .bindPopup('<b>🌊 Flood Alert Area</b><br>Water Level: <span style="color:#facc15;font-weight:600;">2.3m</span>');
 
             L.marker([14.5935, 120.9802], {icon: ambulanceIcon})
                 .addTo(map)
-                .bindPopup('Ambulance Unit A-02<br>Status: En Route');
+                .bindPopup('<b>🚑 Ambulance Unit A-02</b><br>Status: <span style="color:#dc2626;font-weight:600;">En Route</span>');
 
-            // Handle map resize
-            setTimeout(function() {
-                map.invalidateSize();
-            }, 100);
+            // No dropdowns to collapse by default anymore
         });
     </script>
+    <style>
+        /* Toast styles */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.97);
+            background: linear-gradient(90deg, #dc2626 0%, #facc15 100%);
+            color: #111;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            box-shadow: 0 4px 16px #dc2626;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) scale(1.04);
+            pointer-events: auto;
+        }
+        .toast.success {
+            background: linear-gradient(90deg, #facc15 0%, #dc2626 100%);
+            color: #111;
+        }
+        .toast.error {
+            background: linear-gradient(90deg, #dc2626 0%, #facc15 100%);
+            color: #fff;
+        }
+    </style>
 </div>
+
+<?php }
+?>
