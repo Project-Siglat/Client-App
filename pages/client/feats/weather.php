@@ -38,11 +38,45 @@ function toggleWeatherPanel() {
         setTimeout(() => {
             panel.classList.add('show');
         }, 10);
+        // Add event listener to close on outside click
+        document.addEventListener('mousedown', handleOutsideClick);
     } else {
         panel.classList.remove('show');
         setTimeout(() => {
             panel.style.display = 'none';
         }, 300);
+        document.removeEventListener('mousedown', handleOutsideClick);
     }
 }
+
+// Handle click outside weather panel to close it
+function handleOutsideClick(event) {
+    const panel = document.getElementById('weatherPanel');
+    const button = document.querySelector('button[onclick="toggleWeatherPanel()"]');
+    if (
+        weatherVisible &&
+        !panel.contains(event.target) &&
+        !button.contains(event.target)
+    ) {
+        weatherVisible = false;
+        panel.classList.remove('show');
+        setTimeout(() => {
+            panel.style.display = 'none';
+        }, 300);
+        document.removeEventListener('mousedown', handleOutsideClick);
+    }
+}
+
+// Listen for "others" being triggered and close weather panel
+document.addEventListener('othersTriggered', function() {
+    const panel = document.getElementById('weatherPanel');
+    if (weatherVisible) {
+        weatherVisible = false;
+        panel.classList.remove('show');
+        setTimeout(() => {
+            panel.style.display = 'none';
+        }, 300);
+        document.removeEventListener('mousedown', handleOutsideClick);
+    }
+});
 </script>

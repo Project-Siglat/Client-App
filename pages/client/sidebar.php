@@ -36,7 +36,7 @@ $API = $_ENV["API"];
     <!-- Navigation Menu -->
     <div class="p-4 border-b border-red-600">
         <div class="space-y-2">
-            <?php include "./pages/client/profile.php"; ?>
+            <?php include "./pages/client/forms/profile.php"; ?>
             <!-- <button class="w-full text-left py-2 px-3 rounded-lg hover:bg-gray-800 text-yellow-400 text-sm flex items-center gap-2" onclick="Sidebar.showSettings()">
                 ⚙️ Settings
             </button>

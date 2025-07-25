@@ -1,0 +1,397 @@
+<section class="flex flex-col gap-6 p-4 md:p-6 lg:p-8 bg-[#2e3440]">
+    <img
+        src="./assets/siglat.png"
+        alt=""
+        class="w-48 h-48 md:w-64 md:h-64 lg:w-72 lg:h-72 rounded-lg mx-auto"
+    />
+    <h1
+        class="font-bold text-3xl md:text-4xl lg:text-5xl mx-auto text-[#eceff4]"
+    >
+        Siglat Alert
+    </h1>
+    <p
+        class="w-full md:w-3/4 lg:w-2/3 xl:w-1/2 mx-auto text-center text-[#d8dee9] text-sm md:text-base lg:text-lg"
+    >
+        SIGLAT provides immediate emergency rescue services 24/7 in Villaverde,
+        Nueva Vizcaya. Your reliable emergency response platform with real-time
+        disaster forecasting, instant emergency services, and community safety -
+        all in one app.
+    </p>
+
+    <button
+        class="bg-[#bf616a] hover:bg-[#d08770] text-[#eceff4] font-bold py-2 px-6 md:py-3 md:px-8 rounded w-full md:w-auto md:max-w-xs mx-auto transition-colors duration-200"
+        onclick="window.location.pathname = '/login'"
+    >
+        Emergency Alert
+    </button>
+</section>
+
+<hr class="border-[#4c566a]" />
+
+<section
+    class="flex flex-col py-8 md:py-12 lg:py-16 px-4 md:px-6 lg:px-8 bg-[#3b4252]"
+>
+    <section class="max-w-7xl mx-auto w-full">
+        <h1
+            class="font-bold text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-center mb-8 md:mb-10 lg:mb-12 text-[#eceff4]"
+        >
+            We Offer
+        </h1>
+
+        <div
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8"
+        >
+            <div
+                class="bg-[#434c5e] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-6 flex flex-col hover:bg-[#4c566a]"
+            >
+                <div class="text-4xl md:text-5xl mb-4 text-center">🚨</div>
+                <h3
+                    class="text-lg md:text-xl font-semibold mb-3 text-center text-[#eceff4]"
+                >
+                    Emergency Response
+                </h3>
+                <p
+                    class="text-[#d8dee9] text-center flex-grow text-sm md:text-base"
+                >
+                    Connect instantly with emergency services, ambulances, fire
+                    departments, and police with real-time location tracking.
+                </p>
+            </div>
+
+            <div
+                class="bg-[#434c5e] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-6 flex flex-col hover:bg-[#4c566a]"
+            >
+                <div class="text-4xl md:text-5xl mb-4 text-center">🌊</div>
+                <h3
+                    class="text-lg md:text-xl font-semibold mb-3 text-center text-[#eceff4]"
+                >
+                    Flood Forecasting
+                </h3>
+                <p
+                    class="text-[#d8dee9] text-center flex-grow text-sm md:text-base"
+                >
+                    Advanced AI-powered flood prediction system with real-time
+                    water level monitoring and evacuation alerts.
+                </p>
+            </div>
+
+            <div
+                class="bg-[#434c5e] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-6 flex flex-col hover:bg-[#4c566a]"
+            >
+                <div class="text-4xl md:text-5xl mb-4 text-center">⚠️</div>
+                <h3
+                    class="text-lg md:text-xl font-semibold mb-3 text-center text-[#eceff4]"
+                >
+                    Disaster Alerts
+                </h3>
+                <p
+                    class="text-[#d8dee9] text-center flex-grow text-sm md:text-base"
+                >
+                    Comprehensive disaster forecasting including earthquakes,
+                    storms, wildfires, and severe weather warnings.
+                </p>
+            </div>
+        </div>
+    </section>
+</section>
+
+<section class="bg-[#2e3440] p-4 md:p-6 lg:p-8">
+    <h1
+        class="text-2xl md:text-3xl lg:text-4xl font-bold text-[#eceff4] mb-4 md:mb-6 text-center"
+    >
+        Nueva Vizcaya Map
+    </h1>
+    <div
+        id="map-container"
+        class="relative rounded-lg overflow-hidden shadow-lg"
+    >
+        <div
+            id="map-loading"
+            class="absolute inset-0 bg-[#3b4252] flex items-center justify-center z-10"
+        >
+            <div class="text-center">
+                <div
+                    class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#88c0d0] border-t-transparent"
+                ></div>
+                <p class="text-[#d8dee9] mt-4">Loading map...</p>
+            </div>
+        </div>
+        <div id="map"></div>
+    </div>
+    <style>
+        #map,
+        #map-container {
+            height: 250px;
+        }
+        @media (min-width: 768px) {
+            #map,
+            #map-container {
+                height: 400px;
+            }
+        }
+        @media (min-width: 1024px) {
+            #map,
+            #map-container {
+                height: 500px;
+            }
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+    <script>
+        // Nueva Vizcaya coordinates
+        var map = L.map("map").setView([16.3301, 121.171], 10);
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution:
+                '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        }).addTo(map);
+
+        var loadingElement = document.getElementById("map-loading");
+
+        // Hide loading indicator once map tiles are loaded
+        map.on("load", function () {
+            if (loadingElement) {
+                loadingElement.style.display = "none";
+            }
+        });
+
+        // Also hide loading after a timeout in case load event doesn't fire
+        setTimeout(function () {
+            if (loadingElement) {
+                loadingElement.style.display = "none";
+            }
+        }, 2000);
+
+        // Add a marker for Villaverde, Nueva Vizcaya
+        L.marker([16.3833, 121.0833])
+            .addTo(map)
+            .bindPopup("Villaverde, Nueva Vizcaya")
+            .openPopup();
+    </script>
+</section>
+
+<hr class="border-[#4c566a]" />
+
+<section class="bg-[#3b4252] p-4 md:p-6 lg:p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1
+            class="text-2xl md:text-3xl lg:text-4xl font-bold text-[#eceff4] mb-4"
+        >
+            Get in Touch
+        </h1>
+        <h2 class="text-xl md:text-2xl font-semibold text-[#e5e9f0] mb-3">
+            Emergency Response & Disaster Management Contact
+        </h2>
+        <h3 class="text-lg md:text-xl font-semibold text-[#d8dee9] mb-2">
+            Emergency Response Team
+        </h3>
+        <p class="text-[#d8dee9] mb-4 text-sm md:text-base">
+            Contact our emergency response team for immediate assistance with
+            natural disasters, medical emergencies, and crisis situations. We're
+            here 24/7 to help.
+        </p>
+
+        <ul
+            id="contact-list"
+            class="text-[#88c0d0] text-lg md:text-xl font-semibold"
+        >
+            <li class="animate-pulse">Loading contacts...</li>
+        </ul>
+        <script>
+            fetch("http://localhost:5069/api/v1/Admin/contact")
+                .then((response) => response.json())
+                .then((data) => {
+                    const contactList = document.getElementById("contact-list");
+                    contactList.innerHTML = "";
+                    contactList.className =
+                        "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4";
+
+                    data.forEach((contact) => {
+                        // Function to determine icon and link based on contact type
+                        const getContactIcon = (info) => {
+                            const lowerInfo = info.toLowerCase();
+
+                            // Email
+                            if (
+                                lowerInfo.includes("@") ||
+                                lowerInfo.includes("email")
+                            ) {
+                                return {
+                                    icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>`,
+                                    href: `mailto:${info}`,
+                                };
+                            }
+                            // Facebook
+                            else if (
+                                lowerInfo.includes("facebook") ||
+                                lowerInfo.includes("fb.com")
+                            ) {
+                                return {
+                                    icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                    </svg>`,
+                                    href: info.includes("http")
+                                        ? info
+                                        : `https://${info}`,
+                                };
+                            }
+                            // Twitter/X
+                            else if (
+                                lowerInfo.includes("twitter") ||
+                                lowerInfo.includes("x.com")
+                            ) {
+                                return {
+                                    icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                    </svg>`,
+                                    href: info.includes("http")
+                                        ? info
+                                        : `https://${info}`,
+                                };
+                            }
+                            // Instagram
+                            else if (lowerInfo.includes("instagram")) {
+                                return {
+                                    icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1112.324 0 6.162 6.162 0 01-12.324 0zM12 16a4 4 0 110-8 4 4 0 010 8zm4.965-10.405a1.44 1.44 0 112.881.001 1.44 1.44 0 01-2.881-.001z"/>
+                                    </svg>`,
+                                    href: info.includes("http")
+                                        ? info
+                                        : `https://${info}`,
+                                };
+                            }
+                            // LinkedIn
+                            else if (lowerInfo.includes("linkedin")) {
+                                return {
+                                    icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                    </svg>`,
+                                    href: info.includes("http")
+                                        ? info
+                                        : `https://${info}`,
+                                };
+                            }
+                            // Website/URL
+                            else if (
+                                lowerInfo.includes("http") ||
+                                lowerInfo.includes("www.")
+                            ) {
+                                return {
+                                    icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                                    </svg>`,
+                                    href: info.includes("http")
+                                        ? info
+                                        : `https://${info}`,
+                                };
+                            }
+                            // Phone (default)
+                            else {
+                                return {
+                                    icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                                    </svg>`,
+                                    href: `tel:${info}`,
+                                };
+                            }
+                        };
+
+                        const contactDetails = getContactIcon(
+                            contact.contactInformation,
+                        );
+
+                        const li = document.createElement("li");
+                        li.className =
+                            "bg-[#434c5e] rounded-lg p-4 hover:bg-[#4c566a] transition-all duration-300 shadow-md hover:shadow-lg";
+                        li.innerHTML = `
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-[#88c0d0] rounded-full flex items-center justify-center text-[#2e3440]">
+                                        ${contactDetails.icon}
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[#eceff4] font-semibold text-base md:text-lg">${contact.label}</h4>
+                                        <p class="text-[#88c0d0] text-sm md:text-base break-all">${contact.contactInformation}</p>
+                                    </div>
+                                </div>
+                                <a href="${contactDetails.href}" class="bg-[#88c0d0] hover:bg-[#8fbcbb] text-[#2e3440] rounded-full p-3 transition-colors duration-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                </a>
+                            </div>
+                        `;
+                        contactList.appendChild(li);
+                    });
+                })
+                .catch((error) => {
+                    const contactList = document.getElementById("contact-list");
+                    contactList.innerHTML = `
+                        <li class="bg-[#434c5e] rounded-lg p-4 border-2 border-[#bf616a]">
+                            <div class="flex items-center gap-3">
+                                <div class="text-[#bf616a]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
+                                <span class="text-[#bf616a]">Failed to load contacts. Please try again later.</span>
+                            </div>
+                        </li>
+                    `;
+                    console.error("Error fetching contacts:", error);
+                });
+        </script>
+    </div>
+</section>
+
+<hr class="border-[#4c566a]" />
+
+<section class="bg-[#2e3440] p-4 md:p-6 lg:p-8">
+    <div class="max-w-4xl mx-auto grid md:grid-cols-3 gap-4 md:gap-6">
+        <div>
+            <h2 class="text-xl md:text-2xl font-bold text-[#eceff4] mb-2">
+                Emergency Response Hours
+            </h2>
+        </div>
+        <div>
+            <h3 class="text-lg font-semibold text-[#e5e9f0]">Emergency Line</h3>
+            <p class="text-[#88c0d0] font-medium">24/7 Available</p>
+        </div>
+        <div>
+            <h3 class="text-lg font-semibold text-[#e5e9f0]">
+                General Support
+            </h3>
+            <p class="text-[#d8dee9]">8:00 AM - 8:00 PM</p>
+            <h3 class="text-lg font-semibold text-[#e5e9f0] mt-2">Weekend</h3>
+            <p class="text-[#d8dee9]">Emergency Only</p>
+        </div>
+    </div>
+</section>
+
+<section class="bg-[#4c566a] p-4 md:p-6 lg:p-8 text-center">
+    <div class="max-w-4xl mx-auto">
+        <h1
+            class="text-xl md:text-2xl lg:text-3xl font-bold text-[#eceff4] mb-4"
+        >
+            SIGLAT Emergency Response System
+        </h1>
+        <p class="text-[#d8dee9] mb-4 text-sm md:text-base">
+            System for Integrated Government Locality Alert and Tracking -
+            Protecting communities through advanced emergency response
+            coordination and disaster management.
+        </p>
+        <p class="text-[#81a1c1] text-xs md:text-sm">
+            &copy; 2025 SIGLAT Emergency Services &bull; Emergency Response
+            Division &bull; All Rights Reserved
+        </p>
+    </div>
+</section>

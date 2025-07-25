@@ -10,135 +10,6 @@ include "./config/env.php";
 $API = $_ENV["API"];
 ?>
 
-<!-- Sidebar Component (slides in from the right) -->
-<style>
-    /* Sidebar overlay styles */
-    .sidebar-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.4);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.3s;
-        z-index: 49;
-    }
-    .sidebar-overlay.active {
-        opacity: 1;
-        pointer-events: auto;
-    }
-
-    /* Sidebar styles */
-    .sidebar {
-        position: fixed;
-        top: 0;
-        right: 0;
-        height: 100vh;
-        width: 340px;
-        max-width: 100vw;
-        background: #1a1a1a;
-        box-shadow: -2px 0 16px rgba(0,0,0,0.25);
-        transform: translateX(100%);
-        transition: transform 0.3s cubic-bezier(.4,0,.2,1);
-        z-index: 50;
-        overflow-y: auto;
-        will-change: transform;
-    }
-    .sidebar.active {
-        transform: translateX(0);
-    }
-
-    @media (max-width: 500px) {
-        .sidebar {
-            width: 100vw;
-            max-width: 100vw;
-        }
-    }
-</style>
-
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="Sidebar.toggle()"></div>
-<aside class="sidebar" id="sidebar">
-    <div class="p-4 border-b border-red-600">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold text-yellow-400">Profile</h2>
-            <button class="text-gray-400 hover:text-yellow-400" onclick="Sidebar.close()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-        </div>
-
-        <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center">
-                <span id="sidebarUserInitials" class="text-lg font-bold text-yellow-400">--</span>
-            </div>
-            <div>
-                <div id="sidebarUserName" class="text-sm font-semibold text-yellow-400">Loading...</div>
-                <div id="sidebarUserEmail" class="text-xs text-gray-400">Loading...</div>
-                <div class="text-xs text-yellow-400">●  <span id="sidebarStatus">Online</span></div>
-                <div class="flex items-center gap-1 mt-1">
-                    <span id="accountVerificationBadge" class="text-xs">⏳</span>
-                    <span id="accountValidationText" class="text-xs text-gray-400">Loading...</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Navigation Menu -->
-    <div class="p-4 border-b border-red-600">
-        <div class="space-y-2">
-            <?php include "./pages/client/profile.php"; ?>
-            <!-- <button class="w-full text-left py-2 px-3 rounded-lg hover:bg-gray-800 text-yellow-400 text-sm flex items-center gap-2" onclick="Sidebar.showSettings()">
-                ⚙️ Settings
-            </button>
-            <button class="w-full text-left py-2 px-3 rounded-lg hover:bg-gray-800 text-yellow-400 text-sm flex items-center gap-2" onclick="Sidebar.showHelp()">
-                ❓ Help & Support
-            </button> -->
-        </div>
-    </div>
-
-    <!-- Emergency Contacts -->
-    <div class="p-4 border-b border-red-600">
-        <h3 class="text-sm font-bold text-yellow-400 mb-3">Emergency Contacts</h3>
-        <div class="space-y-2">
-            <div class="text-xs text-gray-400">
-                <div class="flex justify-between">
-                    <span>Police:</span>
-                    <span class="text-yellow-400">117</span>
-                </div>
-            </div>
-            <div class="text-xs text-gray-400">
-                <div class="flex justify-between">
-                    <span>Fire Dept:</span>
-                    <span class="text-yellow-400">116</span>
-                </div>
-            </div>
-            <div class="text-xs text-gray-400">
-                <div class="flex justify-between">
-                    <span>Medical:</span>
-                    <span class="text-yellow-400">911</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- User Session Info -->
-    <div class="p-4 border-b border-red-600">
-        <div class="text-xs text-gray-400 space-y-1">
-            <div>Session: <span id="sessionTime" class="text-yellow-400">--:--</span></div>
-            <div>Location: <span id="locationStatus" class="text-yellow-400">Getting location...</span></div>
-            <div>Last Update: <span id="lastUpdate" class="text-yellow-400">--:--:--</span></div>
-        </div>
-    </div>
-
-    <!-- Logout Button -->
-    <div class="p-4">
-        <button class="logout-btn w-full py-2 px-3 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-yellow-400" onclick="Sidebar.logout()">
-            🚪 Logout
-        </button>
-    </div>
-</aside>
-
 <script>
 // Independent Sidebar Module
 const Sidebar = (function() {
@@ -496,3 +367,132 @@ window.addEventListener('beforeunload', function() {
     Sidebar.destroy();
 });
 </script>
+
+<!-- Sidebar Component (slides in from the right) -->
+<style>
+    /* Sidebar overlay styles */
+    .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+        z-index: 49;
+    }
+    .sidebar-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* Sidebar styles */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        height: 100vh;
+        width: 340px;
+        max-width: 100vw;
+        background: #1a1a1a;
+        box-shadow: -2px 0 16px rgba(0,0,0,0.25);
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+        z-index: 50;
+        overflow-y: auto;
+        will-change: transform;
+    }
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    @media (max-width: 500px) {
+        .sidebar {
+            width: 100vw;
+            max-width: 100vw;
+        }
+    }
+</style>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="Sidebar.toggle()"></div>
+<aside class="sidebar" id="sidebar">
+    <div class="p-4 border-b border-red-600">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-yellow-400">Profile</h2>
+            <button class="text-gray-400 hover:text-yellow-400" onclick="Sidebar.close()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center">
+                <span id="sidebarUserInitials" class="text-lg font-bold text-yellow-400">--</span>
+            </div>
+            <div>
+                <div id="sidebarUserName" class="text-sm font-semibold text-yellow-400">Loading...</div>
+                <div id="sidebarUserEmail" class="text-xs text-gray-400">Loading...</div>
+                <div class="text-xs text-yellow-400">●  <span id="sidebarStatus">Online</span></div>
+                <div class="flex items-center gap-1 mt-1">
+                    <span id="accountVerificationBadge" class="text-xs">⏳</span>
+                    <span id="accountValidationText" class="text-xs text-gray-400">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Menu -->
+    <div class="p-4 border-b border-red-600">
+        <div class="space-y-2">
+            <?php include "./pages/client/forms/profile.php"; ?>
+            <!-- <button class="w-full text-left py-2 px-3 rounded-lg hover:bg-gray-800 text-yellow-400 text-sm flex items-center gap-2" onclick="Sidebar.showSettings()">
+                ⚙️ Settings
+            </button>
+            <button class="w-full text-left py-2 px-3 rounded-lg hover:bg-gray-800 text-yellow-400 text-sm flex items-center gap-2" onclick="Sidebar.showHelp()">
+                ❓ Help & Support
+            </button> -->
+        </div>
+    </div>
+
+    <!-- Emergency Contacts -->
+    <div class="p-4 border-b border-red-600">
+        <h3 class="text-sm font-bold text-yellow-400 mb-3">Emergency Contacts</h3>
+        <div class="space-y-2">
+            <div class="text-xs text-gray-400">
+                <div class="flex justify-between">
+                    <span>Police:</span>
+                    <span class="text-yellow-400">117</span>
+                </div>
+            </div>
+            <div class="text-xs text-gray-400">
+                <div class="flex justify-between">
+                    <span>Fire Dept:</span>
+                    <span class="text-yellow-400">116</span>
+                </div>
+            </div>
+            <div class="text-xs text-gray-400">
+                <div class="flex justify-between">
+                    <span>Medical:</span>
+                    <span class="text-yellow-400">911</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Session Info -->
+    <div class="p-4 border-b border-red-600">
+        <div class="text-xs text-gray-400 space-y-1">
+            <div>Session: <span id="sessionTime" class="text-yellow-400">--:--</span></div>
+            <div>Location: <span id="locationStatus" class="text-yellow-400">Getting location...</span></div>
+            <div>Last Update: <span id="lastUpdate" class="text-yellow-400">--:--:--</span></div>
+        </div>
+    </div>
+
+    <!-- Logout Button -->
+    <div class="p-4">
+        <button class="logout-btn w-full py-2 px-3 border-none rounded-lg font-bold cursor-pointer transition-all duration-300 text-sm text-yellow-400" onclick="Sidebar.logout()">
+            🚪 Logout
+        </button>
+    </div>
+</aside>
