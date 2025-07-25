@@ -22,6 +22,10 @@
     <!-- Eto yung tailwind CSS -->
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 
-    <?php include "./config/route.php"; ?>
+    <?php
+    include "./config/vars.php";
+
+    include "./config/route.php";
+    ?>
 </body>
 </html>

@@ -7,7 +7,7 @@ switch ($request_uri) {
         include "./pages/landing-page/index.php";
         break;
     case "/login":
-        include "./pages/auth/login.php";
+        include "./pages/auth/index.php";
         break;
     case "/env":
         $env = $_ENV["ENVIRONMENT"];
