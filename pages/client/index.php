@@ -1,11 +1,5 @@
 <?php
-include "./pages/client/component/topbar.php";
-include "./pages/client/component/map.php";
-?>
+// include "./pages/client/component/topbar.php";
+include "./components/topbar.html";
 
-<script>
-const authToken = sessionStorage.getItem('token');
-if (!authToken) {
-    window.location.href = '/login';
-}
-</script>
+include "./pages/client/component/map.html"; ?>
