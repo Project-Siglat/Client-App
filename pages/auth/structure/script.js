@@ -106,7 +106,15 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         if (response.ok) {
-          const result = await response.json();
+          // Handle both JSON and non-JSON responses
+          const contentType = response.headers.get("content-type");
+          let result;
+
+          if (contentType && contentType.includes("application/json")) {
+            result = await response.json();
+          } else {
+            result = await response.text();
+          }
 
           // Store role and token in sessionStorage
           sessionStorage.setItem("userRole", result.role);
