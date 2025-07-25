@@ -1,0 +1,222 @@
+<section class="flex flex-col gap-6 p-4 md:p-6 lg:p-8 bg-[#2e3440]">
+    <img
+        src="./assets/siglat.png"
+        alt=""
+        class="w-48 h-48 md:w-64 md:h-64 lg:w-72 lg:h-72 rounded-lg mx-auto"
+    />
+    <h1
+        class="font-bold text-3xl md:text-4xl lg:text-5xl mx-auto text-[#eceff4]"
+    >
+        Siglat Alert
+    </h1>
+    <p
+        class="w-full md:w-3/4 lg:w-2/3 xl:w-1/2 mx-auto text-center text-[#d8dee9] text-sm md:text-base lg:text-lg"
+    >
+        SIGLAT provides immediate emergency rescue services 24/7 in Villaverde,
+        Nueva Vizcaya. Your reliable emergency response platform with real-time
+        disaster forecasting, instant emergency services, and community safety -
+        all in one app.
+    </p>
+
+    <button
+        class="bg-[#bf616a] hover:bg-[#d08770] text-[#eceff4] font-bold py-2 px-6 md:py-3 md:px-8 rounded w-full md:w-auto md:max-w-xs mx-auto transition-colors duration-200"
+        onclick="window.location.pathname = '/login'"
+    >
+        Emergency Alert
+    </button>
+</section>
+
+<hr class="border-[#4c566a]" />
+
+<section
+    class="flex flex-col py-8 md:py-12 lg:py-16 px-4 md:px-6 lg:px-8 bg-[#3b4252]"
+>
+    <section class="max-w-7xl mx-auto w-full">
+        <h1
+            class="font-bold text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-center mb-8 md:mb-10 lg:mb-12 text-[#eceff4]"
+        >
+            We Offer
+        </h1>
+
+        <div
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8"
+        >
+            <div
+                class="bg-[#434c5e] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-6 flex flex-col hover:bg-[#4c566a]"
+            >
+                <div class="text-4xl md:text-5xl mb-4 text-center">🚨</div>
+                <h3
+                    class="text-lg md:text-xl font-semibold mb-3 text-center text-[#eceff4]"
+                >
+                    Emergency Response
+                </h3>
+                <p
+                    class="text-[#d8dee9] text-center flex-grow text-sm md:text-base"
+                >
+                    Connect instantly with emergency services, ambulances, fire
+                    departments, and police with real-time location tracking.
+                </p>
+            </div>
+
+            <div
+                class="bg-[#434c5e] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-6 flex flex-col hover:bg-[#4c566a]"
+            >
+                <div class="text-4xl md:text-5xl mb-4 text-center">🌊</div>
+                <h3
+                    class="text-lg md:text-xl font-semibold mb-3 text-center text-[#eceff4]"
+                >
+                    Flood Forecasting
+                </h3>
+                <p
+                    class="text-[#d8dee9] text-center flex-grow text-sm md:text-base"
+                >
+                    Advanced AI-powered flood prediction system with real-time
+                    water level monitoring and evacuation alerts.
+                </p>
+            </div>
+
+            <div
+                class="bg-[#434c5e] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-6 flex flex-col hover:bg-[#4c566a]"
+            >
+                <div class="text-4xl md:text-5xl mb-4 text-center">⚠️</div>
+                <h3
+                    class="text-lg md:text-xl font-semibold mb-3 text-center text-[#eceff4]"
+                >
+                    Disaster Alerts
+                </h3>
+                <p
+                    class="text-[#d8dee9] text-center flex-grow text-sm md:text-base"
+                >
+                    Comprehensive disaster forecasting including earthquakes,
+                    storms, wildfires, and severe weather warnings.
+                </p>
+            </div>
+        </div>
+    </section>
+</section>
+
+<section class="bg-[#2e3440] p-4 md:p-6 lg:p-8">
+    <h1
+        class="text-2xl md:text-3xl lg:text-4xl font-bold text-[#eceff4] mb-4 md:mb-6 text-center"
+    >
+        Nueva Vizcaya Map
+    </h1>
+    <div
+        id="map-container"
+        class="relative rounded-lg overflow-hidden shadow-lg"
+    >
+        <div
+            id="map-loading"
+            class="absolute inset-0 bg-[#3b4252] flex items-center justify-center z-10"
+        >
+            <div class="text-center">
+                <div
+                    class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#88c0d0] border-t-transparent"
+                ></div>
+                <p class="text-[#d8dee9] mt-4">Loading map...</p>
+            </div>
+        </div>
+        <div id="map"></div>
+    </div>
+    <style>
+        #map,
+        #map-container {
+            height: 250px;
+        }
+        @media (min-width: 768px) {
+            #map,
+            #map-container {
+                height: 400px;
+            }
+        }
+        @media (min-width: 1024px) {
+            #map,
+            #map-container {
+                height: 500px;
+            }
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+    <script src="./pages/landing-page/structure/map.js"></script>
+</section>
+
+<hr class="border-[#4c566a]" />
+
+<section class="bg-[#3b4252] p-4 md:p-6 lg:p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1
+            class="text-2xl md:text-3xl lg:text-4xl font-bold text-[#eceff4] mb-4"
+        >
+            Get in Touch
+        </h1>
+        <h2 class="text-xl md:text-2xl font-semibold text-[#e5e9f0] mb-3">
+            Emergency Response & Disaster Management Contact
+        </h2>
+        <h3 class="text-lg md:text-xl font-semibold text-[#d8dee9] mb-2">
+            Emergency Response Team
+        </h3>
+        <p class="text-[#d8dee9] mb-4 text-sm md:text-base">
+            Contact our emergency response team for immediate assistance with
+            natural disasters, medical emergencies, and crisis situations. We're
+            here 24/7 to help.
+        </p>
+
+        <ul
+            id="contact-list"
+            class="text-[#88c0d0] text-lg md:text-xl font-semibold"
+        >
+            <li class="animate-pulse">Loading contacts...</li>
+        </ul>
+        <script src="./pages/landing-page/structure/contact.js"></script>
+    </div>
+</section>
+
+<hr class="border-[#4c566a]" />
+
+<section class="bg-[#2e3440] p-4 md:p-6 lg:p-8">
+    <div class="max-w-4xl mx-auto grid md:grid-cols-3 gap-4 md:gap-6">
+        <div>
+            <h2 class="text-xl md:text-2xl font-bold text-[#eceff4] mb-2">
+                Emergency Response Hours
+            </h2>
+        </div>
+        <div>
+            <h3 class="text-lg font-semibold text-[#e5e9f0]">Emergency Line</h3>
+            <p class="text-[#88c0d0] font-medium">24/7 Available</p>
+        </div>
+        <div>
+            <h3 class="text-lg font-semibold text-[#e5e9f0]">
+                General Support
+            </h3>
+            <p class="text-[#d8dee9]">8:00 AM - 8:00 PM</p>
+            <h3 class="text-lg font-semibold text-[#e5e9f0] mt-2">Weekend</h3>
+            <p class="text-[#d8dee9]">Emergency Only</p>
+        </div>
+    </div>
+</section>
+
+<section class="bg-[#4c566a] p-4 md:p-6 lg:p-8 text-center">
+    <div class="max-w-4xl mx-auto">
+        <h1
+            class="text-xl md:text-2xl lg:text-3xl font-bold text-[#eceff4] mb-4"
+        >
+            SIGLAT Emergency Response System
+        </h1>
+        <p class="text-[#d8dee9] mb-4 text-sm md:text-base">
+            System for Integrated Government Locality Alert and Tracking -
+            Protecting communities through advanced emergency response
+            coordination and disaster management.
+        </p>
+        <p class="text-[#81a1c1] text-xs md:text-sm">
+            &copy; 2025 SIGLAT Emergency Services &bull; Emergency Response
+            Division &bull; All Rights Reserved
+        </p>
+    </div>
+</section>

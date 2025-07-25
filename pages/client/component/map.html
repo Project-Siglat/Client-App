@@ -1,0 +1,95 @@
+<div id="map" style="height: calc(100vh - 92.5px); width: 100%"></div>
+<div
+    id="loading"
+    style="
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: white;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        display: block;
+        z-index: 1000;
+    "
+>
+    Loading location...
+</div>
+<script>
+    // Create the map
+    var map = L.map("map").setView([51.505, -0.09], 13);
+
+    // Add tile layer
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+    }).addTo(map);
+
+    // Create custom human icon
+    var humanIcon = L.divIcon({
+        html: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="5" r="3" fill="#2563eb" stroke="white" stroke-width="1"/>
+            <path d="M12 8v8m-4 2l4-2 4 2m-8-6l4 2 4-2" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <circle cx="8" cy="20" r="1.5" fill="#2563eb"/>
+            <circle cx="16" cy="20" r="1.5" fill="#2563eb"/>
+        </svg>`,
+        className: "custom-human-icon",
+        iconSize: [24, 24],
+        iconAnchor: [12, 20],
+    });
+
+    // User marker variable
+    var userMarker;
+    var loadingElement = document.getElementById("loading");
+    var locationLoaded = false;
+
+    // Function to update user location
+    function updateLocation() {
+        if (navigator.geolocation) {
+            // Show loading state if location hasn't been loaded yet
+            if (!locationLoaded) {
+                loadingElement.style.display = "block";
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    var lat = position.coords.latitude;
+                    var lng = position.coords.longitude;
+
+                    // If marker doesn't exist, create it
+                    if (!userMarker) {
+                        userMarker = L.marker([lat, lng], {
+                            icon: humanIcon,
+                        }).addTo(map);
+                        map.setView([lat, lng], 15);
+                        locationLoaded = true;
+                        // Hide loading state only after first successful location
+                        loadingElement.style.display = "none";
+                    } else {
+                        // Update existing marker position
+                        userMarker.setLatLng([lat, lng]);
+                    }
+                },
+                function (error) {
+                    // Keep loading visible if location fails and hasn't loaded before
+                    if (locationLoaded) {
+                        loadingElement.style.display = "none";
+                    }
+                    console.log("Geolocation error: " + error.message);
+                },
+                {
+                    timeout: 10000,
+                    enableHighAccuracy: true,
+                },
+            );
+        } else {
+            loadingElement.innerHTML = "Geolocation not supported";
+            console.log("Geolocation is not supported by this browser.");
+        }
+    }
+
+    // Update location immediately
+    updateLocation();
+
+    // Update location every 0.5 seconds
+    setInterval(updateLocation, 500);
+</script>

@@ -20,7 +20,7 @@ if ($current_page === "user-list") {
 if ($current_page === "dashboard") { ?>
 
 <!-- Google Fonts for modern look -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
 <div class="dashboard-container">
@@ -29,7 +29,7 @@ if ($current_page === "dashboard") { ?>
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin=""/>
 
-    <!-- Ultra Glassmorphism Header -->
+    <!-- Modern Glassmorphism Header -->
     <div class="dashboard-header ultra-glass">
         <div class="dashboard-title">
             <img src="https://cdn-icons-png.flaticon.com/512/484/484167.png" alt="Logo" class="dashboard-logo">
@@ -106,13 +106,13 @@ if ($current_page === "dashboard") { ?>
                 <h3><i class="bi bi-cloud-sun"></i> Hourly Weather Forecast</h3>
                 <span class="close" onclick="closeWeatherModal()">&times;</span>
             </div>
-            <div class="weather-iframe-container" style="height: 200px;">
+            <div class="weather-iframe-container" style="height: 220px;">
                 <iframe
                     src="https://www.accuweather.com/en/ph/villaverde/265132/hourly-weather-forecast/265132"
                     class="weather-iframe"
                     frameborder="0"
                     allowfullscreen
-                    style="height:180px;">
+                    style="height:200px;">
                 </iframe>
             </div>
         </div>
@@ -125,12 +125,12 @@ if ($current_page === "dashboard") { ?>
                 <h3><i class="bi bi-people"></i> Contact Management</h3>
                 <span class="close" onclick="closeContactListModal()">&times;</span>
             </div>
-            <div class="contact-crud-controls" id="contactCrudControls" style="margin-bottom:8px; display:flex; justify-content:flex-end;">
+            <div class="contact-crud-controls" id="contactCrudControls">
                 <button class="btn btn-gradient btn-small" onclick="openContactModal()">
                     <i class="bi bi-plus-circle"></i> Add Contact
                 </button>
             </div>
-            <div class="contacts-container" id="contactsContainer" style="height:160px; overflow-y:auto;">
+            <div class="contacts-container" id="contactsContainer">
                 <div class="table-responsive">
                     <table class="contacts-table">
                         <thead>
@@ -199,20 +199,20 @@ if ($current_page === "dashboard") { ?>
         }
 
         body, .dashboard-container {
-            font-family: 'Inter', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Roboto', 'Inter', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             margin: 0;
             padding: 0;
-            background: #111;
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
             min-height: 100vh;
             height: 100vh;
             overflow: hidden;
         }
 
         .ultra-glass {
-            background: rgba(0,0,0,0.85);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(255,0,0,0.10), 0 2px 8px rgba(0,0,0,0.18);
-            backdrop-filter: blur(12px) saturate(180%);
+            background: rgba(30, 30, 40, 0.85);
+            border-radius: 24px;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.18), 0 2px 8px rgba(220,38,38,0.10);
+            backdrop-filter: blur(18px) saturate(200%);
             border: 2px solid #222;
         }
 
@@ -220,37 +220,37 @@ if ($current_page === "dashboard") { ?>
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 18px;
-            margin-bottom: 12px;
-            background: linear-gradient(90deg, rgba(0,0,0,0.95) 0%, rgba(40,40,40,0.95) 100%);
+            padding: 24px 32px;
+            margin-bottom: 18px;
+            background: linear-gradient(90deg, rgba(40,40,50,0.95) 0%, rgba(60,60,70,0.95) 100%);
         }
 
         .dashboard-title {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 18px;
         }
 
         .dashboard-logo {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
             background: #222;
             border: 2px solid #dc2626;
             transition: transform 0.2s;
         }
         .dashboard-logo:hover {
-            transform: scale(1.08) rotate(-8deg);
+            transform: scale(1.12) rotate(-8deg);
         }
 
         .dashboard-header h1 {
             color: #fff;
-            font-size: 1.2rem;
+            font-size: 2rem;
             font-weight: 700;
             margin: 0;
-            letter-spacing: 1px;
-            text-shadow: 0 2px 8px #dc2626;
+            letter-spacing: 1.5px;
+            text-shadow: 0 2px 12px #dc2626;
         }
 
         .gradient-text {
@@ -262,104 +262,104 @@ if ($current_page === "dashboard") { ?>
 
         .dashboard-actions {
             display: flex;
-            gap: 8px;
+            gap: 16px;
         }
 
         .btn-gradient {
             background: linear-gradient(90deg, #dc2626 0%, #facc15 100%);
             color: #111;
             border: none;
-            border-radius: 8px;
-            padding: 8px 16px;
-            font-size: 1rem;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-size: 1.2rem;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(255,0,0,0.10);
+            box-shadow: 0 4px 16px rgba(255,0,0,0.10);
             transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
         }
         .btn-gradient:hover, .btn-gradient:focus {
-            transform: translateY(-1px) scale(1.06);
-            box-shadow: 0 6px 24px rgba(255,0,0,0.18);
+            transform: translateY(-2px) scale(1.08);
+            box-shadow: 0 12px 32px rgba(255,0,0,0.18);
             background: linear-gradient(90deg, #facc15 0%, #dc2626 100%);
             color: #fff;
         }
         .btn-action {
-            padding: 8px 10px;
-            font-size: 1.2rem;
+            padding: 12px 14px;
+            font-size: 1.5rem;
             border-radius: 50%;
-            min-width: 32px;
-            min-height: 32px;
+            min-width: 48px;
+            min-height: 48px;
             justify-content: center;
-            box-shadow: 0 1px 6px rgba(255,0,0,0.10);
+            box-shadow: 0 2px 12px rgba(255,0,0,0.10);
         }
 
         .main-content {
             display: grid;
-            grid-template-columns: 180px 1fr;
-            gap: 12px;
+            grid-template-columns: 260px 1fr;
+            gap: 24px;
             max-width: 100vw;
             margin: 0 auto;
-            height: calc(100vh - 60px);
+            height: calc(100vh - 100px);
         }
 
         .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 24px;
             overflow-y: auto;
-            padding-right: 4px;
+            padding-right: 8px;
         }
 
         .sidebar::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
         .sidebar::-webkit-scrollbar-thumb {
             background: #222;
-            border-radius: 4px;
+            border-radius: 6px;
         }
 
         .panel-item {
-            background: #181818;
-            padding: 10px 8px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(255,0,0,0.10);
+            background: linear-gradient(135deg, #232526 80%, #414345 100%);
+            padding: 18px 16px;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(255,0,0,0.10);
             border: 1px solid #222;
             position: relative;
             transition: box-shadow 0.2s, transform 0.2s;
         }
         .panel-item:hover {
-            box-shadow: 0 8px 24px #dc2626;
-            transform: translateY(-1px) scale(1.02);
+            box-shadow: 0 16px 32px #dc2626;
+            transform: translateY(-2px) scale(1.04);
         }
 
         .panel-title {
-            font-family: 'Montserrat', 'Inter', sans-serif;
-            font-size: 1rem;
+            font-family: 'Montserrat', 'Inter', 'Roboto', sans-serif;
+            font-size: 1.2rem;
             font-weight: 700;
             color: #facc15;
-            margin-bottom: 8px;
-            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            letter-spacing: 0.8px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
         }
 
         .weather-card .weather-header,
         .contact-card .contact-header {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
+            gap: 12px;
+            margin-bottom: 12px;
         }
         .weather-modal-btn,
         .contact-modal-btn {
             margin-left: auto;
-            padding: 4px 8px;
-            font-size: 1rem;
-            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 1.2rem;
+            border-radius: 10px;
             background: linear-gradient(90deg, #dc2626 0%, #facc15 100%);
             color: #111;
             border: none;

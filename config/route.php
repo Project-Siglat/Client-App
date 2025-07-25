@@ -4,16 +4,10 @@ $request_uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 switch ($request_uri) {
     // here is the landing page
     case "/":
-        include "./pages/landing-page/core.php";
-        break;
-    case "/about":
-        include "./pages/landing-page/about.php";
-        break;
-    case "/contact":
-        include "./pages/contact/core.php";
+        include "./pages/landing-page/index.php";
         break;
     case "/login":
-        include "./pages/auth/login.php";
+        include "./pages/auth/index.php";
         break;
     case "/env":
         $env = $_ENV["ENVIRONMENT"];
@@ -27,7 +21,7 @@ switch ($request_uri) {
 
     // here is the user set
     case "/client":
-        include "./pages/client/core.php";
+        include "./pages/client/index.php";
         break;
 
     // here is the ambulance set
