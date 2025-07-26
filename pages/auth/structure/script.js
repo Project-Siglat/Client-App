@@ -110,23 +110,56 @@ document.addEventListener("DOMContentLoaded", function () {
           const contentType = response.headers.get("content-type");
           let result;
 
-          if (contentType && contentType.includes("application/json")) {
-            result = await response.json();
-          } else {
-            result = await response.text();
+          try {
+            if (contentType && contentType.includes("application/json")) {
+              result = await response.json();
+            } else {
+              const textResult = await response.text();
+              console.log("Non-JSON response received:", textResult);
+
+              // Try to parse as JSON in case content-type header is wrong
+              try {
+                result = JSON.parse(textResult);
+              } catch (parseError) {
+                console.log(
+                  "Failed to parse as JSON, treating as text:",
+                  parseError,
+                );
+                result = { message: textResult };
+              }
+            }
+          } catch (parseError) {
+            console.error("Error parsing response:", parseError);
+            showToast("Invalid response from server.", "error");
+            return;
           }
 
-          // Store role and token in sessionStorage
-          sessionStorage.setItem("userRole", result.role);
-          sessionStorage.setItem("authToken", result.token);
-
           console.log("Login response:", result);
-          showToast("Login successful!", "success");
 
-          // Redirect based on role
-          setTimeout(() => {
-            redirectBasedOnRole(result.role);
-          }, 1000);
+          // Check if result has the expected properties
+          if (
+            result &&
+            typeof result === "object" &&
+            result.role &&
+            result.token
+          ) {
+            // Store role and token in sessionStorage
+            sessionStorage.setItem("userRole", result.role);
+            sessionStorage.setItem("authToken", result.token);
+
+            showToast("Login successful!", "success");
+
+            // Redirect based on role
+            setTimeout(() => {
+              redirectBasedOnRole(result.role);
+            }, 1000);
+          } else {
+            console.error("Invalid response structure:", result);
+            showToast(
+              "Invalid response from server. Missing role or token.",
+              "error",
+            );
+          }
         } else {
           const errorData = await response.text();
           console.error("Login failed:", errorData);
@@ -177,10 +210,28 @@ document.addEventListener("DOMContentLoaded", function () {
           const contentType = response.headers.get("content-type");
           let result;
 
-          if (contentType && contentType.includes("application/json")) {
-            result = await response.json();
-          } else {
-            result = await response.text();
+          try {
+            if (contentType && contentType.includes("application/json")) {
+              result = await response.json();
+            } else {
+              const textResult = await response.text();
+              console.log("Non-JSON response received:", textResult);
+
+              // Try to parse as JSON in case content-type header is wrong
+              try {
+                result = JSON.parse(textResult);
+              } catch (parseError) {
+                console.log(
+                  "Failed to parse as JSON, treating as text:",
+                  parseError,
+                );
+                result = { message: textResult };
+              }
+            }
+          } catch (parseError) {
+            console.error("Error parsing response:", parseError);
+            showToast("Invalid response from server.", "error");
+            return;
           }
 
           // Store registration data in sessionStorage temporarily
