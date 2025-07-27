@@ -18,6 +18,39 @@ var userMarker;
 var loadingElement = document.getElementById("loading");
 var locationLoaded = false;
 var permissionDenied = false;
+var currentLat = null;
+var currentLng = null;
+
+// Function to send coordinates to API
+function sendCoordinatesToAPI(latitude, longitude) {
+  const authToken = sessionStorage.getItem("authToken");
+  if (!authToken) {
+    console.log("No auth token found");
+    return;
+  }
+
+  fetch(API() + "/api/v1/User/coordinates", {
+    method: "POST",
+    headers: {
+      accept: "*/*",
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + authToken,
+    },
+    body: JSON.stringify({
+      id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      latitude: latitude.toString(),
+      longitude: longitude.toString(),
+    }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        console.log("Failed to send coordinates:", response.status);
+      }
+    })
+    .catch((error) => {
+      console.log("Error sending coordinates:", error);
+    });
+}
 
 // Function to update user location
 function updateLocation() {
@@ -32,6 +65,10 @@ function updateLocation() {
       function (position) {
         var lat = position.coords.latitude;
         var lng = position.coords.longitude;
+
+        // Store current coordinates
+        currentLat = lat;
+        currentLng = lng;
 
         // If marker doesn't exist, create it
         if (!userMarker) {
@@ -103,3 +140,10 @@ function reCenter() {
 
 // Update location immediately
 updateLocation();
+
+// Send coordinates to API every 0.5 seconds
+setInterval(function () {
+  if (currentLat !== null && currentLng !== null && locationLoaded) {
+    sendCoordinatesToAPI(currentLat, currentLng);
+  }
+}, 500);

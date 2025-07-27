@@ -120,10 +120,11 @@
 </div>
 
 <!-- here -->
+<?php include "./pages/client/widget/weather.html"; ?>
 <?php include "./pages/client/widget/user.html"; ?>
 <?php include "./pages/client/widget/contactlist.html"; ?>
 
-<div id="optionsContainer" style="position: fixed; bottom: 90px; right: 25px; z-index: 2147483646; opacity: 0; transform: translateY(20px) scale(0.8); pointer-events: none; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+<div id="optionsContainer" style="position: fixed; bottom: 90px; right: 25px; z-index: 2147483640; opacity: 0; transform: translateY(20px) scale(0.8); pointer-events: none; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
     <?php include "./pages/client/widget/account.html"; ?>
     <?php include "./pages/client/widget/contact.html"; ?>
 
