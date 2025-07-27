@@ -1,0 +1,226 @@
+<div
+    id="contactModal"
+    class="hidden fixed inset-0 w-full h-full z-[9999] flex items-center justify-center"
+>
+    <div
+        class="rounded-xl w-[90%] max-w-md max-h-[80vh] shadow-2xl relative bg-[#3b4252]"
+    >
+        <div
+            class="p-5 border-b border-[#4c566a] flex justify-between items-center"
+        >
+            <h3 class="m-0 text-[#eceff4] text-lg font-semibold">
+                Contact Information
+            </h3>
+            <div class="flex gap-2">
+                <button
+                    onclick="toggleContactModal()"
+                    class="bg-transparent border-none text-2xl cursor-pointer text-[#d8dee9] p-0 w-8 h-8 flex items-center justify-center hover:text-[#eceff4] transition-colors"
+                >
+                    &times;
+                </button>
+            </div>
+        </div>
+        <div id="contactList" class="p-5 max-h-[50vh] overflow-y-auto"></div>
+        <div id="addContactForm" class="hidden p-5 border-t border-[#4c566a]">
+            <div class="mb-3">
+                <label class="block text-[#88c0d0] text-sm font-medium mb-1"
+                    >Label</label
+                >
+                <input
+                    id="newContactLabel"
+                    type="text"
+                    class="w-full p-2 rounded bg-[#434c5e] text-[#eceff4] border border-[#4c566a]"
+                    placeholder="Enter label"
+                />
+            </div>
+            <div class="mb-3">
+                <label class="block text-[#88c0d0] text-sm font-medium mb-1"
+                    >Type</label
+                >
+                <select
+                    id="newContactType"
+                    class="w-full p-2 rounded bg-[#434c5e] text-[#eceff4] border border-[#4c566a]"
+                >
+                    <option value="email">Email</option>
+                    <option value="phone">Phone</option>
+                    <option value="facebook">Facebook</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="block text-[#88c0d0] text-sm font-medium mb-1"
+                    >Contact Information</label
+                >
+                <input
+                    id="newContactInfo"
+                    type="text"
+                    class="w-full p-2 rounded bg-[#434c5e] text-[#eceff4] border border-[#4c566a]"
+                    placeholder="Enter contact information"
+                />
+            </div>
+            <div class="flex gap-2">
+                <button
+                    onclick="addContact()"
+                    class="bg-[#a3be8c] hover:bg-[#b8d1a4] text-[#2e3440] px-4 py-2 rounded cursor-pointer border-none transition-colors"
+                >
+                    Save
+                </button>
+                <button
+                    onclick="cancelAddContact()"
+                    class="bg-[#bf616a] hover:bg-[#d08770] text-[#eceff4] px-4 py-2 rounded cursor-pointer border-none transition-colors"
+                >
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let contactData = [];
+
+    async function fetchContactData() {
+        try {
+            const response = await fetch(
+                "http://localhost:5069/api/v1/Admin/contact",
+                {
+                    method: "GET",
+                    headers: {
+                        accept: "*/*",
+                    },
+                },
+            );
+
+            if (response.ok) {
+                contactData = await response.json();
+            } else {
+                console.error(
+                    "Failed to fetch contact data:",
+                    response.statusText,
+                );
+                showToast("Failed to load contact data");
+            }
+        } catch (error) {
+            console.error("Error fetching contact data:", error);
+            showToast("Error loading contact data");
+        }
+    }
+
+    async function renderContactList() {
+        const contactList = document.getElementById("contactList");
+        contactList.innerHTML = "";
+
+        await fetchContactData();
+
+        contactData.forEach((contact) => {
+            let icon, linkHref, linkText;
+
+            if (contact.contactType === "email") {
+                icon = "📧";
+                linkHref = `mailto:${contact.contactInformation}`;
+                linkText = contact.contactInformation;
+            } else if (contact.contactType === "phone") {
+                icon = "📞";
+                linkHref = `tel:${contact.contactInformation}`;
+                linkText = contact.contactInformation;
+            } else if (contact.contactType === "facebook") {
+                icon = "📘";
+                linkHref = `https://facebook.com/${contact.contactInformation}`;
+                linkText = contact.contactInformation;
+            }
+
+            const contactItem = document.createElement("div");
+            contactItem.className =
+                "mb-4 p-4 border border-[#4c566a] rounded-lg bg-[#434c5e] hover:bg-[#4f5a6b] transition-colors";
+            contactItem.innerHTML = `
+                <div class="mb-3">
+                    <div class="text-[#88c0d0] text-sm font-medium mb-1">
+                        ${contact.label}
+                    </div>
+                    <a href="${linkHref}" class="flex items-center gap-2 mb-2 text-[#eceff4] hover:text-[#88c0d0] no-underline" target="_blank">
+                        <span class="text-[#88c0d0]">${icon}</span>
+                        <div class="text-[#eceff4] flex-1">
+                            ${linkText}
+                        </div>
+                    </a>
+                </div>
+            `;
+
+            contactList.appendChild(contactItem);
+        });
+    }
+
+    function showToast(message) {
+        const toast = document.createElement("div");
+        toast.className =
+            "fixed top-4 right-4 bg-[#a3be8c] text-[#2e3440] px-4 py-2 rounded shadow-lg z-[10000] transition-opacity";
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            setTimeout(() => document.body.removeChild(toast), 300);
+        }, 2000);
+    }
+
+    function showAddContactForm() {
+        document.getElementById("addContactForm").classList.remove("hidden");
+    }
+
+    function cancelAddContact() {
+        document.getElementById("addContactForm").classList.add("hidden");
+        document.getElementById("newContactLabel").value = "";
+        document.getElementById("newContactInfo").value = "";
+    }
+
+    function addContact() {
+        const label = document.getElementById("newContactLabel").value.trim();
+        const type = document.getElementById("newContactType").value;
+        const info = document.getElementById("newContactInfo").value.trim();
+
+        if (!label || !info) {
+            showToast("Please fill in all fields");
+            return;
+        }
+
+        const newContact = {
+            id: generateId(),
+            label: label,
+            contactType: type,
+            contactInformation: info,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        };
+
+        contactData.push(newContact);
+        renderContactList();
+        cancelAddContact();
+        showToast("Contact added successfully!");
+    }
+
+    function generateId() {
+        return "xxxx-xxxx-4xxx-yxxx".replace(/[xy]/g, function (c) {
+            const r = (Math.random() * 16) | 0;
+            const v = c == "x" ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+        });
+    }
+
+    function toggleContactModal() {
+        console.log("toggleContactModal function triggered");
+        const modal = document.getElementById("contactModal");
+        console.log("Modal element:", modal);
+        console.log("Current classes:", modal.className);
+
+        if (modal.classList.contains("hidden")) {
+            modal.classList.remove("hidden");
+            modal.style.display = "flex";
+            renderContactList();
+            console.log("Modal shown");
+        } else {
+            modal.classList.add("hidden");
+            modal.style.display = "none";
+            cancelAddContact();
+            console.log("Modal hidden");
+        }
+    }
+</script>
