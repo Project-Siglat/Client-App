@@ -20,7 +20,17 @@
                 </button>
             </div>
         </div>
-        <div id="contactList" class="p-5 max-h-[50vh] overflow-y-auto"></div>
+        <div id="contactList" class="p-5 max-h-[50vh] overflow-y-auto">
+            <div
+                id="loadingSpinner"
+                class="hidden flex items-center justify-center py-8"
+            >
+                <div
+                    class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#88c0d0]"
+                ></div>
+                <span class="ml-3 text-[#d8dee9]">Loading contacts...</span>
+            </div>
+        </div>
         <div id="addContactForm" class="hidden p-5 border-t border-[#4c566a]">
             <div class="mb-3">
                 <label class="block text-[#88c0d0] text-sm font-medium mb-1"
@@ -104,25 +114,40 @@
 
     async function renderContactList() {
         const contactList = document.getElementById("contactList");
-        contactList.innerHTML = "";
+        const loadingSpinner = document.getElementById("loadingSpinner");
+
+        // Show loading spinner
+        loadingSpinner.classList.remove("hidden");
+        contactList.innerHTML =
+            '<div id="loadingSpinner" class="flex items-center justify-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#88c0d0]"></div><span class="ml-3 text-[#d8dee9]">Loading contacts...</span></div>';
 
         await fetchContactData();
 
+        // Hide loading spinner and clear content
+        contactList.innerHTML = "";
+
         contactData.forEach((contact) => {
-            let icon, linkHref, linkText;
+            let icon, linkHref, linkText, displayText;
 
             if (contact.contactType === "email") {
                 icon = "📧";
                 linkHref = `mailto:${contact.contactInformation}`;
                 linkText = contact.contactInformation;
+                displayText = linkText;
             } else if (contact.contactType === "phone") {
                 icon = "📞";
                 linkHref = `tel:${contact.contactInformation}`;
                 linkText = contact.contactInformation;
+                displayText = linkText;
             } else if (contact.contactType === "facebook") {
                 icon = "📘";
                 linkHref = `https://facebook.com/${contact.contactInformation}`;
                 linkText = contact.contactInformation;
+                // Truncate Facebook URL if too long
+                displayText =
+                    linkText.length > 25
+                        ? linkText.substring(0, 25) + "..."
+                        : linkText;
             }
 
             const contactItem = document.createElement("div");
@@ -133,10 +158,10 @@
                     <div class="text-[#88c0d0] text-sm font-medium mb-1">
                         ${contact.label}
                     </div>
-                    <a href="${linkHref}" class="flex items-center gap-2 mb-2 text-[#eceff4] hover:text-[#88c0d0] no-underline" target="_blank">
+                    <a href="${linkHref}" class="flex items-center gap-2 mb-2 text-[#eceff4] hover:text-[#88c0d0] no-underline" target="_blank" title="${linkText}">
                         <span class="text-[#88c0d0]">${icon}</span>
-                        <div class="text-[#eceff4] flex-1">
-                            ${linkText}
+                        <div class="text-[#eceff4] flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                            ${displayText}
                         </div>
                     </a>
                 </div>
