@@ -80,15 +80,12 @@
 
     async function fetchContactData() {
         try {
-            const response = await fetch(
-                "http://localhost:5069/api/v1/Admin/contact",
-                {
-                    method: "GET",
-                    headers: {
-                        accept: "*/*",
-                    },
+            const response = await fetch(`${API()}/api/v1/Admin/contact`, {
+                method: "GET",
+                headers: {
+                    accept: "*/*",
                 },
-            );
+            });
 
             if (response.ok) {
                 contactData = await response.json();

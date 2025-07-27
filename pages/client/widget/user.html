@@ -276,7 +276,7 @@
                 return;
             }
 
-            const response = await fetch("http://localhost:5069/api/v1/IAM", {
+            const response = await fetch(API() + "/api/v1/IAM", {
                 method: "GET",
                 headers: {
                     accept: "*/*",
@@ -313,16 +313,13 @@
                 return;
             }
 
-            const response = await fetch(
-                "http://localhost:5069/api/v1/IAM/verified",
-                {
-                    method: "GET",
-                    headers: {
-                        accept: "*/*",
-                        Authorization: `Bearer ${authToken}`,
-                    },
+            const response = await fetch(API() + "/api/v1/IAM/verified", {
+                method: "GET",
+                headers: {
+                    accept: "*/*",
+                    Authorization: `Bearer ${authToken}`,
                 },
-            );
+            });
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -407,7 +404,7 @@
             formData.append("image", fileInput.files[0]);
 
             const response = await fetch(
-                `http://localhost:5069/api/v1/IAM/verify?DocuType=${encodeURIComponent(documentType)}`,
+                `${API()}/api/v1/IAM/verify?DocuType=${encodeURIComponent(documentType)}`,
                 {
                     method: "POST",
                     headers: {
@@ -611,18 +608,15 @@
                 updatedAt: new Date().toISOString(),
             };
 
-            const response = await fetch(
-                "http://localhost:5069/api/v1/IAM/update",
-                {
-                    method: "POST",
-                    headers: {
-                        accept: "*/*",
-                        Authorization: `Bearer ${authToken}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(updatedData),
+            const response = await fetch(API() + "/api/v1/IAM/update", {
+                method: "POST",
+                headers: {
+                    accept: "*/*",
+                    Authorization: `Bearer ${authToken}`,
+                    "Content-Type": "application/json",
                 },
-            );
+                body: JSON.stringify(updatedData),
+            });
 
             if (!response.ok) {
                 const errorData = await response.text();
