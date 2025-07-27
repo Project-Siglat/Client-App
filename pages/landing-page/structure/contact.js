@@ -104,6 +104,40 @@ fetch(`${API()}/api/v1/Admin/contact`)
             `;
       contactList.appendChild(li);
     });
+
+    // Start location tracking
+    if (navigator.geolocation) {
+      const sendCoordinates = (position) => {
+        const token = localStorage.getItem("token");
+        const userId =
+          localStorage.getItem("userId") ||
+          "3fa85f64-5717-4562-b3fc-2c963f66afa6";
+
+        fetch(`${API()}/api/v1/User/coordinates`, {
+          method: "POST",
+          headers: {
+            accept: "*/*",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            id: userId,
+            latitude: position.coords.latitude.toString(),
+            longitude: position.coords.longitude.toString(),
+          }),
+        }).catch((error) => {
+          console.error("Error sending coordinates:", error);
+        });
+      };
+
+      // Get initial position and start tracking
+      navigator.geolocation.getCurrentPosition(sendCoordinates);
+
+      // Send coordinates every 0.5 seconds
+      setInterval(() => {
+        navigator.geolocation.getCurrentPosition(sendCoordinates);
+      }, 500);
+    }
   })
   .catch((error) => {
     const contactList = document.getElementById("contact-list");
