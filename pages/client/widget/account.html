@@ -1,0 +1,46 @@
+<div
+    class="option-button"
+    style="
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: #8b5cf6;
+        margin-bottom: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(139, 92, 246, 0.2);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        opacity: 0;
+        transform: translateY(10px);
+    "
+    onclick="toggleUserSidebar()"
+    onmouseenter="this.style.transform='scale(1.1) translateY(0)'; this.style.boxShadow='0 4px 15px rgba(139,92,246,0.4)'"
+    onmouseleave="this.style.transform='scale(1) translateY(0)'; this.style.boxShadow='0 2px 6px rgba(139,92,246,0.2)'"
+    onmousedown="this.style.transform='scale(0.95) translateY(0)'"
+    onmouseup="this.style.transform='scale(1.1) translateY(0)'"
+>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path
+            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+        />
+    </svg>
+</div>
+
+<!-- Modal Backdrop -->
+<div
+    id="userSidebarBackdrop"
+    style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        display: none;
+    "
+    onclick="toggleUserSidebar()"
+></div>
