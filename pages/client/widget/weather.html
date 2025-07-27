@@ -78,6 +78,7 @@
 <script>
     let isDragging = false;
     let startY = 0;
+    let startTime = 0;
     let currentTranslateY = 100;
     let drawerHeight = 0;
 
@@ -105,6 +106,7 @@
         function startDrag(e) {
             isDragging = true;
             startY = e.type === "mousedown" ? e.clientY : e.touches[0].clientY;
+            startTime = Date.now();
             drawer.style.transition = "none";
             header.style.cursor = "grabbing";
         }
@@ -137,13 +139,34 @@
             const deltaPercent = (deltaY / drawerHeight) * 100;
             const newTranslateY = currentTranslateY + deltaPercent;
 
-            // Snap to open or closed based on position and drag direction
-            if (newTranslateY < 50) {
-                drawer.style.transform = "translateY(0%)";
-                currentTranslateY = 0;
+            // Calculate velocity (pixels per millisecond)
+            const endTime = Date.now();
+            const duration = endTime - startTime;
+            const velocity = deltaY / Math.max(duration, 1); // Avoid division by zero
+
+            // Check for fast swipe (velocity threshold)
+            const velocityThreshold = 0.5; // pixels per millisecond
+
+            if (Math.abs(velocity) > velocityThreshold) {
+                // Fast swipe detected - respond immediately based on direction
+                if (velocity > 0) {
+                    // Fast downward swipe - close drawer
+                    drawer.style.transform = "translateY(100%)";
+                    currentTranslateY = 100;
+                } else {
+                    // Fast upward swipe - open drawer
+                    drawer.style.transform = "translateY(0%)";
+                    currentTranslateY = 0;
+                }
             } else {
-                drawer.style.transform = "translateY(100%)";
-                currentTranslateY = 100;
+                // Slow drag - use position-based snapping
+                if (newTranslateY < 50) {
+                    drawer.style.transform = "translateY(0%)";
+                    currentTranslateY = 0;
+                } else {
+                    drawer.style.transform = "translateY(100%)";
+                    currentTranslateY = 100;
+                }
             }
         }
 
