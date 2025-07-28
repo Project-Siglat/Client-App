@@ -15,7 +15,7 @@ var humanIcon = L.icon({
 
 // Create custom ambulance icon using emoji
 var ambulanceIcon = L.divIcon({
-  html: '<svg width="30" height="30" viewBox="0 0 30 30"><rect x="3" y="10" width="20" height="10" fill="white" stroke="black" stroke-width="1"/><circle cx="8" cy="22" r="2" fill="black"/><circle cx="18" cy="22" r="2" fill="black"/><rect x="12" y="12" width="2" height="6" fill="red"/><rect x="9" y="14" width="8" height="2" fill="red"/><rect x="23" y="12" width="4" height="6" fill="lightblue"/></svg>',
+  html: '<svg width="30" height="30" viewBox="0 0 30 30"><rect x="2" y="12" width="22" height="8" fill="white" stroke="black" stroke-width="1"/><rect x="20" y="8" width="6" height="4" fill="lightblue" stroke="black" stroke-width="1"/><circle cx="7" cy="21" r="2" fill="black"/><circle cx="21" cy="21" r="2" fill="black"/><rect x="10" y="14" width="1.5" height="4" fill="red"/><rect x="8.25" y="15.25" width="4" height="1.5" fill="red"/><rect x="2" y="10" width="4" height="2" fill="red"/></svg>',
   iconSize: [30, 30],
   iconAnchor: [15, 15],
   className: "ambulance-icon",
@@ -205,3 +205,75 @@ setInterval(function () {
 setInterval(function () {
   loadAmbulances();
 }, 500);
+
+function redirectTOMappie() {
+  const authToken = sessionStorage.getItem("authToken");
+  if (!authToken) {
+    console.log("No auth token found");
+    alert("Authentication required. Please log in.");
+    return;
+  }
+
+  if (currentLat === null || currentLng === null) {
+    alert("Location not available. Please wait for location to load.");
+    return;
+  }
+
+  // Find nearest ambulance
+  let nearestAmbulance = null;
+  let minDistance = Infinity;
+
+  ambulanceMarkers.forEach((marker) => {
+    const ambulanceLat = marker.getLatLng().lat;
+    const ambulanceLng = marker.getLatLng().lng;
+
+    // Calculate distance using simple Euclidean distance
+    const distance = Math.sqrt(
+      Math.pow(currentLat - ambulanceLat, 2) +
+        Math.pow(currentLng - ambulanceLng, 2),
+    );
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestAmbulance = marker;
+    }
+  });
+
+  if (!nearestAmbulance) {
+    alert("No ambulances available");
+    return;
+  }
+
+  // Make the API call to send alert
+  fetch(API() + "/api/v1/Ambulance/alert", {
+    method: "POST",
+    headers: {
+      accept: "*/*",
+      Authorization: "Bearer " + authToken,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      uid: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      responder: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      what: "Emergency alert from user",
+      respondedAt: new Date().toISOString(),
+      longitude: currentLng.toString(),
+      latitude: currentLat.toString(),
+    }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        console.log("Failed to send alert:", response.status);
+        alert("Failed to send emergency alert");
+      } else {
+        alert(
+          "Emergency alert sent successfully! Nearest ambulance has been notified.",
+        );
+      }
+    })
+    .catch((error) => {
+      console.log("Error sending alert:", error);
+      alert("Error sending emergency alert");
+    });
+}

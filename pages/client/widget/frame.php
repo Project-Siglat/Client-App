@@ -212,8 +212,9 @@ function handleSiren() {
     button.style.animation = 'buttonPulse 0.3s ease';
     setTimeout(() => button.style.animation = '', 300);
 
-    alert('siren button clicked');
+    // alert('siren button clicked');
     // Add your siren logic here
+    redirectTOMappie()
 }
 
 function handleRecenter() {
