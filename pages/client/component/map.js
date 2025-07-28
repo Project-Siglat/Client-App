@@ -1,3 +1,30 @@
+// Function to dynamically load Leaflet Routing Machine
+function loadRoutingMachine() {
+  return new Promise((resolve, reject) => {
+    // Check if already loaded
+    if (typeof L !== "undefined" && L.Routing && L.Routing.control) {
+      resolve();
+      return;
+    }
+
+    // Load CSS
+    const cssLink = document.createElement("link");
+    cssLink.rel = "stylesheet";
+    cssLink.href =
+      "https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css";
+    document.head.appendChild(cssLink);
+
+    // Load JavaScript
+    const script = document.createElement("script");
+    script.src =
+      "https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js";
+    script.onload = () => resolve();
+    script.onerror = () =>
+      reject(new Error("Failed to load Leaflet Routing Machine"));
+    document.head.appendChild(script);
+  });
+}
+
 // Create the map
 var map = L.map("map", { maxZoom: 18 }).setView([51.505, -0.09], 13);
 
@@ -36,9 +63,30 @@ var routingControl = null;
 var routeWaypoints = [];
 var isRoutingMode = false;
 var destinationMarker = null;
+var routingMachineLoaded = false;
+
+// Function to check if routing is available
+function isRoutingAvailable() {
+  return typeof L !== "undefined" && L.Routing && L.Routing.control;
+}
 
 // Function to initialize routing control
-function initializeRouting() {
+async function initializeRouting() {
+  if (!routingMachineLoaded) {
+    try {
+      await loadRoutingMachine();
+      routingMachineLoaded = true;
+    } catch (error) {
+      console.log("Failed to load Leaflet Routing Machine:", error);
+      return false;
+    }
+  }
+
+  if (!isRoutingAvailable()) {
+    console.log("Leaflet Routing Machine not available");
+    return false;
+  }
+
   routingControl = L.Routing.control({
     waypoints: [],
     routeWhileDragging: true,
@@ -50,12 +98,34 @@ function initializeRouting() {
       styles: [{ color: "#3388ff", weight: 6, opacity: 0.8 }],
     },
   }).addTo(map);
+  return true;
 }
 
 // Function to calculate route between two points
-function calculateRoute(startLat, startLng, endLat, endLng) {
+async function calculateRoute(startLat, startLng, endLat, endLng) {
+  if (!routingMachineLoaded) {
+    try {
+      await loadRoutingMachine();
+      routingMachineLoaded = true;
+    } catch (error) {
+      alert(
+        "Failed to load routing functionality. Please check your internet connection.",
+      );
+      return;
+    }
+  }
+
+  if (!isRoutingAvailable()) {
+    alert(
+      "Routing functionality not available. Please ensure Leaflet Routing Machine is loaded.",
+    );
+    return;
+  }
+
   if (!routingControl) {
-    initializeRouting();
+    if (!(await initializeRouting())) {
+      return;
+    }
   }
 
   // Clear existing route
@@ -89,7 +159,7 @@ function clearRoute() {
 }
 
 // Function to find route to nearest ambulance
-function routeToNearestAmbulance() {
+async function routeToNearestAmbulance() {
   if (currentLat === null || currentLng === null) {
     alert("Location not available. Please wait for location to load.");
     return;
@@ -97,6 +167,25 @@ function routeToNearestAmbulance() {
 
   if (ambulanceMarkers.length === 0) {
     alert("No ambulances available");
+    return;
+  }
+
+  if (!routingMachineLoaded) {
+    try {
+      await loadRoutingMachine();
+      routingMachineLoaded = true;
+    } catch (error) {
+      alert(
+        "Failed to load routing functionality. Please check your internet connection.",
+      );
+      return;
+    }
+  }
+
+  if (!isRoutingAvailable()) {
+    alert(
+      "Routing functionality not available. Please ensure Leaflet Routing Machine is loaded.",
+    );
     return;
   }
 
@@ -126,7 +215,7 @@ function routeToNearestAmbulance() {
     const ambulanceLat = nearestAmbulance.getLatLng().lat;
     const ambulanceLng = nearestAmbulance.getLatLng().lng;
 
-    calculateRoute(currentLat, currentLng, ambulanceLat, ambulanceLng);
+    await calculateRoute(currentLat, currentLng, ambulanceLat, ambulanceLng);
 
     // Show route info
     alert(
@@ -151,14 +240,33 @@ function calculateHaversineDistance(lat1, lng1, lat2, lng2) {
 }
 
 // Add click event for manual route planning
-map.on("click", function (e) {
+map.on("click", async function (e) {
   if (isRoutingMode && currentLat !== null && currentLng !== null) {
-    calculateRoute(currentLat, currentLng, e.latlng.lat, e.latlng.lng);
+    await calculateRoute(currentLat, currentLng, e.latlng.lat, e.latlng.lng);
   }
 });
 
 // Function to toggle routing mode
-function toggleRoutingMode() {
+async function toggleRoutingMode() {
+  if (!routingMachineLoaded) {
+    try {
+      await loadRoutingMachine();
+      routingMachineLoaded = true;
+    } catch (error) {
+      alert(
+        "Failed to load routing functionality. Please check your internet connection.",
+      );
+      return;
+    }
+  }
+
+  if (!isRoutingAvailable()) {
+    alert(
+      "Routing functionality not available. Please ensure Leaflet Routing Machine is loaded.",
+    );
+    return;
+  }
+
   isRoutingMode = !isRoutingMode;
   if (isRoutingMode) {
     alert(
@@ -352,81 +460,88 @@ setInterval(function () {
   loadAmbulances();
 }, 500);
 
-function redirectTOMappie() {
-  const authToken = sessionStorage.getItem("authToken");
-  if (!authToken) {
-    console.log("No auth token found");
-    alert("Authentication required. Please log in.");
-    return;
-  }
-
-  if (currentLat === null || currentLng === null) {
-    alert("Location not available. Please wait for location to load.");
-    return;
-  }
-
-  // Find nearest ambulance
-  let nearestAmbulance = null;
-  let minDistance = Infinity;
-
-  ambulanceMarkers.forEach((marker) => {
-    const ambulanceLat = marker.getLatLng().lat;
-    const ambulanceLng = marker.getLatLng().lng;
-
-    // Calculate distance using Haversine formula for better accuracy
-    const distance = calculateHaversineDistance(
-      currentLat,
-      currentLng,
-      ambulanceLat,
-      ambulanceLng,
-    );
-
-    if (distance < minDistance) {
-      minDistance = distance;
-      nearestAmbulance = marker;
+// Isolated function for emergency alert
+const redirectTOMappie = (function () {
+  return async function (
+    userLat = currentLat,
+    userLng = currentLng,
+    markers = ambulanceMarkers,
+  ) {
+    const authToken = sessionStorage.getItem("authToken");
+    if (!authToken) {
+      console.log("No auth token found");
+      alert("Authentication required. Please log in.");
+      return;
     }
-  });
 
-  if (!nearestAmbulance) {
-    alert("No ambulances available");
-    return;
-  }
+    if (userLat === null || userLng === null) {
+      alert("Location not available. Please wait for location to load.");
+      return;
+    }
 
-  // Calculate route to nearest ambulance
-  const ambulanceLat = nearestAmbulance.getLatLng().lat;
-  const ambulanceLng = nearestAmbulance.getLatLng().lng;
-  calculateRoute(currentLat, currentLng, ambulanceLat, ambulanceLng);
+    // Find nearest ambulance
+    let nearestAmbulance = null;
+    let minDistance = Infinity;
 
-  // Make the API call to send alert
-  fetch(API() + "/api/v1/Ambulance/alert", {
-    method: "POST",
-    headers: {
-      accept: "*/*",
-      Authorization: "Bearer " + authToken,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      uid: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      responder: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      what: "Emergency alert from user",
-      respondedAt: new Date().toISOString(),
-      longitude: currentLng.toString(),
-      latitude: currentLat.toString(),
-    }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        console.log("Failed to send alert:", response.status);
-        alert("Failed to send emergency alert");
-      } else {
-        alert(
-          "Emergency alert sent successfully! Nearest ambulance has been notified. Route displayed on map.",
-        );
+    markers.forEach((marker) => {
+      const ambulanceLat = marker.getLatLng().lat;
+      const ambulanceLng = marker.getLatLng().lng;
+
+      // Calculate distance using Haversine formula for better accuracy
+      const distance = calculateHaversineDistance(
+        userLat,
+        userLng,
+        ambulanceLat,
+        ambulanceLng,
+      );
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestAmbulance = marker;
       }
-    })
-    .catch((error) => {
-      console.log("Error sending alert:", error);
-      alert("Error sending emergency alert");
     });
-}
+
+    if (!nearestAmbulance) {
+      alert("No ambulances available");
+      return;
+    }
+
+    // Calculate route to nearest ambulance
+    const ambulanceLat = nearestAmbulance.getLatLng().lat;
+    const ambulanceLng = nearestAmbulance.getLatLng().lng;
+    await calculateRoute(userLat, userLng, ambulanceLat, ambulanceLng);
+
+    // Make the API call to send alert
+    fetch(API() + "/api/v1/Ambulance/alert", {
+      method: "POST",
+      headers: {
+        accept: "*/*",
+        Authorization: "Bearer " + authToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        uid: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        responder: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        what: "Emergency alert from user",
+        respondedAt: new Date().toISOString(),
+        longitude: userLng.toString(),
+        latitude: userLat.toString(),
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          console.log("Failed to send alert:", response.status);
+          alert("Failed to send emergency alert");
+        } else {
+          alert(
+            "Emergency alert sent successfully! Nearest ambulance has been notified. Route displayed on map.",
+          );
+        }
+      })
+      .catch((error) => {
+        console.log("Error sending alert:", error);
+        alert("Error sending emergency alert");
+      });
+  };
+})();
