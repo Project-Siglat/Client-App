@@ -1,3 +1,15 @@
+<!-- Loading screen -->
+<div id="loading-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; color: white; font-family: Arial, sans-serif;">
+  <div style="text-align: center;">
+    <div style="font-size: 24px; margin-bottom: 20px;">🚑</div>
+    <div style="font-size: 18px; margin-bottom: 10px;">Getting your location...</div>
+    <div style="font-size: 14px; color: #ccc;">Please allow location access for accurate tracking</div>
+    <div style="margin-top: 20px;">
+      <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+    </div>
+  </div>
+</div>
+
 <!-- Info panel for speed, distance, and ETA -->
 <div id="info-panel" style="position: absolute; top: 10px; right: 10px; z-index: 1000; background: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-family: Arial, sans-serif; min-width: 200px;">
   <div style="display: flex; align-items: center; margin-bottom: 5px;">
@@ -11,6 +23,14 @@
 </div>
 
 <div id="map" class="h-screen w-screen m-0 p-0" style="height: 100vh; width: 100vw; margin: 0; padding: 0;"></div>
+
+<style>
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+
 <script>
   // Wait for Leaflet JS to load before using L
   document.addEventListener('DOMContentLoaded', function() {
@@ -19,9 +39,12 @@
       return;
     }
 
-    // Default coordinates
+    // Default coordinates (fallback only)
     var defaultLat = 16.606254918019598;
     var defaultLng = 121.18314743041994;
+
+    // Track if we have gotten actual location
+    var hasRealLocation = false;
 
     // Initialize map
     var map = L.map('map').setView([defaultLat, defaultLng], 16);
@@ -39,9 +62,8 @@
       popupAnchor: [0, -35]
     });
 
-    // Create marker variable
-    var marker = L.marker([defaultLat, defaultLng], { icon: ambulanceIcon }).addTo(map)
-      .bindPopup("Auto-pointed location").openPopup();
+    // Create marker variable (don't add to map yet)
+    var marker = null;
 
     // Variables for speed and distance calculation
     var previousLat = null;
@@ -50,6 +72,18 @@
     var currentSpeed = 0;
     var targetLat = null; // Set this to target coordinates if available
     var targetLng = null; // Set this to target coordinates if available
+
+    // Live location logic
+    var lastLat = defaultLat;
+    var lastLng = defaultLng;
+
+    // Function to hide loading screen
+    function hideLoadingScreen() {
+      var loadingScreen = document.getElementById('loading-screen');
+      if (loadingScreen) {
+        loadingScreen.style.display = 'none';
+      }
+    }
 
     // Function to calculate distance between two points (Haversine formula)
     function calculateDistance(lat1, lng1, lat2, lng2) {
@@ -70,7 +104,7 @@
         headers: {
           accept: "*/*",
           "Content-Type": "application/json",
-          Authorization: "Bearer " + authToken,
+          Authorization: "Bearer " + sessionStorage.getItem("authToken"),
         },
         body: JSON.stringify({
           id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -118,7 +152,7 @@
     }
 
     // Function to update marker location
-    function updateLocation(lat, lng) {
+    function updateLocation(lat, lng, isRealLocation) {
       var currentTime = Date.now();
 
       // Calculate speed if we have previous position
@@ -136,34 +170,51 @@
       previousLng = lng;
       previousTime = currentTime;
 
-      // Load the location first
-      marker.setLatLng([lat, lng]);
-      marker.getPopup().setContent("Live location");
-      marker.openPopup();
+      // Create or update marker only when we have real location
+      if (isRealLocation && !hasRealLocation) {
+        hasRealLocation = true;
+        hideLoadingScreen();
 
-      // Then re-center the map
-      map.setView([lat, lng], map.getZoom());
+        // Create marker for the first time with real location
+        marker = L.marker([lat, lng], { icon: ambulanceIcon }).addTo(map)
+          .bindPopup("Live location").openPopup();
+      } else if (marker) {
+        // Update existing marker
+        marker.setLatLng([lat, lng]);
+        marker.getPopup().setContent("Live location");
+        marker.openPopup();
+      }
+
+      // Update map view only if we have real location or as fallback
+      if (hasRealLocation || isRealLocation) {
+        map.setView([lat, lng], map.getZoom());
+      }
 
       // Update info panel
       updateInfoPanel();
 
-      // Send coordinates to API
-      sendCoordinatesToAPI(lat, lng);
+      // Send coordinates to API only if real location
+      if (isRealLocation) {
+        sendCoordinatesToAPI(lat, lng);
+      }
     }
-
-    // Use default coordinates initially
-    updateLocation(defaultLat, defaultLng);
-
-    // Live location logic
-    var lastLat = defaultLat;
-    var lastLng = defaultLng;
 
     function requestLiveLocation() {
       if (!navigator.geolocation) {
-        // Geolocation not available, use default
-        updateLocation(lastLat, lastLng);
+        // Geolocation not available, use default and hide loading
+        if (!hasRealLocation) {
+          hideLoadingScreen();
+          updateLocation(lastLat, lastLng, false);
+        }
         return;
       }
+
+      // High accuracy options for better location precision
+      var options = {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      };
 
       // Check permission status if possible
       if (navigator.permissions) {
@@ -174,14 +225,20 @@
               var lng = position.coords.longitude;
               lastLat = lat;
               lastLng = lng;
-              updateLocation(lat, lng);
+              updateLocation(lat, lng, true);
             }, function(error) {
-              // If error, use last known or default
-              updateLocation(lastLat, lastLng);
-            });
+              // If error and no real location yet, use default and hide loading
+              if (!hasRealLocation) {
+                hideLoadingScreen();
+                updateLocation(lastLat, lastLng, false);
+              }
+            }, options);
           } else {
-            // Permission denied, use last known or default
-            updateLocation(lastLat, lastLng);
+            // Permission denied, use default and hide loading
+            if (!hasRealLocation) {
+              hideLoadingScreen();
+              updateLocation(lastLat, lastLng, false);
+            }
           }
         }).catch(function() {
           // If permissions API fails, fallback to requesting location
@@ -190,10 +247,13 @@
             var lng = position.coords.longitude;
             lastLat = lat;
             lastLng = lng;
-            updateLocation(lat, lng);
+            updateLocation(lat, lng, true);
           }, function(error) {
-            updateLocation(lastLat, lastLng);
-          });
+            if (!hasRealLocation) {
+              hideLoadingScreen();
+              updateLocation(lastLat, lastLng, false);
+            }
+          }, options);
         });
       } else {
         // Permissions API not available, fallback to requesting location
@@ -202,15 +262,30 @@
           var lng = position.coords.longitude;
           lastLat = lat;
           lastLng = lng;
-          updateLocation(lat, lng);
+          updateLocation(lat, lng, true);
         }, function(error) {
-          updateLocation(lastLat, lastLng);
-        });
+          if (!hasRealLocation) {
+            hideLoadingScreen();
+            updateLocation(lastLat, lastLng, false);
+          }
+        }, options);
       }
     }
 
     // Request location initially and then every 0.5 seconds
     requestLiveLocation();
-    setInterval(requestLiveLocation, 500);
+    setInterval(function() {
+      if (hasRealLocation) {
+        requestLiveLocation();
+      }
+    }, 500);
+
+    // Set a timeout to hide loading screen if location takes too long
+    setTimeout(function() {
+      if (!hasRealLocation) {
+        hideLoadingScreen();
+        updateLocation(defaultLat, defaultLng, false);
+      }
+    }, 15000); // 15 seconds timeout
   });
 </script>
