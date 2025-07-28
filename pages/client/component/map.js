@@ -31,6 +31,145 @@ var permissionDenied = false;
 var currentLat = null;
 var currentLng = null;
 
+// Routing variables
+var routingControl = null;
+var routeWaypoints = [];
+var isRoutingMode = false;
+var destinationMarker = null;
+
+// Function to initialize routing control
+function initializeRouting() {
+  routingControl = L.Routing.control({
+    waypoints: [],
+    routeWhileDragging: true,
+    addWaypoints: false,
+    createMarker: function () {
+      return null;
+    }, // Don't create default markers
+    lineOptions: {
+      styles: [{ color: "#3388ff", weight: 6, opacity: 0.8 }],
+    },
+  }).addTo(map);
+}
+
+// Function to calculate route between two points
+function calculateRoute(startLat, startLng, endLat, endLng) {
+  if (!routingControl) {
+    initializeRouting();
+  }
+
+  // Clear existing route
+  clearRoute();
+
+  // Set waypoints
+  routingControl.setWaypoints([
+    L.latLng(startLat, startLng),
+    L.latLng(endLat, endLng),
+  ]);
+
+  // Add destination marker
+  destinationMarker = L.marker([endLat, endLng], {
+    icon: L.divIcon({
+      html: '<div style="background-color: red; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>',
+      iconSize: [16, 16],
+      iconAnchor: [8, 8],
+    }),
+  }).addTo(map);
+}
+
+// Function to clear current route
+function clearRoute() {
+  if (routingControl) {
+    routingControl.setWaypoints([]);
+  }
+  if (destinationMarker) {
+    map.removeLayer(destinationMarker);
+    destinationMarker = null;
+  }
+}
+
+// Function to find route to nearest ambulance
+function routeToNearestAmbulance() {
+  if (currentLat === null || currentLng === null) {
+    alert("Location not available. Please wait for location to load.");
+    return;
+  }
+
+  if (ambulanceMarkers.length === 0) {
+    alert("No ambulances available");
+    return;
+  }
+
+  // Find nearest ambulance
+  let nearestAmbulance = null;
+  let minDistance = Infinity;
+
+  ambulanceMarkers.forEach((marker) => {
+    const ambulanceLat = marker.getLatLng().lat;
+    const ambulanceLng = marker.getLatLng().lng;
+
+    // Calculate distance using Haversine formula for better accuracy
+    const distance = calculateHaversineDistance(
+      currentLat,
+      currentLng,
+      ambulanceLat,
+      ambulanceLng,
+    );
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestAmbulance = marker;
+    }
+  });
+
+  if (nearestAmbulance) {
+    const ambulanceLat = nearestAmbulance.getLatLng().lat;
+    const ambulanceLng = nearestAmbulance.getLatLng().lng;
+
+    calculateRoute(currentLat, currentLng, ambulanceLat, ambulanceLng);
+
+    // Show route info
+    alert(
+      `Route calculated to nearest ambulance (${(minDistance * 1000).toFixed(0)}m away)`,
+    );
+  }
+}
+
+// Function to calculate Haversine distance between two points
+function calculateHaversineDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in kilometers
+}
+
+// Add click event for manual route planning
+map.on("click", function (e) {
+  if (isRoutingMode && currentLat !== null && currentLng !== null) {
+    calculateRoute(currentLat, currentLng, e.latlng.lat, e.latlng.lng);
+  }
+});
+
+// Function to toggle routing mode
+function toggleRoutingMode() {
+  isRoutingMode = !isRoutingMode;
+  if (isRoutingMode) {
+    alert(
+      "Routing mode enabled. Click on the map to calculate route from your location.",
+    );
+  } else {
+    alert("Routing mode disabled.");
+    clearRoute();
+  }
+}
+
 // Function to fetch and display ambulances
 function loadAmbulances() {
   fetch(API() + "/api/v1/Ambulance", {
@@ -62,7 +201,14 @@ function loadAmbulances() {
           },
         ).addTo(map);
 
-        marker.bindPopup(`Ambulance ID: ${ambulance.id}`);
+        marker.bindPopup(`
+          <div>
+            <strong>Ambulance ID:</strong> ${ambulance.id}<br>
+            <button onclick="calculateRoute(${currentLat}, ${currentLng}, ${parseFloat(ambulance.latitude)}, ${parseFloat(ambulance.longitude)})">
+              Route Here
+            </button>
+          </div>
+        `);
         ambulanceMarkers.push(marker);
       });
     })
@@ -227,10 +373,12 @@ function redirectTOMappie() {
     const ambulanceLat = marker.getLatLng().lat;
     const ambulanceLng = marker.getLatLng().lng;
 
-    // Calculate distance using simple Euclidean distance
-    const distance = Math.sqrt(
-      Math.pow(currentLat - ambulanceLat, 2) +
-        Math.pow(currentLng - ambulanceLng, 2),
+    // Calculate distance using Haversine formula for better accuracy
+    const distance = calculateHaversineDistance(
+      currentLat,
+      currentLng,
+      ambulanceLat,
+      ambulanceLng,
     );
 
     if (distance < minDistance) {
@@ -243,6 +391,11 @@ function redirectTOMappie() {
     alert("No ambulances available");
     return;
   }
+
+  // Calculate route to nearest ambulance
+  const ambulanceLat = nearestAmbulance.getLatLng().lat;
+  const ambulanceLng = nearestAmbulance.getLatLng().lng;
+  calculateRoute(currentLat, currentLng, ambulanceLat, ambulanceLng);
 
   // Make the API call to send alert
   fetch(API() + "/api/v1/Ambulance/alert", {
@@ -268,7 +421,7 @@ function redirectTOMappie() {
         alert("Failed to send emergency alert");
       } else {
         alert(
-          "Emergency alert sent successfully! Nearest ambulance has been notified.",
+          "Emergency alert sent successfully! Nearest ambulance has been notified. Route displayed on map.",
         );
       }
     })
