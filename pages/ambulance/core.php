@@ -63,6 +63,31 @@
       return R * c;
     }
 
+    // Function to send coordinates to API
+    function sendCoordinatesToAPI(latitude, longitude) {
+      fetch(API() + "/api/v1/User/coordinates", {
+        method: "POST",
+        headers: {
+          accept: "*/*",
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + authToken,
+        },
+        body: JSON.stringify({
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          latitude: latitude.toString(),
+          longitude: longitude.toString(),
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            console.log("Failed to send coordinates:", response.status);
+          }
+        })
+        .catch((error) => {
+          console.log("Error sending coordinates:", error);
+        });
+    }
+
     // Function to update info panel
     function updateInfoPanel() {
       document.getElementById('speed-display').textContent = 'Speed: ' + currentSpeed.toFixed(1) + ' km/h';
@@ -121,6 +146,9 @@
 
       // Update info panel
       updateInfoPanel();
+
+      // Send coordinates to API
+      sendCoordinatesToAPI(lat, lng);
     }
 
     // Use default coordinates initially
