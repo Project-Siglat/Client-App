@@ -16,7 +16,7 @@ switch ($request_uri) {
 
     // siglat
     case "/siglat":
-        include "./pages/siglat/core.php";
+        include "./pages/siglat/index.php";
         break;
 
     // here is the user set

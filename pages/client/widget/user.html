@@ -3,6 +3,30 @@
     class="fixed top-0 right-0 w-96 max-w-[90vw] h-screen shadow-2xl z-[2147483647] p-6 box-border overflow-y-auto transform translate-x-full transition-transform duration-300 ease-in-out"
     style="background-color: #2e3440"
 >
+    <!-- Toast notification container -->
+    <div
+        id="toastContainer"
+        class="fixed top-4 right-4 hidden"
+        <!-- style="z-index: 2147483647" -->
+    >
+        <div
+            id="toast"
+            class="px-4 py-3 rounded-lg shadow-lg text-sm font-medium transition-all duration-300 transform translate-x-full"
+            style="background-color: #434c5e; color: #eceff4"
+        >
+            <div class="flex items-center justify-between">
+                <span id="toastMessage"></span>
+                <button
+                    onclick="hideToast()"
+                    class="ml-3 text-lg font-bold bg-transparent border-none cursor-pointer"
+                    style="color: #eceff4"
+                >
+                    ×
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div
         class="flex justify-between items-center mb-6 pb-4"
         style="border-bottom: 1px solid #434c5e"
@@ -114,12 +138,24 @@
                     <span class="text-sm font-medium" style="color: #d8dee9"
                         >Verification Status:</span
                     >
-                    <span
-                        id="verificationStatusDisplay"
-                        class="text-sm font-medium px-2 py-1 rounded"
-                        style="color: #81a1c1"
-                        >Loading...</span
-                    >
+                    <div class="flex items-center gap-2">
+                        <span
+                            id="verificationStatusDisplay"
+                            class="text-sm font-medium px-2 py-1 rounded"
+                            style="color: #81a1c1"
+                            >Loading...</span
+                        >
+                        <button
+                            id="toggleVerificationBtn"
+                            onclick="toggleVerificationForm()"
+                            class="bg-transparent border-none text-sm cursor-pointer px-2 py-1 rounded transition-colors duration-200"
+                            style="color: #88c0d0; border: 1px solid #88c0d0"
+                            onmouseover="this.style.backgroundColor='#88c0d0'; this.style.color='#2e3440'"
+                            onmouseout="this.style.backgroundColor='transparent'; this.style.color='#88c0d0'"
+                        >
+                            Verify
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -129,130 +165,134 @@
                 Account Verification
             </h4>
             <div class="space-y-3">
-                <div>
-                    <label
-                        class="block text-sm font-medium mb-2"
-                        style="color: #d8dee9"
-                    >
-                        Upload Verification Document:
-                    </label>
-                    <input
-                        id="verificationFileUpload"
-                        type="file"
-                        accept="image/*"
-                        class="w-full p-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
-                        style="background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
-                    />
-                </div>
-                <div>
-                    <label
-                        class="block text-sm font-medium mb-2"
-                        style="color: #d8dee9"
-                    >
-                        Document Type:
-                    </label>
-                    <select
-                        id="documentTypeSelect"
-                        class="w-full p-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
-                        style="background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
-                    >
-                        <option value="">Select document type</option>
-                        <option value="passport">Passport</option>
-                        <option value="drivers_license">
-                            Driver's License
-                        </option>
-                        <option value="national_id">National ID</option>
-                        <option value="valid id">Valid ID</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                <button
-                    id="submitVerificationBtn"
-                    onclick="submitVerification()"
-                    class="w-full p-3 border-none rounded-lg cursor-pointer text-base font-medium transition-all duration-200"
-                    style="background-color: #a3be8c; color: #eceff4"
-                    onmouseover="this.style.backgroundColor='#b5c9a4'"
-                    onmouseout="this.style.backgroundColor='#a3be8c'"
+                <div></div>
+                <label
+                    class="block text-sm font-medium mb-2"
+                    style="color: #d8dee9"
                 >
-                    Submit for Verification
-                </button>
+                    Upload Verification Document:
+                </label>
+                <input
+                    id="verificationFileUpload"
+                    type="file"
+                    accept="image/*"
+                    class="w-full p-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                    style="background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
+                />
             </div>
-        </div>
-
-        <div class="mb-6">
-            <h4 class="m-0 mb-3 text-base font-semibold" style="color: #eceff4">
-                Contact Details
-            </h4>
-            <div class="space-y-3">
-                <div class="flex justify-between items-center">
-                    <span class="text-sm font-medium" style="color: #d8dee9"
-                        >Phone:</span
-                    >
-                    <span
-                        id="userPhoneDisplay"
-                        class="text-sm"
-                        style="color: #81a1c1"
-                        >Loading...</span
-                    >
-                    <input
-                        id="userPhoneEdit"
-                        type="text"
-                        class="ml-2 p-2 rounded text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
-                        style="display: none; background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
-                    />
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-sm font-medium" style="color: #d8dee9"
-                        >Address:</span
-                    >
-                    <span
-                        id="userAddressDisplay"
-                        class="text-sm"
-                        style="color: #81a1c1"
-                        >Loading...</span
-                    >
-                    <input
-                        id="userAddressEdit"
-                        type="text"
-                        class="ml-2 p-2 rounded text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
-                        style="display: none; background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
-                    />
-                </div>
+            <div>
+                <label
+                    class="block text-sm font-medium mb-2"
+                    style="color: #d8dee9"
+                >
+                    Document Type:
+                </label>
+                <select
+                    id="documentTypeSelect"
+                    class="w-full p-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                    style="background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
+                >
+                    <option value="">Select document type</option>
+                    <option value="passport">Passport</option>
+                    <option value="drivers_license">Driver's License</option>
+                    <option value="national_id">National ID</option>
+                    <option value="valid id">Valid ID</option>
+                    <option value="other">Other</option>
+                </select>
             </div>
-        </div>
-
-        <div class="mt-8 space-y-3">
             <button
-                id="editProfileBtn"
-                onclick="toggleEditMode()"
-                class="w-full p-3 border-none rounded-lg cursor-pointer text-base font-medium transition-all duration-200"
-                style="background-color: #5e81ac; color: #eceff4"
-                onmouseover="this.style.backgroundColor='#81a1c1'"
-                onmouseout="this.style.backgroundColor='#5e81ac'"
-            >
-                Edit Profile
-            </button>
-            <button
-                id="saveProfileBtn"
-                onclick="saveUserProfile()"
-                class="w-full p-3 border-none rounded-lg cursor-pointer text-base font-medium transition-all duration-200"
-                style="display: none; background-color: #a3be8c; color: #eceff4"
+                id="submitVerificationBtn"
+                onclick="submitVerificationV2()"
+                class="w-full p-3 border-none rounded-lg cursor-pointer text-base font-medium transition-all duration-200 mt-3"
+                style="background-color: #a3be8c; color: #eceff4"
                 onmouseover="this.style.backgroundColor='#b5c9a4'"
                 onmouseout="this.style.backgroundColor='#a3be8c'"
             >
-                Save Changes
+                Submit for Verification
             </button>
-            <button
-                id="cancelEditBtn"
-                onclick="cancelEdit()"
-                class="w-full p-3 border-none rounded-lg cursor-pointer text-base font-medium transition-all duration-200"
-                style="display: none; background-color: #bf616a; color: #eceff4"
-                onmouseover="this.style.backgroundColor='#d08770'"
-                onmouseout="this.style.backgroundColor='#bf616a'"
+            <div
+                id="verificationErrorMessage"
+                class="w-full p-3 rounded-lg text-sm font-medium mt-3"
+                style="display: none; background-color: #bf616a; color: #eceff4; border: 1px solid #d08770;"
             >
-                Cancel
-            </button>
+                <span id="verificationErrorText">An error occurred during verification.</span>
+            </div>
         </div>
+    </div>
+
+    <div class="mb-6">
+        <h4 class="m-0 mb-3 text-base font-semibold" style="color: #eceff4">
+            Contact Details
+        </h4>
+        <div class="space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-sm font-medium" style="color: #d8dee9"
+                    >Phone:</span
+                >
+                <span
+                    id="userPhoneDisplay"
+                    class="text-sm"
+                    style="color: #81a1c1"
+                    >Loading...</span
+                >
+                <input
+                    id="userPhoneEdit"
+                    type="text"
+                    class="ml-2 p-2 rounded text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                    style="display: none; background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
+                />
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm font-medium" style="color: #d8dee9"
+                    >Address:</span
+                >
+                <span
+                    id="userAddressDisplay"
+                    class="text-sm"
+                    style="color: #81a1c1"
+                    >Loading...</span
+                >
+                <input
+                    id="userAddressEdit"
+                    type="text"
+                    class="ml-2 p-2 rounded text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                    style="display: none; background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
+                />
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-8 space-y-3">
+        <button
+            id="editProfileBtn"
+            onclick="toggleEditMode()"
+            class="w-full p-3 border-none rounded-lg cursor-pointer text-base font-medium transition-all duration-200"
+            style="background-color: #5e81ac; color: #eceff4"
+            onmouseover="this.style.backgroundColor='#81a1c1'"
+            onmouseout="this.style.backgroundColor='#5e81ac'"
+        >
+            Edit Profile
+        </button>
+        <button
+            id="saveProfileBtn"
+            onclick="saveUserProfile()"
+            class="w-full p-3 border-none rounded-lg cursor-pointer text-base font-medium transition-all duration-200"
+            style="display: none; background-color: #a3be8c; color: #eceff4"
+            onmouseover="this.style.backgroundColor='#b5c9a4'"
+            onmouseout="this.style.backgroundColor='#a3be8c'"
+        >
+            Save Changes
+        </button>
+        <button
+            id="cancelEditBtn"
+            onclick="cancelEdit()"
+            class="w-full p-3 border-none rounded-lg cursor-pointer text-base font-medium transition-all duration-200"
+            style="display: none; background-color: #bf616a; color: #eceff4"
+            onmouseover="this.style.backgroundColor='#d08770'"
+            onmouseout="this.style.backgroundColor='#bf616a'"
+        >
+            Cancel
+        </button>
     </div>
 </div>
 
@@ -261,6 +301,80 @@
     let isEditMode = false;
     let isLoading = false;
     let verificationStatus = null;
+    let isVerificationFormVisible = false;
+
+    function showToast(message, type = "error") {
+        const toastContainer = document.getElementById("toastContainer");
+        const toast = document.getElementById("toast");
+        const toastMessage = document.getElementById("toastMessage");
+
+        toastMessage.textContent = message;
+
+        // Set toast styling based on type
+        if (type === "error") {
+            toast.style.backgroundColor = "#bf616a";
+            toast.style.color = "#eceff4";
+        } else if (type === "success") {
+            toast.style.backgroundColor = "#a3be8c";
+            toast.style.color = "#2e3440";
+        } else if (type === "warning") {
+            toast.style.backgroundColor = "#ebcb8b";
+            toast.style.color = "#2e3440";
+        }
+
+        toastContainer.style.display = "block";
+
+        // Animate in
+        setTimeout(() => {
+            toast.classList.remove("translate-x-full");
+            toast.classList.add("translate-x-0");
+        }, 10);
+
+        // Auto hide after 5 seconds
+        setTimeout(() => {
+            hideToast();
+        }, 5000);
+    }
+
+    function hideToast() {
+        const toastContainer = document.getElementById("toastContainer");
+        const toast = document.getElementById("toast");
+
+        toast.classList.remove("translate-x-0");
+        toast.classList.add("translate-x-full");
+
+        setTimeout(() => {
+            toastContainer.style.display = "none";
+        }, 300);
+    }
+
+    function checkProfileCompleteness() {
+        if (!currentUserData) return false;
+
+        const requiredFields = [
+            { field: "firstName", name: "First Name" },
+            { field: "lastName", name: "Last Name" },
+            { field: "phoneNumber", name: "Phone Number" },
+            { field: "address", name: "Address" },
+            { field: "gender", name: "Gender" },
+        ];
+
+        const missingFields = [];
+
+        for (const fieldInfo of requiredFields) {
+            const value = currentUserData[fieldInfo.field];
+            if (
+                !value ||
+                value.trim() === "" ||
+                value === "Not provided" ||
+                value === "Not specified"
+            ) {
+                missingFields.push(fieldInfo.name);
+            }
+        }
+
+        return missingFields;
+    }
 
     async function loadUserData() {
         if (isLoading) return;
@@ -339,104 +453,66 @@
         const statusDisplay = document.getElementById(
             "verificationStatusDisplay",
         );
-        const verificationSection = document.getElementById(
-            "verificationSection",
-        );
+        const toggleBtn = document.getElementById("toggleVerificationBtn");
 
         statusDisplay.textContent =
             status.charAt(0).toUpperCase() + status.slice(1);
 
-        // Apply color coding
+        // Apply color coding and update button text
         switch (status) {
             case "verified":
                 statusDisplay.style.backgroundColor = "#a3be8c";
                 statusDisplay.style.color = "#2e3440";
-                verificationSection.style.display = "none";
+                toggleBtn.textContent = "Re-verify";
                 break;
-            case "pending":
-                statusDisplay.style.backgroundColor = "#ebcb8b";
-                statusDisplay.style.color = "#2e3440";
-                verificationSection.style.display = "none";
-                break;
+              case "pending":
+                  statusDisplay.style.backgroundColor = "#ebcb8b";
+                  statusDisplay.style.color = "#2e3440";
+                  toggleBtn.style.display = "none";
+                  break;
             case "rejected":
                 statusDisplay.style.backgroundColor = "#bf616a";
                 statusDisplay.style.color = "#eceff4";
-                verificationSection.style.display = "block";
+                toggleBtn.textContent = "Re-verify";
                 break;
             case "none":
             default:
                 statusDisplay.style.backgroundColor = "#4c566a";
                 statusDisplay.style.color = "#d8dee9";
-                verificationSection.style.display = "block";
+                toggleBtn.textContent = "Verify";
                 break;
         }
     }
 
-    async function submitVerification() {
-        const fileInput = document.getElementById("verificationFileUpload");
-        const documentType =
-            document.getElementById("documentTypeSelect").value;
+    function toggleVerificationForm() {
+        // Check if profile is complete before allowing verification
+        const missingFields = checkProfileCompleteness();
 
-        if (!fileInput.files[0]) {
-            showErrorMessage("Please select a file to upload");
+        if (missingFields.length > 0) {
+            const fieldsText = missingFields.join(", ");
+            showToast(
+                `Please complete your profile first. Missing fields: ${fieldsText}`,
+                "error",
+            );
             return;
         }
 
-        if (!documentType) {
-            showErrorMessage("Please select a document type");
-            return;
-        }
+        const verificationSection = document.getElementById(
+            "verificationSection",
+        );
+        const toggleBtn = document.getElementById("toggleVerificationBtn");
 
-        const submitBtn = document.getElementById("submitVerificationBtn");
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = "Submitting...";
-        submitBtn.disabled = true;
+        isVerificationFormVisible = !isVerificationFormVisible;
 
-        try {
-            const authToken = sessionStorage.getItem("authToken");
-            if (!authToken) {
-                console.error("No auth token found");
-                showErrorMessage("Authentication required");
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append("image", fileInput.files[0]);
-
-            const response = await fetch(
-                `${API()}/api/v1/IAM/verify?DocuType=${encodeURIComponent(documentType)}`,
-                {
-                    method: "POST",
-                    headers: {
-                        accept: "*/*",
-                        Authorization: `Bearer ${authToken}`,
-                    },
-                    body: formData,
-                },
-            );
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            showSuccessMessage("Verification document submitted successfully!");
-            // Reload verification status
-            await loadVerificationStatus();
-
-            // Clear form
-            fileInput.value = "";
-            document.getElementById("documentTypeSelect").value = "";
-        } catch (error) {
-            console.error("Error submitting verification:", error);
-            showErrorMessage(
-                "Error submitting verification document. Please try again.",
-            );
-        } finally {
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
+        if (isVerificationFormVisible) {
+            verificationSection.style.display = "block";
+            toggleBtn.textContent = "Hide Form";
+        } else {
+            verificationSection.style.display = "none";
+            // Reset button text based on verification status
+            updateVerificationDisplay(verificationStatus);
         }
     }
-
     function updateUserDisplay(userData) {
         const fullName = [
             userData.firstName,
@@ -494,12 +570,26 @@
     }
 
     function showErrorMessage(message) {
-        // You can implement a toast notification system here
-        console.error(message);
+        showToast(message, "error");
     }
 
     function toggleEditMode() {
-        isEditMode = true;
+      isEditMode = true;
+      if (isVerificationFormVisible) {
+          document.getElementById("verificationSection").style.display = "none";
+          isVerificationFormVisible = false;
+          // Reset the verify button text based on current verification status
+          updateVerificationDisplay(verificationStatus);
+      }
+
+      // Hide the verification button when in edit mode
+      document.getElementById("toggleVerificationBtn").style.display = "none";
+
+      // Auto show verification section and button when edit mode is false
+      if (!isEditMode) {
+          document.getElementById("verificationSection").style.display = "block";
+          document.getElementById("toggleVerificationBtn").style.display = "inline-block";
+      }
 
         // Hide display elements and show edit elements
         document.getElementById("userNameDisplay").style.display = "none";
@@ -541,6 +631,8 @@
 
     function cancelEdit() {
         isEditMode = false;
+        // Show the verification button when exiting edit mode
+        document.getElementById("toggleVerificationBtn").style.display = "inline-block";
 
         // Show display elements and hide edit elements
         document.getElementById("userNameDisplay").style.display = "block";
@@ -644,8 +736,7 @@
     }
 
     function showSuccessMessage(message) {
-        // You can implement a toast notification system here
-        alert(message);
+        showToast(message, "success");
     }
 
     function toggleUserSidebar() {
@@ -663,6 +754,12 @@
             if (isEditMode) {
                 cancelEdit();
             }
+            // Hide verification form when closing sidebar
+            if (isVerificationFormVisible) {
+                isVerificationFormVisible = false;
+                document.getElementById("verificationSection").style.display =
+                    "none";
+            }
         } else {
             modal.classList.remove("translate-x-full");
             modal.classList.add("translate-x-0");
@@ -671,6 +768,104 @@
             }
             // Load user data when sidebar opens
             loadUserData();
+        }
+    }
+
+    async function submitVerificationV2() {
+        const fileInput = document.getElementById("verificationFileUpload");
+        const documentType = document.getElementById("documentTypeSelect").value;
+        const errorDiv = document.getElementById("verificationErrorMessage");
+        const errorText = document.getElementById("verificationErrorText");
+
+        // Hide error message initially
+        errorDiv.style.display = "none";
+
+        if (!fileInput.files[0]) {
+            errorText.textContent = "Please select a file to upload";
+            errorDiv.style.backgroundColor = "#bf616a";
+            errorDiv.style.color = "#eceff4";
+            errorDiv.style.borderColor = "#d08770";
+            errorDiv.style.display = "block";
+            return;
+        }
+
+        if (!documentType) {
+            errorText.textContent = "Please select a document type";
+            errorDiv.style.backgroundColor = "#bf616a";
+            errorDiv.style.color = "#eceff4";
+            errorDiv.style.borderColor = "#d08770";
+            errorDiv.style.display = "block";
+            return;
+        }
+
+        const submitBtn = document.getElementById("submitVerificationBtn");
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = "Submitting...";
+        submitBtn.disabled = true;
+
+        try {
+            const authToken = sessionStorage.getItem("authToken");
+            if (!authToken) {
+                console.error("No auth token found");
+                errorText.textContent = "Authentication required";
+                errorDiv.style.backgroundColor = "#bf616a";
+                errorDiv.style.color = "#eceff4";
+                errorDiv.style.borderColor = "#d08770";
+                errorDiv.style.display = "block";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("image", fileInput.files[0]);
+
+            const response = await fetch(
+                `${API()}/api/v1/IAM/verify?DocuType=${encodeURIComponent(documentType)}`,
+                {
+                    method: "POST",
+                    headers: {
+                        accept: "*/*",
+                        Authorization: `Bearer ${authToken}`,
+                    },
+                    body: formData,
+                },
+            );
+
+            if (!response.ok) {
+                if (response.status === 400) {
+                    errorText.textContent = "One of your credentials must be complied";
+                    errorDiv.style.backgroundColor = "#bf616a";
+                    errorDiv.style.color = "#eceff4";
+                    errorDiv.style.borderColor = "#d08770";
+                    errorDiv.style.display = "block";
+                    return;
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Show success message
+            errorText.textContent = "Verification document submitted successfully!";
+            errorDiv.style.backgroundColor = "#a3be8c";
+            errorDiv.style.color = "#2e3440";
+            errorDiv.style.borderColor = "#a3be8c";
+            errorDiv.style.display = "block";
+
+            // Reload verification status
+            await loadVerificationStatus();
+
+            // Clear form and hide it
+            fileInput.value = "";
+            document.getElementById("documentTypeSelect").value = "";
+            toggleVerificationForm(); // Hide the form after successful submission
+        } catch (error) {
+            console.error("Error submitting verification:", error);
+            errorText.textContent = "Error submitting verification document. Please try again.";
+            errorDiv.style.backgroundColor = "#bf616a";
+            errorDiv.style.color = "#eceff4";
+            errorDiv.style.borderColor = "#d08770";
+            errorDiv.style.display = "block";
+        } finally {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
         }
     }
 </script>

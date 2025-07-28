@@ -1,0 +1,21 @@
+<div id="map" style="height: calc(100vh - 65px); width: 100%"></div>
+<script>
+    // Initialize the map centered on Villaverde, Nueva Vizcaya, Philippines
+    var map = L.map("map").setView([16.5333, 121.1667], 13);
+
+    // Add OpenStreetMap tile layer
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+    }).addTo(map);
+
+    // Add a marker for Villaverde, Nueva Vizcaya
+    L.marker([16.5333, 121.1667])
+        .addTo(map)
+        .bindPopup("Nueva Vizcaya, Philippines")
+        .openPopup();
+
+    // Add click event listener to log coordinates
+    map.on("click", function (e) {
+        console.log(e.latlng.lat, e.latlng.lng);
+    });
+</script>

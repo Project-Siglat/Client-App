@@ -1,111 +1,21 @@
-<!-- Remove Tailwind CSS CDN due to MIME type and production warning -->
-<!-- <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet"> -->
-
-<!-- Leaflet CSS (remove integrity attribute due to hash mismatch) -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  crossorigin=""/>
-
-<!-- Map container using Tailwind utility classes (these classes will have no effect without Tailwind, but left as-is for layout) -->
-<div id="map" class="h-screen w-screen m-0 p-0" style="display:none;"></div>
-
-<!-- Login UI -->
-<div id="login-ui" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#f8fafc; z-index:9999; align-items:center; justify-content:center; flex-direction:column; font-family:sans-serif;">
-  <form id="login-form" style="background:white; padding:2rem; border-radius:1rem; box-shadow:0 2px 16px rgba(0,0,0,0.1); display:flex; flex-direction:column; gap:1rem; min-width:300px;">
-    <h2 style="margin-bottom:1rem; text-align:center;">Login</h2>
-    <label>
-      Email
-      <input type="text" id="email" required style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:0.5rem;">
-    </label>
-    <label>
-      Password
-      <input type="password" id="password" required style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:0.5rem;">
-    </label>
-    <button type="submit" style="padding:0.75rem; background:#2563eb; color:white; border:none; border-radius:0.5rem; cursor:pointer;">Login</button>
-    <div id="login-error" style="color:red; text-align:center; display:none;"></div>
-  </form>
+<!-- Info panel for speed, distance, and ETA -->
+<div id="info-panel" style="position: absolute; top: 10px; right: 10px; z-index: 1000; background: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-family: Arial, sans-serif; min-width: 200px;">
+  <div style="display: flex; align-items: center; margin-bottom: 5px;">
+    <span style="margin-right: 10px;">🚑</span>
+    <div>
+      <div id="speed-display" style="font-weight: bold;">Speed: 0 km/h</div>
+      <div id="distance-display">Distance: 0 km</div>
+      <div id="eta-display" style="color: #666; font-size: 12px;"></div>
+    </div>
+  </div>
 </div>
 
-<!-- Leaflet JS (remove integrity attribute due to hash mismatch) -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  crossorigin=""></script>
-
-<?php
-include "./config/env.php";
-$API = $_ENV["API"];
-?>
-
+<div id="map" class="h-screen w-screen m-0 p-0" style="height: 100vh; width: 100vw; margin: 0; padding: 0;"></div>
 <script>
-  // Helper to get token from sessionStorage
-  function getToken() {
-    return sessionStorage.getItem('token');
-  }
-
-  // Show/hide UI based on token
-  function updateUIVisibility() {
-    var token = getToken();
-    var mapDiv = document.getElementById('map');
-    var loginDiv = document.getElementById('login-ui');
-    if (token) {
-      mapDiv.style.display = '';
-      loginDiv.style.display = 'none';
-    } else {
-      mapDiv.style.display = 'none';
-      loginDiv.style.display = 'flex';
-    }
-  }
-
-  // Login form logic
+  // Wait for Leaflet JS to load before using L
   document.addEventListener('DOMContentLoaded', function() {
-    updateUIVisibility();
-
-    var loginForm = document.getElementById('login-form');
-    if (loginForm) {
-      loginForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        var email = document.getElementById('email').value;
-        var password = document.getElementById('password').value;
-        var errorDiv = document.getElementById('login-error');
-        errorDiv.style.display = 'none';
-
-        // Replace this with your real login API endpoint
-        fetch('<?php echo $API; ?>/api/v1/Auth/login', {
-          method: 'POST',
-          headers: {
-            'accept': '*/*',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            email: email,
-            password: password
-          })
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Invalid credentials');
-          }
-          return response.text(); // Expect raw string token
-        })
-        .then(token => {
-          sessionStorage.setItem('token', token);
-          updateUIVisibility();
-          // Optionally reload to re-init map
-          location.reload();
-        })
-        .catch(error => {
-          errorDiv.textContent = error.message || 'Login failed';
-          errorDiv.style.display = 'block';
-        });
-      });
-    }
-
-    // Wait for Leaflet JS to load before using L
     if (typeof L === 'undefined') {
       // Do not alert, just return
-      return;
-    }
-
-    // Only show map if token is present
-    if (!getToken()) {
       return;
     }
 
@@ -123,7 +33,7 @@ $API = $_ENV["API"];
 
     // Define ambulance SVG icon for Leaflet
     var ambulanceIcon = L.icon({
-      iconUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ambulance-icon lucide-ambulance"><path d="M10 10H6"/><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.28a1 1 0 0 0-.684-.948l-1.923-.641a1 1 0 0 1-.578-.502l-1.539-3.076A1 1 0 0 0 16.382 8H14"/><path d="M8 8v4"/><path d="M9 18h6"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>',
+      iconUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="red" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="12" height="7" rx="1" fill="white" stroke="red"/><rect x="14" y="10" width="6" height="5" rx="1" fill="white" stroke="red"/><circle cx="6" cy="17" r="1.5" fill="black"/><circle cx="16" cy="17" r="1.5" fill="black"/><line x1="8" y1="10" x2="8" y2="13" stroke="red" stroke-width="2"/><line x1="6.5" y1="11.5" x2="9.5" y2="11.5" stroke="red" stroke-width="2"/></svg>',
       iconSize: [40, 40],
       iconAnchor: [20, 35],
       popupAnchor: [0, -35]
@@ -133,51 +43,94 @@ $API = $_ENV["API"];
     var marker = L.marker([defaultLat, defaultLng], { icon: ambulanceIcon }).addTo(map)
       .bindPopup("Auto-pointed location").openPopup();
 
-    // Function to post location
-    function postLocation(lat, lng) {
-      var token = getToken();
-      var payload = {
-        id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        latitude: lat.toString(),
-        longitude: lng.toString()
-      };
+    // Variables for speed and distance calculation
+    var previousLat = null;
+    var previousLng = null;
+    var previousTime = null;
+    var currentSpeed = 0;
+    var targetLat = null; // Set this to target coordinates if available
+    var targetLng = null; // Set this to target coordinates if available
 
-      fetch('<?php echo $API; ?>/api/v1/User/coordinates', {
-        method: 'POST',
-        headers: {
-          'accept': '*/*',
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': 'Bearer ' + token } : {})
-        },
-        body: JSON.stringify(payload)
-      })
-      .then(response => response.json())
-      .then(data => {
-        // Optionally handle response
-        console.log('Location posted:', data);
-      })
-      .catch(error => {
-        console.error('Error posting location:', error);
-      });
+    // Function to calculate distance between two points (Haversine formula)
+    function calculateDistance(lat1, lng1, lat2, lng2) {
+      var R = 6371; // Radius of the Earth in kilometers
+      var dLat = (lat2 - lat1) * Math.PI / 180;
+      var dLng = (lng2 - lng1) * Math.PI / 180;
+      var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
     }
 
-    // Function to update marker and post location
+    // Function to update info panel
+    function updateInfoPanel() {
+      document.getElementById('speed-display').textContent = 'Speed: ' + currentSpeed.toFixed(1) + ' km/h';
+
+      var distance = 0;
+      var eta = '';
+
+      if (targetLat && targetLng) {
+        distance = calculateDistance(lastLat, lastLng, targetLat, targetLng);
+        document.getElementById('distance-display').textContent = 'Distance: ' + distance.toFixed(2) + ' km';
+
+        if (distance > 0 && currentSpeed > 0) {
+          var etaHours = distance / currentSpeed;
+          var etaMinutes = etaHours * 60;
+          if (etaMinutes < 60) {
+            eta = 'ETA: ' + Math.round(etaMinutes) + ' min';
+          } else {
+            var hours = Math.floor(etaHours);
+            var minutes = Math.round((etaHours - hours) * 60);
+            eta = 'ETA: ' + hours + 'h ' + minutes + 'm';
+          }
+        }
+      } else {
+        document.getElementById('distance-display').textContent = 'Distance: 0 km';
+      }
+
+      document.getElementById('eta-display').textContent = eta;
+    }
+
+    // Function to update marker location
     function updateLocation(lat, lng) {
+      var currentTime = Date.now();
+
+      // Calculate speed if we have previous position
+      if (previousLat !== null && previousLng !== null && previousTime !== null) {
+        var distance = calculateDistance(previousLat, previousLng, lat, lng);
+        var timeElapsed = (currentTime - previousTime) / 1000 / 3600; // Convert to hours
+
+        if (timeElapsed > 0) {
+          currentSpeed = distance / timeElapsed;
+        }
+      }
+
+      // Update previous position and time
+      previousLat = lat;
+      previousLng = lng;
+      previousTime = currentTime;
+
+      // Load the location first
       marker.setLatLng([lat, lng]);
-      map.setView([lat, lng], map.getZoom());
       marker.getPopup().setContent("Live location");
       marker.openPopup();
-      postLocation(lat, lng);
+
+      // Then re-center the map
+      map.setView([lat, lng], map.getZoom());
+
+      // Update info panel
+      updateInfoPanel();
     }
 
     // Use default coordinates initially
     updateLocation(defaultLat, defaultLng);
 
-    // Live location logic: only request once, and only if not denied
+    // Live location logic
     var lastLat = defaultLat;
     var lastLng = defaultLng;
 
-    function requestLiveLocationOnce() {
+    function requestLiveLocation() {
       if (!navigator.geolocation) {
         // Geolocation not available, use default
         updateLocation(lastLat, lastLng);
@@ -203,7 +156,7 @@ $API = $_ENV["API"];
             updateLocation(lastLat, lastLng);
           }
         }).catch(function() {
-          // If permissions API fails, fallback to requesting location once
+          // If permissions API fails, fallback to requesting location
           navigator.geolocation.getCurrentPosition(function(position) {
             var lat = position.coords.latitude;
             var lng = position.coords.longitude;
@@ -215,7 +168,7 @@ $API = $_ENV["API"];
           });
         });
       } else {
-        // Permissions API not available, fallback to requesting location once
+        // Permissions API not available, fallback to requesting location
         navigator.geolocation.getCurrentPosition(function(position) {
           var lat = position.coords.latitude;
           var lng = position.coords.longitude;
@@ -228,7 +181,8 @@ $API = $_ENV["API"];
       }
     }
 
-    // Only request location once, not repeatedly
-    requestLiveLocationOnce();
+    // Request location initially and then every 0.5 seconds
+    requestLiveLocation();
+    setInterval(requestLiveLocation, 500);
   });
 </script>
