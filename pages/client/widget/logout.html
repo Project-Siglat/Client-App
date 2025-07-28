@@ -1,0 +1,37 @@
+<div
+    class="option-button"
+    style="
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: #dc2626;
+        margin-bottom: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        opacity: 0;
+        transform: translateY(10px);
+        z-index: 10;
+    "
+    onclick="Logout()"
+    onmouseenter="this.style.transform='scale(1.1) translateY(0)'; this.style.boxShadow='0 4px 15px rgba(220,38,38,0.4)'"
+    onmouseleave="this.style.transform='scale(1) translateY(0)'; this.style.boxShadow='0 2px 6px rgba(220,38,38,0.2)'"
+    onmousedown="this.style.transform='scale(0.95) translateY(0)'"
+    onmouseup="this.style.transform='scale(1.1) translateY(0)'"
+>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path
+            d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
+        />
+    </svg>
+</div>
+
+<script>
+    function Logout() {
+        sessionStorage.clear();
+    }
+</script>

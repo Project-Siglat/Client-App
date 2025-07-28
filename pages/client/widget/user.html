@@ -1,0 +1,871 @@
+<div
+    id="userSidebar"
+    class="fixed top-0 right-0 w-96 max-w-[90vw] h-screen shadow-2xl z-[2147483647] p-6 box-border overflow-y-auto transform translate-x-full transition-transform duration-300 ease-in-out"
+    style="background-color: #2e3440"
+>
+    <!-- Toast notification container -->
+    <div
+        id="toastContainer"
+        class="fixed top-4 right-4 hidden"
+        <!-- style="z-index: 2147483647" -->
+    >
+        <div
+            id="toast"
+            class="px-4 py-3 rounded-lg shadow-lg text-sm font-medium transition-all duration-300 transform translate-x-full"
+            style="background-color: #434c5e; color: #eceff4"
+        >
+            <div class="flex items-center justify-between">
+                <span id="toastMessage"></span>
+                <button
+                    onclick="hideToast()"
+                    class="ml-3 text-lg font-bold bg-transparent border-none cursor-pointer"
+                    style="color: #eceff4"
+                >
+                    ×
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div
+        class="flex justify-between items-center mb-6 pb-4"
+        style="border-bottom: 1px solid #434c5e"
+    >
+        <h2 class="m-0 text-2xl font-semibold" style="color: #eceff4">
+            User Profile
+        </h2>
+        <button
+            onclick="toggleUserSidebar()"
+            class="bg-transparent border-none text-2xl cursor-pointer w-8 h-8 flex items-center justify-center rounded-md transition-colors duration-200"
+            style="color: #d8dee9"
+            onmouseover="this.style.backgroundColor='#434c5e'"
+            onmouseout="this.style.backgroundColor='transparent'"
+        >
+            ×
+        </button>
+    </div>
+
+    <div class="text-center mb-6">
+        <div id="userNameDisplay">
+            <h3
+                id="userName"
+                class="m-0 mb-2 text-xl font-medium"
+                style="color: #eceff4"
+            >
+                Loading...
+            </h3>
+        </div>
+        <div id="userNameEdit" style="display: none">
+            <input
+                id="firstNameEdit"
+                type="text"
+                placeholder="First Name"
+                class="w-full mb-3 p-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                style="background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
+            />
+            <input
+                id="middleNameEdit"
+                type="text"
+                placeholder="Middle Name"
+                class="w-full mb-3 p-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                style="background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
+            />
+            <input
+                id="lastNameEdit"
+                type="text"
+                placeholder="Last Name"
+                class="w-full mb-3 p-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                style="background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
+            />
+        </div>
+        <p id="userEmail" class="m-0 text-sm" style="color: #81a1c1">
+            Loading...
+        </p>
+    </div>
+
+    <div class="pt-4" style="border-top: 1px solid #434c5e">
+        <div class="mb-6">
+            <h4 class="m-0 mb-3 text-base font-semibold" style="color: #eceff4">
+                Account Information
+            </h4>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium" style="color: #d8dee9"
+                        >Member since:</span
+                    >
+                    <span
+                        id="memberSince"
+                        class="text-sm"
+                        style="color: #81a1c1"
+                        >Loading...</span
+                    >
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium" style="color: #d8dee9"
+                        >Role:</span
+                    >
+                    <span
+                        id="userRoleDisplay"
+                        class="text-sm"
+                        style="color: #81a1c1"
+                        >Loading...</span
+                    >
+                    <input
+                        id="userRoleEdit"
+                        type="text"
+                        class="ml-2 p-2 rounded text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                        style="display: none; background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
+                    />
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium" style="color: #d8dee9"
+                        >Gender:</span
+                    >
+                    <span
+                        id="userGenderDisplay"
+                        class="text-sm"
+                        style="color: #81a1c1"
+                        >Loading...</span
+                    >
+                    <input
+                        id="userGenderEdit"
+                        type="text"
+                        class="ml-2 p-2 rounded text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                        style="display: none; background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
+                    />
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium" style="color: #d8dee9"
+                        >Verification Status:</span
+                    >
+                    <div class="flex items-center gap-2">
+                        <span
+                            id="verificationStatusDisplay"
+                            class="text-sm font-medium px-2 py-1 rounded"
+                            style="color: #81a1c1"
+                            >Loading...</span
+                        >
+                        <button
+                            id="toggleVerificationBtn"
+                            onclick="toggleVerificationForm()"
+                            class="bg-transparent border-none text-sm cursor-pointer px-2 py-1 rounded transition-colors duration-200"
+                            style="color: #88c0d0; border: 1px solid #88c0d0"
+                            onmouseover="this.style.backgroundColor='#88c0d0'; this.style.color='#2e3440'"
+                            onmouseout="this.style.backgroundColor='transparent'; this.style.color='#88c0d0'"
+                        >
+                            Verify
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="verificationSection" class="mb-6" style="display: none">
+            <h4 class="m-0 mb-3 text-base font-semibold" style="color: #eceff4">
+                Account Verification
+            </h4>
+            <div class="space-y-3">
+                <div></div>
+                <label
+                    class="block text-sm font-medium mb-2"
+                    style="color: #d8dee9"
+                >
+                    Upload Verification Document:
+                </label>
+                <input
+                    id="verificationFileUpload"
+                    type="file"
+                    accept="image/*"
+                    class="w-full p-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                    style="background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
+                />
+            </div>
+            <div>
+                <label
+                    class="block text-sm font-medium mb-2"
+                    style="color: #d8dee9"
+                >
+                    Document Type:
+                </label>
+                <select
+                    id="documentTypeSelect"
+                    class="w-full p-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                    style="background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
+                >
+                    <option value="">Select document type</option>
+                    <option value="passport">Passport</option>
+                    <option value="drivers_license">Driver's License</option>
+                    <option value="national_id">National ID</option>
+                    <option value="valid id">Valid ID</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <button
+                id="submitVerificationBtn"
+                onclick="submitVerificationV2()"
+                class="w-full p-3 border-none rounded-lg cursor-pointer text-base font-medium transition-all duration-200 mt-3"
+                style="background-color: #a3be8c; color: #eceff4"
+                onmouseover="this.style.backgroundColor='#b5c9a4'"
+                onmouseout="this.style.backgroundColor='#a3be8c'"
+            >
+                Submit for Verification
+            </button>
+            <div
+                id="verificationErrorMessage"
+                class="w-full p-3 rounded-lg text-sm font-medium mt-3"
+                style="display: none; background-color: #bf616a; color: #eceff4; border: 1px solid #d08770;"
+            >
+                <span id="verificationErrorText">An error occurred during verification.</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-6">
+        <h4 class="m-0 mb-3 text-base font-semibold" style="color: #eceff4">
+            Contact Details
+        </h4>
+        <div class="space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-sm font-medium" style="color: #d8dee9"
+                    >Phone:</span
+                >
+                <span
+                    id="userPhoneDisplay"
+                    class="text-sm"
+                    style="color: #81a1c1"
+                    >Loading...</span
+                >
+                <input
+                    id="userPhoneEdit"
+                    type="text"
+                    class="ml-2 p-2 rounded text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                    style="display: none; background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
+                />
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm font-medium" style="color: #d8dee9"
+                    >Address:</span
+                >
+                <span
+                    id="userAddressDisplay"
+                    class="text-sm"
+                    style="color: #81a1c1"
+                    >Loading...</span
+                >
+                <input
+                    id="userAddressEdit"
+                    type="text"
+                    class="ml-2 p-2 rounded text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                    style="display: none; background-color: #3b4252; border: 1px solid #434c5e; color: #eceff4; focus:ring-color: #88c0d0;"
+                />
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-8 space-y-3">
+        <button
+            id="editProfileBtn"
+            onclick="toggleEditMode()"
+            class="w-full p-3 border-none rounded-lg cursor-pointer text-base font-medium transition-all duration-200"
+            style="background-color: #5e81ac; color: #eceff4"
+            onmouseover="this.style.backgroundColor='#81a1c1'"
+            onmouseout="this.style.backgroundColor='#5e81ac'"
+        >
+            Edit Profile
+        </button>
+        <button
+            id="saveProfileBtn"
+            onclick="saveUserProfile()"
+            class="w-full p-3 border-none rounded-lg cursor-pointer text-base font-medium transition-all duration-200"
+            style="display: none; background-color: #a3be8c; color: #eceff4"
+            onmouseover="this.style.backgroundColor='#b5c9a4'"
+            onmouseout="this.style.backgroundColor='#a3be8c'"
+        >
+            Save Changes
+        </button>
+        <button
+            id="cancelEditBtn"
+            onclick="cancelEdit()"
+            class="w-full p-3 border-none rounded-lg cursor-pointer text-base font-medium transition-all duration-200"
+            style="display: none; background-color: #bf616a; color: #eceff4"
+            onmouseover="this.style.backgroundColor='#d08770'"
+            onmouseout="this.style.backgroundColor='#bf616a'"
+        >
+            Cancel
+        </button>
+    </div>
+</div>
+
+<script>
+    let currentUserData = null;
+    let isEditMode = false;
+    let isLoading = false;
+    let verificationStatus = null;
+    let isVerificationFormVisible = false;
+
+    function showToast(message, type = "error") {
+        const toastContainer = document.getElementById("toastContainer");
+        const toast = document.getElementById("toast");
+        const toastMessage = document.getElementById("toastMessage");
+
+        toastMessage.textContent = message;
+
+        // Set toast styling based on type
+        if (type === "error") {
+            toast.style.backgroundColor = "#bf616a";
+            toast.style.color = "#eceff4";
+        } else if (type === "success") {
+            toast.style.backgroundColor = "#a3be8c";
+            toast.style.color = "#2e3440";
+        } else if (type === "warning") {
+            toast.style.backgroundColor = "#ebcb8b";
+            toast.style.color = "#2e3440";
+        }
+
+        toastContainer.style.display = "block";
+
+        // Animate in
+        setTimeout(() => {
+            toast.classList.remove("translate-x-full");
+            toast.classList.add("translate-x-0");
+        }, 10);
+
+        // Auto hide after 5 seconds
+        setTimeout(() => {
+            hideToast();
+        }, 5000);
+    }
+
+    function hideToast() {
+        const toastContainer = document.getElementById("toastContainer");
+        const toast = document.getElementById("toast");
+
+        toast.classList.remove("translate-x-0");
+        toast.classList.add("translate-x-full");
+
+        setTimeout(() => {
+            toastContainer.style.display = "none";
+        }, 300);
+    }
+
+    function checkProfileCompleteness() {
+        if (!currentUserData) return false;
+
+        const requiredFields = [
+            { field: "firstName", name: "First Name" },
+            { field: "lastName", name: "Last Name" },
+            { field: "phoneNumber", name: "Phone Number" },
+            { field: "address", name: "Address" },
+            { field: "gender", name: "Gender" },
+        ];
+
+        const missingFields = [];
+
+        for (const fieldInfo of requiredFields) {
+            const value = currentUserData[fieldInfo.field];
+            if (
+                !value ||
+                value.trim() === "" ||
+                value === "Not provided" ||
+                value === "Not specified"
+            ) {
+                missingFields.push(fieldInfo.name);
+            }
+        }
+
+        return missingFields;
+    }
+
+    async function loadUserData() {
+        if (isLoading) return;
+
+        try {
+            isLoading = true;
+            updateLoadingState(true);
+
+            const authToken = sessionStorage.getItem("authToken");
+            if (!authToken) {
+                console.error("No auth token found");
+                showErrorMessage("Authentication required");
+                return;
+            }
+
+            const response = await fetch(API() + "/api/v1/IAM", {
+                method: "GET",
+                headers: {
+                    accept: "*/*",
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const userData = await response.json();
+            currentUserData = userData;
+
+            // Update the UI with fetched data
+            updateUserDisplay(userData);
+
+            // Load verification status
+            await loadVerificationStatus();
+        } catch (error) {
+            console.error("Error loading user data:", error);
+            showErrorMessage("Failed to load user data");
+        } finally {
+            isLoading = false;
+            updateLoadingState(false);
+        }
+    }
+
+    async function loadVerificationStatus() {
+        try {
+            const authToken = sessionStorage.getItem("authToken");
+            if (!authToken) {
+                console.error("No auth token found");
+                return;
+            }
+
+            const response = await fetch(API() + "/api/v1/IAM/verified", {
+                method: "GET",
+                headers: {
+                    accept: "*/*",
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const status = await response.text();
+            verificationStatus = status.replace(/"/g, ""); // Remove quotes if present
+            updateVerificationDisplay(verificationStatus);
+        } catch (error) {
+            console.error("Error loading verification status:", error);
+            document.getElementById("verificationStatusDisplay").textContent =
+                "Error loading status";
+        }
+    }
+
+    function updateVerificationDisplay(status) {
+        const statusDisplay = document.getElementById(
+            "verificationStatusDisplay",
+        );
+        const toggleBtn = document.getElementById("toggleVerificationBtn");
+
+        statusDisplay.textContent =
+            status.charAt(0).toUpperCase() + status.slice(1);
+
+        // Apply color coding and update button text
+        switch (status) {
+            case "verified":
+                statusDisplay.style.backgroundColor = "#a3be8c";
+                statusDisplay.style.color = "#2e3440";
+                toggleBtn.textContent = "Re-verify";
+                break;
+              case "pending":
+                  statusDisplay.style.backgroundColor = "#ebcb8b";
+                  statusDisplay.style.color = "#2e3440";
+                  toggleBtn.style.display = "none";
+                  break;
+            case "rejected":
+                statusDisplay.style.backgroundColor = "#bf616a";
+                statusDisplay.style.color = "#eceff4";
+                toggleBtn.textContent = "Re-verify";
+                break;
+            case "none":
+            default:
+                statusDisplay.style.backgroundColor = "#4c566a";
+                statusDisplay.style.color = "#d8dee9";
+                toggleBtn.textContent = "Verify";
+                break;
+        }
+    }
+
+    function toggleVerificationForm() {
+        // Check if profile is complete before allowing verification
+        const missingFields = checkProfileCompleteness();
+
+        if (missingFields.length > 0) {
+            const fieldsText = missingFields.join(", ");
+            showToast(
+                `Please complete your profile first. Missing fields: ${fieldsText}`,
+                "error",
+            );
+            return;
+        }
+
+        const verificationSection = document.getElementById(
+            "verificationSection",
+        );
+        const toggleBtn = document.getElementById("toggleVerificationBtn");
+
+        isVerificationFormVisible = !isVerificationFormVisible;
+
+        if (isVerificationFormVisible) {
+            verificationSection.style.display = "block";
+            toggleBtn.textContent = "Hide Form";
+        } else {
+            verificationSection.style.display = "none";
+            // Reset button text based on verification status
+            updateVerificationDisplay(verificationStatus);
+        }
+    }
+    function updateUserDisplay(userData) {
+        const fullName = [
+            userData.firstName,
+            userData.middleName,
+            userData.lastName,
+        ]
+            .filter((name) => name && name.trim())
+            .join(" ");
+
+        document.getElementById("userName").textContent =
+            fullName || "No name provided";
+        document.getElementById("userEmail").textContent =
+            userData.email || "No email provided";
+        document.getElementById("userRoleDisplay").textContent =
+            userData.role || "No role assigned";
+        document.getElementById("userGenderDisplay").textContent =
+            userData.gender || "Not specified";
+        document.getElementById("userPhoneDisplay").textContent =
+            userData.phoneNumber || "Not provided";
+        document.getElementById("userAddressDisplay").textContent =
+            userData.address || "Not provided";
+
+        // Format and display member since date
+        if (userData.createdAt) {
+            const memberSince = new Date(userData.createdAt).toLocaleDateString(
+                "en-US",
+                {
+                    year: "numeric",
+                    month: "long",
+                },
+            );
+            document.getElementById("memberSince").textContent = memberSince;
+        } else {
+            document.getElementById("memberSince").textContent = "Unknown";
+        }
+    }
+
+    function updateLoadingState(loading) {
+        const loadingText = loading ? "Loading..." : "";
+        if (loading) {
+            document.getElementById("userName").textContent = loadingText;
+            document.getElementById("userEmail").textContent = loadingText;
+            document.getElementById("userRoleDisplay").textContent =
+                loadingText;
+            document.getElementById("userGenderDisplay").textContent =
+                loadingText;
+            document.getElementById("userPhoneDisplay").textContent =
+                loadingText;
+            document.getElementById("userAddressDisplay").textContent =
+                loadingText;
+            document.getElementById("memberSince").textContent = loadingText;
+            document.getElementById("verificationStatusDisplay").textContent =
+                loadingText;
+        }
+    }
+
+    function showErrorMessage(message) {
+        showToast(message, "error");
+    }
+
+    function toggleEditMode() {
+      isEditMode = true;
+      if (isVerificationFormVisible) {
+          document.getElementById("verificationSection").style.display = "none";
+          isVerificationFormVisible = false;
+          // Reset the verify button text based on current verification status
+          updateVerificationDisplay(verificationStatus);
+      }
+
+      // Hide the verification button when in edit mode
+      document.getElementById("toggleVerificationBtn").style.display = "none";
+
+      // Auto show verification section and button when edit mode is false
+      if (!isEditMode) {
+          document.getElementById("verificationSection").style.display = "block";
+          document.getElementById("toggleVerificationBtn").style.display = "inline-block";
+      }
+
+        // Hide display elements and show edit elements
+        document.getElementById("userNameDisplay").style.display = "none";
+        document.getElementById("userNameEdit").style.display = "block";
+        document.getElementById("userRoleDisplay").style.display = "none";
+        document.getElementById("userRoleEdit").style.display = "inline-block";
+        document.getElementById("userGenderDisplay").style.display = "none";
+        document.getElementById("userGenderEdit").style.display =
+            "inline-block";
+        document.getElementById("userPhoneDisplay").style.display = "none";
+        document.getElementById("userPhoneEdit").style.display = "inline-block";
+        document.getElementById("userAddressDisplay").style.display = "none";
+        document.getElementById("userAddressEdit").style.display =
+            "inline-block";
+
+        // Populate edit fields with current data
+        if (currentUserData) {
+            document.getElementById("firstNameEdit").value =
+                currentUserData.firstName || "";
+            document.getElementById("middleNameEdit").value =
+                currentUserData.middleName || "";
+            document.getElementById("lastNameEdit").value =
+                currentUserData.lastName || "";
+            document.getElementById("userRoleEdit").value =
+                currentUserData.role || "";
+            document.getElementById("userGenderEdit").value =
+                currentUserData.gender || "";
+            document.getElementById("userPhoneEdit").value =
+                currentUserData.phoneNumber || "";
+            document.getElementById("userAddressEdit").value =
+                currentUserData.address || "";
+        }
+
+        // Toggle buttons
+        document.getElementById("editProfileBtn").style.display = "none";
+        document.getElementById("saveProfileBtn").style.display = "block";
+        document.getElementById("cancelEditBtn").style.display = "block";
+    }
+
+    function cancelEdit() {
+        isEditMode = false;
+        // Show the verification button when exiting edit mode
+        document.getElementById("toggleVerificationBtn").style.display = "inline-block";
+
+        // Show display elements and hide edit elements
+        document.getElementById("userNameDisplay").style.display = "block";
+        document.getElementById("userNameEdit").style.display = "none";
+        document.getElementById("userRoleDisplay").style.display = "inline";
+        document.getElementById("userRoleEdit").style.display = "none";
+        document.getElementById("userGenderDisplay").style.display = "inline";
+        document.getElementById("userGenderEdit").style.display = "none";
+        document.getElementById("userPhoneDisplay").style.display = "inline";
+        document.getElementById("userPhoneEdit").style.display = "none";
+        document.getElementById("userAddressDisplay").style.display = "inline";
+        document.getElementById("userAddressEdit").style.display = "none";
+
+        // Toggle buttons
+        document.getElementById("editProfileBtn").style.display = "block";
+        document.getElementById("saveProfileBtn").style.display = "none";
+        document.getElementById("cancelEditBtn").style.display = "none";
+    }
+
+    async function saveUserProfile() {
+        if (isLoading) return;
+
+        try {
+            isLoading = true;
+            const saveBtn = document.getElementById("saveProfileBtn");
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = "Saving...";
+            saveBtn.disabled = true;
+
+            const authToken = sessionStorage.getItem("authToken");
+            if (!authToken) {
+                console.error("No auth token found");
+                showErrorMessage("Authentication required");
+                return;
+            }
+
+            if (!currentUserData) {
+                console.error("No current user data found");
+                showErrorMessage("No user data available");
+                return;
+            }
+
+            // Get updated values from form
+            const updatedData = {
+                id: currentUserData.id,
+                firstName: document
+                    .getElementById("firstNameEdit")
+                    .value.trim(),
+                middleName: document
+                    .getElementById("middleNameEdit")
+                    .value.trim(),
+                lastName: document.getElementById("lastNameEdit").value.trim(),
+                address: document
+                    .getElementById("userAddressEdit")
+                    .value.trim(),
+                gender: document.getElementById("userGenderEdit").value.trim(),
+                phoneNumber: document
+                    .getElementById("userPhoneEdit")
+                    .value.trim(),
+                role: document.getElementById("userRoleEdit").value.trim(),
+                dateOfBirth: currentUserData.dateOfBirth,
+                email: currentUserData.email,
+                hashPass: currentUserData.hashPass,
+                createdAt: currentUserData.createdAt,
+                updatedAt: new Date().toISOString(),
+            };
+
+            const response = await fetch(API() + "/api/v1/IAM/update", {
+                method: "POST",
+                headers: {
+                    accept: "*/*",
+                    Authorization: `Bearer ${authToken}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(updatedData),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                throw new Error(
+                    `HTTP error! status: ${response.status}, message: ${errorData}`,
+                );
+            }
+
+            // Update current user data and refresh display
+            currentUserData = updatedData;
+            updateUserDisplay(currentUserData);
+            cancelEdit();
+
+            // Show success message (you can replace alert with a better notification system)
+            showSuccessMessage("Profile updated successfully!");
+        } catch (error) {
+            console.error("Error updating user profile:", error);
+            showErrorMessage("Error updating profile. Please try again.");
+        } finally {
+            isLoading = false;
+            const saveBtn = document.getElementById("saveProfileBtn");
+            saveBtn.textContent = "Save Changes";
+            saveBtn.disabled = false;
+        }
+    }
+
+    function showSuccessMessage(message) {
+        showToast(message, "success");
+    }
+
+    function toggleUserSidebar() {
+        const modal = document.getElementById("userSidebar");
+        const backdrop = document.getElementById("userSidebarBackdrop");
+        const isOpen = modal.classList.contains("translate-x-0");
+
+        if (isOpen) {
+            modal.classList.remove("translate-x-0");
+            modal.classList.add("translate-x-full");
+            if (backdrop) {
+                backdrop.style.display = "none";
+            }
+            // Cancel edit mode when closing sidebar
+            if (isEditMode) {
+                cancelEdit();
+            }
+            // Hide verification form when closing sidebar
+            if (isVerificationFormVisible) {
+                isVerificationFormVisible = false;
+                document.getElementById("verificationSection").style.display =
+                    "none";
+            }
+        } else {
+            modal.classList.remove("translate-x-full");
+            modal.classList.add("translate-x-0");
+            if (backdrop) {
+                backdrop.style.display = "block";
+            }
+            // Load user data when sidebar opens
+            loadUserData();
+        }
+    }
+
+    async function submitVerificationV2() {
+        const fileInput = document.getElementById("verificationFileUpload");
+        const documentType = document.getElementById("documentTypeSelect").value;
+        const errorDiv = document.getElementById("verificationErrorMessage");
+        const errorText = document.getElementById("verificationErrorText");
+
+        // Hide error message initially
+        errorDiv.style.display = "none";
+
+        if (!fileInput.files[0]) {
+            errorText.textContent = "Please select a file to upload";
+            errorDiv.style.backgroundColor = "#bf616a";
+            errorDiv.style.color = "#eceff4";
+            errorDiv.style.borderColor = "#d08770";
+            errorDiv.style.display = "block";
+            return;
+        }
+
+        if (!documentType) {
+            errorText.textContent = "Please select a document type";
+            errorDiv.style.backgroundColor = "#bf616a";
+            errorDiv.style.color = "#eceff4";
+            errorDiv.style.borderColor = "#d08770";
+            errorDiv.style.display = "block";
+            return;
+        }
+
+        const submitBtn = document.getElementById("submitVerificationBtn");
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = "Submitting...";
+        submitBtn.disabled = true;
+
+        try {
+            const authToken = sessionStorage.getItem("authToken");
+            if (!authToken) {
+                console.error("No auth token found");
+                errorText.textContent = "Authentication required";
+                errorDiv.style.backgroundColor = "#bf616a";
+                errorDiv.style.color = "#eceff4";
+                errorDiv.style.borderColor = "#d08770";
+                errorDiv.style.display = "block";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("image", fileInput.files[0]);
+
+            const response = await fetch(
+                `${API()}/api/v1/IAM/verify?DocuType=${encodeURIComponent(documentType)}`,
+                {
+                    method: "POST",
+                    headers: {
+                        accept: "*/*",
+                        Authorization: `Bearer ${authToken}`,
+                    },
+                    body: formData,
+                },
+            );
+
+            if (!response.ok) {
+                if (response.status === 400) {
+                    errorText.textContent = "One of your credentials must be complied";
+                    errorDiv.style.backgroundColor = "#bf616a";
+                    errorDiv.style.color = "#eceff4";
+                    errorDiv.style.borderColor = "#d08770";
+                    errorDiv.style.display = "block";
+                    return;
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Show success message
+            errorText.textContent = "Verification document submitted successfully!";
+            errorDiv.style.backgroundColor = "#a3be8c";
+            errorDiv.style.color = "#2e3440";
+            errorDiv.style.borderColor = "#a3be8c";
+            errorDiv.style.display = "block";
+
+            // Reload verification status
+            await loadVerificationStatus();
+
+            // Clear form and hide it
+            fileInput.value = "";
+            document.getElementById("documentTypeSelect").value = "";
+            toggleVerificationForm(); // Hide the form after successful submission
+        } catch (error) {
+            console.error("Error submitting verification:", error);
+            errorText.textContent = "Error submitting verification document. Please try again.";
+            errorDiv.style.backgroundColor = "#bf616a";
+            errorDiv.style.color = "#eceff4";
+            errorDiv.style.borderColor = "#d08770";
+            errorDiv.style.display = "block";
+        } finally {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+</script>
