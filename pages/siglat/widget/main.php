@@ -48,7 +48,7 @@
         </div>
 
         <div id="users-tab" class="tab-content" style="display: none; height: 100%; color: #eceff4; padding: 0 15px 0 0;">
-            <?php include "./pages/siglat/applet/users.php"; ?>
+            <?php include "./pages/siglat/applet/tab.php"; ?>
         </div>
 
         <div id="contact-tab" class="tab-content" style="display: none; height: 100%; color: #eceff4; padding: 0; margin: 0;">
