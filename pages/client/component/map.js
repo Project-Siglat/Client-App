@@ -13,13 +13,63 @@ var humanIcon = L.icon({
   iconAnchor: [12, 20],
 });
 
+// Create custom ambulance icon using emoji
+var ambulanceIcon = L.divIcon({
+  html: '<svg width="30" height="30" viewBox="0 0 30 30"><rect x="3" y="10" width="20" height="10" fill="white" stroke="black" stroke-width="1"/><circle cx="8" cy="22" r="2" fill="black"/><circle cx="18" cy="22" r="2" fill="black"/><rect x="12" y="12" width="2" height="6" fill="red"/><rect x="9" y="14" width="8" height="2" fill="red"/><rect x="23" y="12" width="4" height="6" fill="lightblue"/></svg>',
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+  className: "ambulance-icon",
+  popupAnchor: [0, -15],
+});
+
 // User marker variable
 var userMarker;
+var ambulanceMarkers = [];
 var loadingElement = document.getElementById("loading");
 var locationLoaded = false;
 var permissionDenied = false;
 var currentLat = null;
 var currentLng = null;
+
+// Function to fetch and display ambulances
+function loadAmbulances() {
+  fetch(API() + "/api/v1/Ambulance", {
+    method: "GET",
+    headers: {
+      accept: "*/*",
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        console.log("Failed to fetch ambulances:", response.status);
+        return;
+      }
+      return response.json();
+    })
+    .then((ambulances) => {
+      // Clear existing ambulance markers
+      ambulanceMarkers.forEach((marker) => {
+        map.removeLayer(marker);
+      });
+      ambulanceMarkers = [];
+
+      // Add new ambulance markers
+      ambulances.forEach((ambulance) => {
+        var marker = L.marker(
+          [parseFloat(ambulance.latitude), parseFloat(ambulance.longitude)],
+          {
+            icon: ambulanceIcon,
+          },
+        ).addTo(map);
+
+        marker.bindPopup(`Ambulance ID: ${ambulance.id}`);
+        ambulanceMarkers.push(marker);
+      });
+    })
+    .catch((error) => {
+      console.log("Error fetching ambulances:", error);
+    });
+}
 
 // Function to send coordinates to API
 function sendCoordinatesToAPI(latitude, longitude) {
@@ -141,9 +191,17 @@ function reCenter() {
 // Update location immediately
 updateLocation();
 
+// Load ambulances immediately
+loadAmbulances();
+
 // Send coordinates to API every 0.5 seconds
 setInterval(function () {
   if (currentLat !== null && currentLng !== null && locationLoaded) {
     sendCoordinatesToAPI(currentLat, currentLng);
   }
+}, 500);
+
+// Update ambulance locations every 0.5 seconds
+setInterval(function () {
+  loadAmbulances();
 }, 500);
