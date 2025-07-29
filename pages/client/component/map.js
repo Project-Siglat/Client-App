@@ -76,6 +76,32 @@ var isRoutingMode = false;
 var destinationMarker = null;
 var routingMachineLoaded = false;
 
+// Emergency mode variables
+var isEmergencyMode = false;
+var ambulanceUpdatesPaused = false;
+
+// =============================================================================
+// EMERGENCY MODE CONTROL
+// =============================================================================
+function pauseAmbulanceUpdates() {
+  console.log("Pausing ambulance updates - Emergency mode activated");
+  ambulanceUpdatesPaused = true;
+  isEmergencyMode = true;
+}
+
+function resumeAmbulanceUpdates() {
+  console.log("Resuming ambulance updates - Emergency mode deactivated");
+  ambulanceUpdatesPaused = false;
+  isEmergencyMode = false;
+  // Immediately load ambulances when resuming
+  loadAmbulances();
+}
+
+// Function to be called when modal/siren countdown finishes
+function emergencyModeFinished() {
+  resumeAmbulanceUpdates();
+}
+
 // =============================================================================
 // ROUTING AVAILABILITY CHECK
 // =============================================================================
@@ -472,6 +498,9 @@ async function redirectTOMappie(userLat, userLng, markers) {
   console.log("ambulanceMarkers length:", ambulanceMarkers.length);
   console.log("ambulanceData length:", ambulanceData.length);
 
+  // Pause ambulance updates when emergency is triggered
+  pauseAmbulanceUpdates();
+
   const authToken = validateAuthToken();
   if (!authToken) return;
 
@@ -761,6 +790,12 @@ function addAmbulanceMarkers(validAmbulances) {
 // AMBULANCE LOADING MAIN FUNCTION
 // =============================================================================
 function loadAmbulances() {
+  // Skip loading if ambulance updates are paused (emergency mode)
+  if (ambulanceUpdatesPaused) {
+    console.log("Ambulance updates paused - skipping load");
+    return;
+  }
+
   console.log("=== LOADING AMBULANCES ===");
   fetch(API() + "/api/v1/Ambulance", {
     method: "GET",
@@ -915,52 +950,3 @@ function updateLocation() {
     if (!locationLoaded && !permissionDenied) {
       loadingElement.style.display = "block";
       loadingElement.innerHTML = "Loading your location...";
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      handleLocationSuccess,
-      handleLocationError,
-      {
-        timeout: 10000,
-        enableHighAccuracy: true,
-      },
-    );
-  } else {
-    loadingElement.style.display = "block";
-    loadingElement.innerHTML = "Geolocation not supported by this browser";
-    console.log("Geolocation is not supported by this browser.");
-  }
-}
-
-// =============================================================================
-// MAP RECENTERING
-// =============================================================================
-function reCenter() {
-  if (userMarker) {
-    map.setView([userMarker.getLatLng().lat, userMarker.getLatLng().lng], 15);
-  }
-}
-
-// =============================================================================
-// INITIALIZATION
-// =============================================================================
-// Update location immediately
-updateLocation();
-
-// Load ambulances immediately
-loadAmbulances();
-
-// =============================================================================
-// INTERVALS
-// =============================================================================
-// Send coordinates to API every 0.5 seconds
-setInterval(function () {
-  if (currentLat !== null && currentLng !== null && locationLoaded) {
-    sendCoordinatesToAPI(currentLat, currentLng);
-  }
-}, 500);
-
-// Update ambulance locations every 0.5 seconds
-setInterval(function () {
-  loadAmbulances();
-}, 500);
