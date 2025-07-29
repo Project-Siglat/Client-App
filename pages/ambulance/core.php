@@ -31,11 +31,13 @@
 }
 </style>
 
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
 <script>
-  // Wait for Leaflet JS to load before using L
+  // Wait for Leaflet JS and Routing Machine to load before using L
   document.addEventListener('DOMContentLoaded', function() {
-    if (typeof L === 'undefined') {
-      // Do not alert, just return
+    if (typeof L === 'undefined' || typeof L.Routing === 'undefined') {
+      console.log('Leaflet or Leaflet Routing Machine not loaded');
       return;
     }
 
@@ -87,7 +89,7 @@
 
     // Function to fetch ambulance alert
     function fetchAmbulanceAlert() {
-      fetch(API() + "/api/v1/Ambulance/alert", {
+      fetch(API() + "/api/v1/Ambulance/alert?" + Date.now(), {
         method: "GET",
         headers: {
           accept: "*/*"
@@ -114,6 +116,9 @@
                 .openPopup();
             }
 
+            // Update route when target changes
+            updateRoute();
+
             // Update info panel with new target
             updateInfoPanel();
           }
@@ -123,7 +128,7 @@
         });
     }
 
-    // Function to update route
+    // Function to update route using Leaflet Routing Machine
     function updateRoute() {
       if (targetLat && targetLng && lastLat && lastLng) {
         // Remove existing route
@@ -131,18 +136,42 @@
           map.removeControl(routeControl);
         }
 
-        // Create new route
-        if (typeof L.Routing !== 'undefined') {
-          routeControl = L.Routing.control({
-            waypoints: [
-              L.latLng(lastLat, lastLng),
-              L.latLng(targetLat, targetLng)
-            ],
-            routeWhileDragging: false,
-            show: false,
-            createMarker: function() { return null; } // Don't create markers
-          }).addTo(map);
-        }
+        // Create new route using Leaflet Routing Machine
+        routeControl = L.Routing.control({
+          waypoints: [
+            L.latLng(lastLat, lastLng),
+            L.latLng(targetLat, targetLng)
+          ],
+          routeWhileDragging: false,
+          show: false,
+          addWaypoints: false,
+          createMarker: function() { return null; }, // Don't create markers
+          lineOptions: {
+            styles: [{ color: 'red', weight: 4, opacity: 0.7 }]
+          },
+          router: L.Routing.osrmv1({
+            serviceUrl: 'https://router.project-osrm.org/route/v1',
+            useHints: false, // Disable caching
+            suppressDemoServerWarning: true
+          })
+        }).on('routesfound', function(e) {
+          var routes = e.routes;
+          var summary = routes[0].summary;
+
+          // Update distance and ETA based on routing machine calculation
+          var routeDistance = (summary.totalDistance / 1000).toFixed(2); // Convert to km
+          var routeTime = Math.round(summary.totalTime / 60); // Convert to minutes
+
+          document.getElementById('distance-display').textContent = 'Distance: ' + routeDistance + ' km';
+
+          if (routeTime < 60) {
+            document.getElementById('eta-display').textContent = 'ETA: ' + routeTime + ' min';
+          } else {
+            var hours = Math.floor(routeTime / 60);
+            var minutes = routeTime % 60;
+            document.getElementById('eta-display').textContent = 'ETA: ' + hours + 'h ' + minutes + 'm';
+          }
+        }).addTo(map);
       }
     }
 
@@ -195,29 +224,26 @@
     function updateInfoPanel() {
       document.getElementById('speed-display').textContent = 'Speed: ' + currentSpeed.toFixed(1) + ' km/h';
 
-      var distance = 0;
-      var eta = '';
-
-      if (targetLat && targetLng) {
-        distance = calculateDistance(lastLat, lastLng, targetLat, targetLng);
+      // If we don't have routing machine active, fall back to straight-line calculation
+      if (!routeControl && targetLat && targetLng) {
+        var distance = calculateDistance(lastLat, lastLng, targetLat, targetLng);
         document.getElementById('distance-display').textContent = 'Distance: ' + distance.toFixed(2) + ' km';
 
         if (distance > 0 && currentSpeed > 0) {
           var etaHours = distance / currentSpeed;
           var etaMinutes = etaHours * 60;
           if (etaMinutes < 60) {
-            eta = 'ETA: ' + Math.round(etaMinutes) + ' min';
+            document.getElementById('eta-display').textContent = 'ETA: ' + Math.round(etaMinutes) + ' min';
           } else {
             var hours = Math.floor(etaHours);
             var minutes = Math.round((etaHours - hours) * 60);
-            eta = 'ETA: ' + hours + 'h ' + minutes + 'm';
+            document.getElementById('eta-display').textContent = 'ETA: ' + hours + 'h ' + minutes + 'm';
           }
         }
-      } else {
+      } else if (!targetLat || !targetLng) {
         document.getElementById('distance-display').textContent = 'Distance: 0 km';
+        document.getElementById('eta-display').textContent = '';
       }
-
-      document.getElementById('eta-display').textContent = eta;
     }
 
     // Function to update marker location
@@ -268,6 +294,11 @@
 
       // Update map view
       map.setView([lat, lng], map.getZoom());
+
+      // Update route when location changes
+      if (targetLat && targetLng) {
+        updateRoute();
+      }
 
       // Update info panel
       updateInfoPanel();
@@ -321,10 +352,10 @@
       requestLiveLocation();
     }, 1000);
 
-    // Auto re-route every 0.5 seconds
+    // Fetch ambulance alert every 5 seconds to check for updates
     setInterval(function() {
-      updateRoute();
-    }, 500);
+      fetchAmbulanceAlert();
+    }, 5000);
 
     // Set a timeout to hide loading screen if location takes too long
     setTimeout(function() {
