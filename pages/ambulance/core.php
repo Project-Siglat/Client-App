@@ -87,6 +87,25 @@
     var lastLat = defaultLat;
     var lastLng = defaultLng;
 
+    // Audio for siren sound
+    var sirenAudio = null;
+    var hasTriggeredSiren = false;
+
+    // Function to initialize and play siren sound
+    function playSirenSound() {
+      if (!sirenAudio) {
+        sirenAudio = new Audio('./assets/sounds/siren.mp3');
+        sirenAudio.loop = true;
+      }
+
+      if (!hasTriggeredSiren) {
+        sirenAudio.play().catch(function(error) {
+          console.log('Could not play siren sound:', error);
+        });
+        hasTriggeredSiren = true;
+      }
+    }
+
     // Function to fetch ambulance alert
     function fetchAmbulanceAlert() {
       fetch(API() + "/api/v1/Ambulance/alert?" + Date.now(), {
@@ -103,6 +122,9 @@
         })
         .then(data => {
           if (data && data.latitude && data.longitude) {
+            // Trigger siren sound when alert data is found
+            playSirenSound();
+
             targetLat = parseFloat(data.latitude);
             targetLng = parseFloat(data.longitude);
 
@@ -134,6 +156,7 @@
         // Remove existing route
         if (routeControl) {
           map.removeControl(routeControl);
+          routeControl = null;
         }
 
         // Create new route using Leaflet Routing Machine
@@ -152,25 +175,32 @@
           router: L.Routing.osrmv1({
             serviceUrl: 'https://router.project-osrm.org/route/v1',
             useHints: false, // Disable caching
-            suppressDemoServerWarning: true
+            suppressDemoServerWarning: true,
+            profile: 'driving' // Specify driving profile for better routing
           })
         }).on('routesfound', function(e) {
           var routes = e.routes;
-          var summary = routes[0].summary;
+          if (routes && routes.length > 0) {
+            var summary = routes[0].summary;
 
-          // Update distance and ETA based on routing machine calculation
-          var routeDistance = (summary.totalDistance / 1000).toFixed(2); // Convert to km
-          var routeTime = Math.round(summary.totalTime / 60); // Convert to minutes
+            // Update distance and ETA based on routing machine calculation
+            var routeDistance = (summary.totalDistance / 1000).toFixed(2); // Convert to km
+            var routeTime = Math.round(summary.totalTime / 60); // Convert to minutes
 
-          document.getElementById('distance-display').textContent = 'Distance: ' + routeDistance + ' km';
+            document.getElementById('distance-display').textContent = 'Distance: ' + routeDistance + ' km';
 
-          if (routeTime < 60) {
-            document.getElementById('eta-display').textContent = 'ETA: ' + routeTime + ' min';
-          } else {
-            var hours = Math.floor(routeTime / 60);
-            var minutes = routeTime % 60;
-            document.getElementById('eta-display').textContent = 'ETA: ' + hours + 'h ' + minutes + 'm';
+            if (routeTime < 60) {
+              document.getElementById('eta-display').textContent = 'ETA: ' + routeTime + ' min';
+            } else {
+              var hours = Math.floor(routeTime / 60);
+              var minutes = routeTime % 60;
+              document.getElementById('eta-display').textContent = 'ETA: ' + hours + 'h ' + minutes + 'm';
+            }
           }
+        }).on('routingerror', function(e) {
+          console.log('Routing error:', e.error);
+          // Fall back to straight line calculation if routing fails
+          updateInfoPanel();
         }).addTo(map);
       }
     }
@@ -224,8 +254,8 @@
     function updateInfoPanel() {
       document.getElementById('speed-display').textContent = 'Speed: ' + currentSpeed.toFixed(1) + ' km/h';
 
-      // If we don't have routing machine active, fall back to straight-line calculation
-      if (!routeControl && targetLat && targetLng) {
+      // If we don't have routing machine active or it failed, fall back to straight-line calculation
+      if ((!routeControl || !routeControl._routes) && targetLat && targetLng) {
         var distance = calculateDistance(lastLat, lastLng, targetLat, targetLng);
         document.getElementById('distance-display').textContent = 'Distance: ' + distance.toFixed(2) + ' km';
 
