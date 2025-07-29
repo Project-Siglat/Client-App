@@ -112,6 +112,7 @@ async function initializeRouting() {
     lineOptions: {
       styles: [{ color: "#3388ff", weight: 6, opacity: 0.8 }],
     },
+    show: false, // Hide the directions box
   }).addTo(map);
   return true;
 }
@@ -321,9 +322,9 @@ async function routeToNearestAmbulance() {
 
   await calculateRoute(currentLat, currentLng, ambulanceLat, ambulanceLng);
 
-  // Show route info - always find a route even if it's the farthest ambulance available
+  // Show route info with ambulance ID
   alert(
-    `Route calculated to available ambulance (${(result.distance * 1000).toFixed(0)}m away)`,
+    `Route calculated to nearest ambulance ID: ${result.id} (${(result.distance * 1000).toFixed(0)}m away)`,
   );
 }
 
@@ -397,7 +398,7 @@ async function sendEmergencyAlert(authToken, userLat, userLng, ambulanceId) {
       return false;
     } else {
       alert(
-        "Emergency alert sent successfully! Available ambulance has been notified. Route displayed on map.",
+        `Emergency alert sent successfully! Ambulance ID: ${ambulanceId} has been notified. Route displayed on map.`,
       );
       return true;
     }
@@ -442,6 +443,9 @@ async function redirectTOMappie(userLat, userLng, markers) {
     alert("No ambulances available for emergency alert.");
     return;
   }
+
+  // Alert the nearest ambulance ID
+  alert(`Nearest ambulance detected - ID: ${result.id}`);
 
   // Calculate route to nearest ambulance (even if it's the farthest, it's still the only one available)
   const ambulanceLat = result.ambulance.getLatLng().lat;
