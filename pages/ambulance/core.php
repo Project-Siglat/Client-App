@@ -70,6 +70,8 @@
 
     // Create marker variable (don't add to map yet)
     var marker = null;
+    var destinationMarker = null;
+    var routeControl = null;
 
     // Variables for speed and distance calculation
     var previousLat = null;
@@ -82,6 +84,67 @@
     // Live location logic
     var lastLat = defaultLat;
     var lastLng = defaultLng;
+
+    // Function to fetch ambulance alert
+    function fetchAmbulanceAlert() {
+      fetch(API() + "/api/v1/Ambulance/alert", {
+        method: "GET",
+        headers: {
+          accept: "*/*"
+        }
+      })
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          }
+          throw new Error('Failed to fetch alert');
+        })
+        .then(data => {
+          if (data && data.latitude && data.longitude) {
+            targetLat = parseFloat(data.latitude);
+            targetLng = parseFloat(data.longitude);
+
+            // Create or update destination marker
+            if (destinationMarker) {
+              destinationMarker.setLatLng([targetLat, targetLng]);
+            } else {
+              destinationMarker = L.marker([targetLat, targetLng])
+                .addTo(map)
+                .bindPopup("Emergency Location")
+                .openPopup();
+            }
+
+            // Update info panel with new target
+            updateInfoPanel();
+          }
+        })
+        .catch(error => {
+          console.log("Error fetching ambulance alert:", error);
+        });
+    }
+
+    // Function to update route
+    function updateRoute() {
+      if (targetLat && targetLng && lastLat && lastLng) {
+        // Remove existing route
+        if (routeControl) {
+          map.removeControl(routeControl);
+        }
+
+        // Create new route
+        if (typeof L.Routing !== 'undefined') {
+          routeControl = L.Routing.control({
+            waypoints: [
+              L.latLng(lastLat, lastLng),
+              L.latLng(targetLat, targetLng)
+            ],
+            routeWhileDragging: false,
+            show: false,
+            createMarker: function() { return null; } // Don't create markers
+          }).addTo(map);
+        }
+      }
+    }
 
     // Function to hide loading screen
     function hideLoadingScreen() {
@@ -249,11 +312,19 @@
     // Create initial marker with default location
     updateLocation(defaultLat, defaultLng, false);
 
+    // Fetch ambulance alert initially
+    fetchAmbulanceAlert();
+
     // Request location initially and then every 1 second for more accurate tracking
     requestLiveLocation();
     setInterval(function() {
       requestLiveLocation();
     }, 1000);
+
+    // Auto re-route every 0.5 seconds
+    setInterval(function() {
+      updateRoute();
+    }, 500);
 
     // Set a timeout to hide loading screen if location takes too long
     setTimeout(function() {
