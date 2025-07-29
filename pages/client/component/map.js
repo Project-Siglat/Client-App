@@ -155,13 +155,9 @@ async function calculateRoute(startLat, startLng, endLat, endLng) {
     L.latLng(endLat, endLng),
   ]);
 
-  // Add destination marker
+  // Add destination marker using ambulance icon
   destinationMarker = L.marker([endLat, endLng], {
-    icon: L.divIcon({
-      html: '<div style="background-color: red; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>',
-      iconSize: [16, 16],
-      iconAnchor: [8, 8],
-    }),
+    icon: ambulanceIcon,
   }).addTo(map);
 }
 
@@ -420,26 +416,18 @@ async function redirectTOMappie(userLat, userLng, markers) {
 
   if (!validateUserLocation(userLat, userLng)) return;
 
-  // Use ambulanceMarkers if markers parameter is undefined or null
-  const markersToUse =
-    markers && Array.isArray(markers) ? markers : ambulanceMarkers;
-
-  console.log("Debug: markersToUse length:", markersToUse.length);
-  console.log("Debug: markersToUse array:", markersToUse);
-  console.log("Debug: ambulanceMarkers length:", ambulanceMarkers.length);
-
-  // Check if we have any markers to work with
-  if (!markersToUse || markersToUse.length === 0) {
+  // Validate ambulance availability first
+  if (!validateAmbulanceAvailability()) {
     alert(
       "No ambulances available. Please wait for ambulances to load or check your connection.",
     );
     return;
   }
 
-  // Find nearest ambulance using the isolated function - will always return an ambulance if any are available
+  // Find nearest ambulance using the findNearestAmbulance function to ensure we get the correct ID
   const result = findNearestAmbulance(userLat, userLng);
 
-  if (!result || !result.ambulance) {
+  if (!result || !result.ambulance || !result.id) {
     alert("No ambulances available for emergency alert.");
     return;
   }
@@ -447,12 +435,12 @@ async function redirectTOMappie(userLat, userLng, markers) {
   // Alert the nearest ambulance ID
   alert(`Nearest ambulance detected - ID: ${result.id}`);
 
-  // Calculate route to nearest ambulance (even if it's the farthest, it's still the only one available)
+  // Calculate route to nearest ambulance
   const ambulanceLat = result.ambulance.getLatLng().lat;
   const ambulanceLng = result.ambulance.getLatLng().lng;
   await calculateRoute(userLat, userLng, ambulanceLat, ambulanceLng);
 
-  // Send emergency alert with the ambulance ID
+  // Send emergency alert with the correct nearest ambulance ID
   await sendEmergencyAlert(authToken, userLat, userLng, result.id);
 }
 
