@@ -6,7 +6,15 @@
 // include "./pages/client/component/topbar.php";
 include "./components/topbar.html";
 
-include "./pages/client/component/map.html";
+$DEBUG = false;
+
+if (!$DEBUG) {
+    include "./pages/client/component/map.html";
+} else {
+    include "./pages/client/component/debugmap.html";
+}
+
 include "./pages/client/widget/frame.php";
+
 
 ?>
