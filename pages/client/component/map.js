@@ -183,23 +183,46 @@ function validateAmbulanceAvailability() {
   console.log("ambulanceMarkers length:", ambulanceMarkers.length);
   console.log("ambulanceMarkers type:", typeof ambulanceMarkers);
   console.log("ambulanceMarkers is array:", Array.isArray(ambulanceMarkers));
+  console.log("ambulanceData array:", ambulanceData);
+  console.log("ambulanceData length:", ambulanceData.length);
 
+  // Check if we have both markers and data
   if (
     !ambulanceMarkers ||
     !Array.isArray(ambulanceMarkers) ||
     ambulanceMarkers.length === 0
   ) {
-    console.log("No ambulances available - validation failed");
+    console.log("No ambulances available - validation failed (no markers)");
     return false;
   }
 
-  // Check each marker is valid
+  if (
+    !ambulanceData ||
+    !Array.isArray(ambulanceData) ||
+    ambulanceData.length === 0
+  ) {
+    console.log("No ambulances available - validation failed (no data)");
+    return false;
+  }
+
+  // Check each marker is valid and has corresponding data
   for (let i = 0; i < ambulanceMarkers.length; i++) {
     const marker = ambulanceMarkers[i];
+    const data = ambulanceData[i];
+
     if (!marker || typeof marker.getLatLng !== "function") {
       console.log(`Invalid marker at index ${i}:`, marker);
-      return false;
+      continue; // Skip invalid markers but don't fail validation
     }
+
+    if (!data || !data.latitude || !data.longitude) {
+      console.log(`Invalid data at index ${i}:`, data);
+      continue; // Skip invalid data but don't fail validation
+    }
+
+    console.log(
+      `Valid ambulance at index ${i}: ID=${data.id}, lat=${data.latitude}, lng=${data.longitude}`,
+    );
   }
 
   console.log("Ambulance validation passed");
@@ -210,21 +233,43 @@ function validateAmbulanceAvailability() {
 // NEAREST AMBULANCE FINDER
 // =============================================================================
 function findNearestAmbulance(userLat, userLng) {
+  console.log("=== FINDING NEAREST AMBULANCE ===");
+  console.log(`User location: lat=${userLat}, lng=${userLng}`);
+
   if (!validateAmbulanceAvailability()) {
+    console.log("Ambulance validation failed in findNearestAmbulance");
     return null;
   }
 
   let nearestAmbulance = null;
   let nearestAmbulanceId = null;
+  let nearestAmbulanceData = null;
   let minDistance = Infinity;
 
-  ambulanceMarkers.forEach((marker, index) => {
+  // Iterate through ambulance data instead of markers for more reliable processing
+  ambulanceData.forEach((ambulanceInfo, index) => {
     try {
-      const ambulanceLat = marker.getLatLng().lat;
-      const ambulanceLng = marker.getLatLng().lng;
+      // Skip if no corresponding marker or invalid data
+      if (!ambulanceMarkers[index] || !ambulanceInfo) {
+        console.log(
+          `Skipping ambulance at index ${index}: missing marker or data`,
+        );
+        return;
+      }
+
+      const ambulanceLat = parseFloat(ambulanceInfo.latitude);
+      const ambulanceLng = parseFloat(ambulanceInfo.longitude);
+
+      // Validate coordinates
+      if (isNaN(ambulanceLat) || isNaN(ambulanceLng)) {
+        console.log(
+          `Skipping ambulance at index ${index}: invalid coordinates`,
+        );
+        return;
+      }
 
       console.log(
-        `Checking ambulance ${index}: lat=${ambulanceLat}, lng=${ambulanceLng}`,
+        `Checking ambulance ${index} (ID: ${ambulanceInfo.id}): lat=${ambulanceLat}, lng=${ambulanceLng}`,
       );
 
       // Calculate distance using Haversine formula for better accuracy
@@ -239,30 +284,37 @@ function findNearestAmbulance(userLat, userLng) {
 
       if (distance < minDistance) {
         minDistance = distance;
-        nearestAmbulance = marker;
-        // Get the ambulance ID from the stored data
-        nearestAmbulanceId = ambulanceData[index]
-          ? ambulanceData[index].id
-          : null;
+        nearestAmbulance = ambulanceMarkers[index];
+        nearestAmbulanceId = ambulanceInfo.id;
+        nearestAmbulanceData = ambulanceInfo;
         console.log(
           `New nearest ambulance found at index ${index}, distance: ${distance}km, ID: ${nearestAmbulanceId}`,
         );
       }
     } catch (error) {
-      console.log(`Error processing ambulance at index ${index}:`, error);
+      console.log(
+        `Error processing ambulance at index ${index}:`,
+        error,
+        ambulanceInfo,
+      );
     }
   });
 
   // Always return an ambulance if any are available, regardless of distance
-  if (nearestAmbulance) {
-    console.log(`Final nearest ambulance distance: ${minDistance}km`);
+  if (nearestAmbulance && nearestAmbulanceId) {
+    console.log(
+      `Final nearest ambulance distance: ${minDistance}km, ID: ${nearestAmbulanceId}`,
+    );
     return {
       ambulance: nearestAmbulance,
       distance: minDistance,
       id: nearestAmbulanceId,
+      data: nearestAmbulanceData,
     };
   } else {
     console.log("No valid nearest ambulance found");
+    console.log("Available ambulances count:", ambulanceData.length);
+    console.log("Available markers count:", ambulanceMarkers.length);
     return null;
   }
 }
@@ -279,6 +331,7 @@ async function routeToNearestAmbulance() {
   }
 
   console.log(`User location: lat=${currentLat}, lng=${currentLng}`);
+  console.log(`Total ambulances loaded: ${ambulanceData.length}`);
 
   if (!validateAmbulanceAvailability()) {
     alert(
@@ -309,6 +362,9 @@ async function routeToNearestAmbulance() {
   const result = findNearestAmbulance(currentLat, currentLng);
 
   if (!result || !result.ambulance) {
+    console.log("No ambulances found for routing. Debug info:");
+    console.log("- ambulanceData:", ambulanceData);
+    console.log("- ambulanceMarkers:", ambulanceMarkers);
     alert("No ambulances available for routing.");
     return;
   }
@@ -437,13 +493,22 @@ async function redirectTOMappie(userLat, userLng, markers) {
   console.log("ambulanceMarkers:", ambulanceMarkers);
   console.log("ambulanceData:", ambulanceData);
 
-  // Check if we have any ambulances at all
+  // Enhanced ambulance availability check
   if (!ambulanceMarkers || ambulanceMarkers.length === 0) {
     console.log("No ambulance markers found");
-    alert(
-      "No ambulances available. Please wait for ambulances to load or check your connection.",
-    );
-    return;
+    // Try to reload ambulances before failing
+    console.log("Attempting to reload ambulances...");
+    await new Promise((resolve) => {
+      loadAmbulances();
+      setTimeout(resolve, 1000); // Wait 1 second for ambulances to load
+    });
+
+    if (!ambulanceMarkers || ambulanceMarkers.length === 0) {
+      alert(
+        "No ambulances available. Please wait for ambulances to load or check your connection.",
+      );
+      return;
+    }
   }
 
   if (!ambulanceData || ambulanceData.length === 0) {
@@ -461,6 +526,14 @@ async function redirectTOMappie(userLat, userLng, markers) {
 
   if (!result) {
     console.log("findNearestAmbulance returned null");
+    console.log(
+      "Available ambulance data:",
+      ambulanceData.map((a) => ({
+        id: a.id,
+        lat: a.latitude,
+        lng: a.longitude,
+      })),
+    );
     alert("No ambulances available for emergency alert - result is null.");
     return;
   }
@@ -558,17 +631,51 @@ function processAmbulanceData(ambulances) {
   console.log("Number of ambulances received:", ambulances.length);
 
   const validAmbulances = ambulances.filter((ambulance) => {
-    if (!ambulance) return false;
-    if (!ambulance.latitude || !ambulance.longitude) return false;
+    if (!ambulance) {
+      console.log("Filtering out null/undefined ambulance");
+      return false;
+    }
+    if (!ambulance.latitude || !ambulance.longitude) {
+      console.log(
+        "Filtering out ambulance with missing coordinates:",
+        ambulance.id,
+      );
+      return false;
+    }
     if (
       isNaN(parseFloat(ambulance.latitude)) ||
       isNaN(parseFloat(ambulance.longitude))
-    )
+    ) {
+      console.log(
+        "Filtering out ambulance with invalid coordinates:",
+        ambulance.id,
+        ambulance.latitude,
+        ambulance.longitude,
+      );
       return false;
+    }
+    if (!ambulance.id) {
+      console.log("Filtering out ambulance with missing ID");
+      return false;
+    }
+    console.log(
+      "Valid ambulance found:",
+      ambulance.id,
+      ambulance.latitude,
+      ambulance.longitude,
+    );
     return true;
   });
 
   console.log("Valid ambulances after filtering:", validAmbulances.length);
+  console.log(
+    "Valid ambulances:",
+    validAmbulances.map((a) => ({
+      id: a.id,
+      lat: a.latitude,
+      lng: a.longitude,
+    })),
+  );
   return validAmbulances;
 }
 
@@ -580,6 +687,10 @@ function createAmbulanceMarker(ambulance) {
     const lat = parseFloat(ambulance.latitude);
     const lng = parseFloat(ambulance.longitude);
 
+    console.log(
+      `Creating marker for ambulance ${ambulance.id} at ${lat}, ${lng}`,
+    );
+
     const marker = L.marker([lat, lng], {
       icon: ambulanceIcon,
       draggable: true,
@@ -588,6 +699,7 @@ function createAmbulanceMarker(ambulance) {
     marker.bindPopup(`
       <div>
         <strong>Ambulance ID:</strong> ${ambulance.id}<br>
+        <strong>Location:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}<br>
         <button onclick="calculateRoute(${currentLat}, ${currentLng}, ${lat}, ${lng})">
           Route Here
         </button>
@@ -595,7 +707,7 @@ function createAmbulanceMarker(ambulance) {
     `);
 
     console.log(
-      `Created marker for ambulance ${ambulance.id} at ${lat}, ${lng}`,
+      `Successfully created marker for ambulance ${ambulance.id} at ${lat}, ${lng}`,
     );
     return marker;
   } catch (error) {
@@ -616,27 +728,40 @@ function clearAmbulanceMarkers() {
   });
   ambulanceMarkers = [];
   ambulanceData = [];
+  console.log("Cleared all ambulance markers and data");
 }
 
 function addAmbulanceMarkers(validAmbulances) {
   console.log("Adding new ambulance markers:", validAmbulances.length);
 
-  validAmbulances.forEach((ambulance) => {
+  validAmbulances.forEach((ambulance, index) => {
+    console.log(`Processing ambulance ${index}:`, ambulance);
     const marker = createAmbulanceMarker(ambulance);
     if (marker) {
       ambulanceMarkers.push(marker);
       ambulanceData.push(ambulance); // Store the ambulance data alongside the marker
+      console.log(
+        `Added ambulance ${ambulance.id} to arrays at index ${ambulanceMarkers.length - 1}`,
+      );
+    } else {
+      console.log(`Failed to create marker for ambulance ${ambulance.id}`);
     }
   });
 
   console.log("Final ambulanceMarkers length:", ambulanceMarkers.length);
+  console.log("Final ambulanceData length:", ambulanceData.length);
   console.log("ambulanceMarkers array:", ambulanceMarkers);
+  console.log(
+    "ambulanceData summary:",
+    ambulanceData.map((a) => ({ id: a.id, lat: a.latitude, lng: a.longitude })),
+  );
 }
 
 // =============================================================================
 // AMBULANCE LOADING MAIN FUNCTION
 // =============================================================================
 function loadAmbulances() {
+  console.log("=== LOADING AMBULANCES ===");
   fetch(API() + "/api/v1/Ambulance", {
     method: "GET",
     headers: {
@@ -644,6 +769,7 @@ function loadAmbulances() {
     },
   })
     .then((response) => {
+      console.log("Ambulance API response status:", response.status);
       if (!response.ok) {
         console.log("Failed to fetch ambulances:", response.status);
         return null;
@@ -651,15 +777,26 @@ function loadAmbulances() {
       return response.json();
     })
     .then((ambulances) => {
-      if (!ambulances) return;
+      console.log("Received ambulances from API:", ambulances);
+      if (!ambulances) {
+        console.log("No ambulances data received");
+        return;
+      }
 
       const validAmbulances = processAmbulanceData(ambulances);
+
+      if (validAmbulances.length === 0) {
+        console.log("No valid ambulances found after processing");
+        return;
+      }
 
       // Clear existing ambulance markers
       clearAmbulanceMarkers();
 
       // Add new ambulance markers
       addAmbulanceMarkers(validAmbulances);
+
+      console.log(`Successfully loaded ${validAmbulances.length} ambulances`);
     })
     .catch((error) => {
       console.log("Error fetching ambulances:", error);
