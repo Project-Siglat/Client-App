@@ -54,13 +54,19 @@
       attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // Define ambulance SVG icon for Leaflet
-    var ambulanceIcon = L.icon({
-      iconUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="red" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="12" height="7" rx="1" fill="white" stroke="red"/><rect x="14" y="10" width="6" height="5" rx="1" fill="white" stroke="red"/><circle cx="6" cy="17" r="1.5" fill="black"/><circle cx="16" cy="17" r="1.5" fill="black"/><line x1="8" y1="10" x2="8" y2="13" stroke="red" stroke-width="2"/><line x1="6.5" y1="11.5" x2="9.5" y2="11.5" stroke="red" stroke-width="2"/></svg>',
-      iconSize: [40, 40],
-      iconAnchor: [20, 35],
-      popupAnchor: [0, -35]
-    });
+    // Define ambulance icon for Leaflet using PNG image with fallback to default marker
+    var ambulanceIcon;
+    try {
+      ambulanceIcon = L.icon({
+        iconUrl: './assets/ambulance.png',
+        iconSize: [60, 60],
+        iconAnchor: [30, 52.5],
+        popupAnchor: [0, -52.5]
+      });
+    } catch (error) {
+      console.log('Failed to load ambulance icon, using default marker');
+      ambulanceIcon = null;
+    }
 
     // Create marker variable (don't add to map yet)
     var marker = null;
@@ -170,25 +176,35 @@
       previousLng = lng;
       previousTime = currentTime;
 
-      // Create or update marker only when we have real location
-      if (isRealLocation && !hasRealLocation) {
-        hasRealLocation = true;
-        hideLoadingScreen();
+      // Update last known coordinates
+      lastLat = lat;
+      lastLng = lng;
 
-        // Create marker for the first time with real location
-        marker = L.marker([lat, lng], { icon: ambulanceIcon }).addTo(map)
-          .bindPopup("Live location").openPopup();
-      } else if (marker) {
+      // Create or update marker
+      if (marker) {
         // Update existing marker
         marker.setLatLng([lat, lng]);
         marker.getPopup().setContent("Live location");
         marker.openPopup();
+      } else {
+        // Create marker for the first time
+        if (ambulanceIcon) {
+          marker = L.marker([lat, lng], { icon: ambulanceIcon }).addTo(map)
+            .bindPopup("Live location").openPopup();
+        } else {
+          marker = L.marker([lat, lng]).addTo(map)
+            .bindPopup("Live location").openPopup();
+        }
       }
 
-      // Update map view only if we have real location or as fallback
-      if (hasRealLocation || isRealLocation) {
-        map.setView([lat, lng], map.getZoom());
+      // Hide loading screen once we have a marker
+      if (isRealLocation && !hasRealLocation) {
+        hasRealLocation = true;
+        hideLoadingScreen();
       }
+
+      // Update map view
+      map.setView([lat, lng], map.getZoom());
 
       // Update info panel
       updateInfoPanel();
@@ -212,80 +228,38 @@
       // High accuracy options for better location precision
       var options = {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 30000,
         maximumAge: 0
       };
 
-      // Check permission status if possible
-      if (navigator.permissions) {
-        navigator.permissions.query({ name: 'geolocation' }).then(function(result) {
-          if (result.state === 'granted' || result.state === 'prompt') {
-            navigator.geolocation.getCurrentPosition(function(position) {
-              var lat = position.coords.latitude;
-              var lng = position.coords.longitude;
-              lastLat = lat;
-              lastLng = lng;
-              updateLocation(lat, lng, true);
-            }, function(error) {
-              // If error and no real location yet, use default and hide loading
-              if (!hasRealLocation) {
-                hideLoadingScreen();
-                updateLocation(lastLat, lastLng, false);
-              }
-            }, options);
-          } else {
-            // Permission denied, use default and hide loading
-            if (!hasRealLocation) {
-              hideLoadingScreen();
-              updateLocation(lastLat, lastLng, false);
-            }
-          }
-        }).catch(function() {
-          // If permissions API fails, fallback to requesting location
-          navigator.geolocation.getCurrentPosition(function(position) {
-            var lat = position.coords.latitude;
-            var lng = position.coords.longitude;
-            lastLat = lat;
-            lastLng = lng;
-            updateLocation(lat, lng, true);
-          }, function(error) {
-            if (!hasRealLocation) {
-              hideLoadingScreen();
-              updateLocation(lastLat, lastLng, false);
-            }
-          }, options);
-        });
-      } else {
-        // Permissions API not available, fallback to requesting location
-        navigator.geolocation.getCurrentPosition(function(position) {
-          var lat = position.coords.latitude;
-          var lng = position.coords.longitude;
-          lastLat = lat;
-          lastLng = lng;
-          updateLocation(lat, lng, true);
-        }, function(error) {
-          if (!hasRealLocation) {
-            hideLoadingScreen();
-            updateLocation(lastLat, lastLng, false);
-          }
-        }, options);
-      }
+      navigator.geolocation.getCurrentPosition(function(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        updateLocation(lat, lng, true);
+      }, function(error) {
+        console.log('Geolocation error:', error);
+        // If error and no real location yet, use default and hide loading
+        if (!hasRealLocation) {
+          hideLoadingScreen();
+          updateLocation(lastLat, lastLng, false);
+        }
+      }, options);
     }
 
-    // Request location initially and then every 0.5 seconds
+    // Create initial marker with default location
+    updateLocation(defaultLat, defaultLng, false);
+
+    // Request location initially and then every 1 second for more accurate tracking
     requestLiveLocation();
     setInterval(function() {
-      if (hasRealLocation) {
-        requestLiveLocation();
-      }
-    }, 500);
+      requestLiveLocation();
+    }, 1000);
 
     // Set a timeout to hide loading screen if location takes too long
     setTimeout(function() {
       if (!hasRealLocation) {
         hideLoadingScreen();
-        updateLocation(defaultLat, defaultLng, false);
       }
-    }, 15000); // 15 seconds timeout
+    }, 10000); // 10 seconds timeout
   });
 </script>
