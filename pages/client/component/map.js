@@ -867,6 +867,15 @@ function loadAmbulances() {
       return response.json();
     })
     .then((ambulances) => {
+      // ADD DEBUG CODE TO SEE WHAT API RETURNS
+      console.log("=== API RESPONSE DEBUG ===");
+      console.log("Full API response:", ambulances);
+      if (ambulances && ambulances.length > 0) {
+        console.log("First ambulance object:", ambulances[0]);
+        console.log("All fields in first ambulance:", Object.keys(ambulances[0]));
+      }
+      // END DEBUG CODE
+
       console.log("Received ambulances from API:", ambulances);
       if (!ambulances) {
         console.log("No ambulances data received");
@@ -932,17 +941,3 @@ function sendCoordinatesToAPI(latitude, longitude) {
 function handleLocationSuccess(position) {
   var lat = position.coords.latitude;
   var lng = position.coords.longitude;
-
-  console.log("Location updated:", lat, lng);
-
-  // Store current coordinates
-  currentLat = lat;
-  currentLng = lng;
-
-  // If marker doesn't exist, create it
-  if (!userMarker) {
-    userMarker = L.marker([lat, lng], {
-      icon: humanIcon,
-    }).addTo(map);
-    map.setView([lat, lng], 15);
-    locationLoade
