@@ -205,50 +205,105 @@ function clearRoute() {
 // =============================================================================
 function validateAmbulanceAvailability() {
   console.log("=== AMBULANCE VALIDATION ===");
-  console.log("ambulanceMarkers array:", ambulanceMarkers);
-  console.log("ambulanceMarkers length:", ambulanceMarkers.length);
-  console.log("ambulanceMarkers type:", typeof ambulanceMarkers);
-  console.log("ambulanceMarkers is array:", Array.isArray(ambulanceMarkers));
-  console.log("ambulanceData array:", ambulanceData);
-  console.log("ambulanceData length:", ambulanceData.length);
 
-  // Check if we have both markers and data
-  if (
-    !ambulanceMarkers ||
-    !Array.isArray(ambulanceMarkers) ||
-    ambulanceMarkers.length === 0
-  ) {
-    console.log("No ambulances available - validation failed (no markers)");
+  // Validate ambulanceMarkers array
+  if (!ambulanceMarkers || !Array.isArray(ambulanceMarkers)) {
+    console.log("ambulanceMarkers is not a valid array:", ambulanceMarkers);
     return false;
   }
 
-  if (
-    !ambulanceData ||
-    !Array.isArray(ambulanceData) ||
-    ambulanceData.length === 0
-  ) {
-    console.log("No ambulances available - validation failed (no data)");
+  // Validate ambulanceData array
+  if (!ambulanceData || !Array.isArray(ambulanceData)) {
+    console.log("ambulanceData is not a valid array:", ambulanceData);
     return false;
   }
 
-  // Check each marker is valid and has corresponding data
+  console.log(`ambulanceMarkers length: ${ambulanceMarkers.length}`);
+  console.log(`ambulanceData length: ${ambulanceData.length}`);
+
+  // Check if arrays have matching lengths
+  if (ambulanceMarkers.length !== ambulanceData.length) {
+    console.log("Mismatch between ambulanceMarkers and ambulanceData lengths");
+    console.log(`ambulanceMarkers: ${ambulanceMarkers.length}, ambulanceData: ${ambulanceData.length}`);
+    return false;
+  }
+
+  // Check if arrays are empty
+  if (ambulanceMarkers.length === 0 || ambulanceData.length === 0) {
+    console.log("No ambulances available - empty arrays");
+    return false;
+  }
+
+  // Count valid ambulances
+  let validCount = 0;
+
   for (let i = 0; i < ambulanceMarkers.length; i++) {
     const marker = ambulanceMarkers[i];
     const data = ambulanceData[i];
 
-    if (!marker || typeof marker.getLatLng !== "function") {
-      console.log(`Invalid marker at index ${i}:`, marker);
-      continue; // Skip invalid markers but don't fail validation
+    // Validate marker
+    if (!marker) {
+      console.log(`Marker at index ${i} is null/undefined`);
+      continue;
     }
 
-    if (!data || !data.latitude || !data.longitude) {
-      console.log(`Invalid data at index ${i}:`, data);
-      continue; // Skip invalid data but don't fail validation
+    if (typeof marker.getLatLng !== "function") {
+      console.log(`Marker at index ${i} is not a valid Leaflet marker:`, marker);
+      continue;
     }
 
-    console.log(
-      `Valid ambulance at index ${i}: ID=${data.id}, lat=${data.latitude}, lng=${data.longitude}`,
-    );
+    // Validate data
+    if (!data) {
+      console.log(`Data at index ${i} is null/undefined`);
+      continue;
+    }
+
+    if (!data.id) {
+      console.log(`Data at index ${i} missing ID:`, data);
+      continue;
+    }
+
+    if (!data.latitude || !data.longitude) {
+      console.log(`Data at index ${i} missing coordinates:`, data);
+      continue;
+    }
+
+    // Validate coordinate values
+    const lat = parseFloat(data.latitude);
+    const lng = parseFloat(data.longitude);
+
+    if (isNaN(lat) || isNaN(lng)) {
+      console.log(`Data at index ${i} has invalid coordinates:`, data.latitude, data.longitude);
+      continue;
+    }
+
+    // Validate coordinate ranges
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      console.log(`Data at index ${i} coordinates out of range:`, lat, lng);
+      continue;
+    }
+
+    // Test marker's getLatLng function
+    try {
+      const markerLatLng = marker.getLatLng();
+      if (!markerLatLng || typeof markerLatLng.lat !== "number" || typeof markerLatLng.lng !== "number") {
+        console.log(`Marker at index ${i} getLatLng() returned invalid result:`, markerLatLng);
+        continue;
+      }
+    } catch (error) {
+      console.log(`Error calling getLatLng() on marker at index ${i}:`, error);
+      continue;
+    }
+
+    validCount++;
+    console.log(`Valid ambulance at index ${i}: ID=${data.id}, lat=${lat}, lng=${lng}`);
+  }
+
+  console.log(`Found ${validCount} valid ambulances out of ${ambulanceMarkers.length} total`);
+
+  if (validCount === 0) {
+    console.log("No valid ambulances found - validation failed");
+    return false;
   }
 
   console.log("Ambulance validation passed");
@@ -890,63 +945,4 @@ function handleLocationSuccess(position) {
       icon: humanIcon,
     }).addTo(map);
     map.setView([lat, lng], 15);
-    locationLoaded = true;
-    permissionDenied = false;
-    // Hide loading state only after first successful location
-    loadingElement.style.display = "none";
-  } else {
-    // Update existing marker position
-    userMarker.setLatLng([lat, lng]);
-  }
-}
-
-// =============================================================================
-// GEOLOCATION ERROR HANDLER
-// =============================================================================
-function handleLocationError(error) {
-  loadingElement.style.display = "block";
-
-  switch (error.code) {
-    case error.PERMISSION_DENIED:
-      permissionDenied = true;
-      loadingElement.innerHTML =
-        "Location access denied. Please enable location permissions in your browser settings and refresh the page.";
-      break;
-    case error.POSITION_UNAVAILABLE:
-      if (!locationLoaded) {
-        loadingElement.innerHTML =
-          "Location information unavailable. Make sure GPS is enabled and try again.";
-      } else {
-        loadingElement.style.display = "none";
-      }
-      break;
-    case error.TIMEOUT:
-      if (!locationLoaded) {
-        loadingElement.innerHTML =
-          "Location request timed out. Please check your connection and try again.";
-      } else {
-        loadingElement.style.display = "none";
-      }
-      break;
-    default:
-      if (!locationLoaded) {
-        loadingElement.innerHTML =
-          "Unable to get your location. Please ensure location services are enabled.";
-      } else {
-        loadingElement.style.display = "none";
-      }
-      break;
-  }
-
-  console.log("Geolocation error: " + error.message);
-}
-
-// =============================================================================
-// LOCATION UPDATE MAIN FUNCTION
-// =============================================================================
-function updateLocation() {
-  if (navigator.geolocation) {
-    // Show loading state if location hasn't been loaded yet and permission wasn't denied
-    if (!locationLoaded && !permissionDenied) {
-      loadingElement.style.display = "block";
-      loadingElement.innerHTML = "Loading your location...";
+    locationLoade
