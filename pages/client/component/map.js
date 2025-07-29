@@ -112,6 +112,7 @@ async function initializeRouting() {
     lineOptions: {
       styles: [{ color: "#3388ff", weight: 6, opacity: 0.8 }],
     },
+    show: false, // Hide the directions box
   }).addTo(map);
   return true;
 }
@@ -154,13 +155,9 @@ async function calculateRoute(startLat, startLng, endLat, endLng) {
     L.latLng(endLat, endLng),
   ]);
 
-  // Add destination marker
+  // Add destination marker using ambulance icon
   destinationMarker = L.marker([endLat, endLng], {
-    icon: L.divIcon({
-      html: '<div style="background-color: red; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>',
-      iconSize: [16, 16],
-      iconAnchor: [8, 8],
-    }),
+    icon: ambulanceIcon,
   }).addTo(map);
 }
 
@@ -321,9 +318,9 @@ async function routeToNearestAmbulance() {
 
   await calculateRoute(currentLat, currentLng, ambulanceLat, ambulanceLng);
 
-  // Show route info - always find a route even if it's the farthest ambulance available
+  // Show route info with ambulance ID
   alert(
-    `Route calculated to available ambulance (${(result.distance * 1000).toFixed(0)}m away)`,
+    `Route calculated to nearest ambulance ID: ${result.id} (${(result.distance * 1000).toFixed(0)}m away)`,
   );
 }
 
@@ -397,7 +394,7 @@ async function sendEmergencyAlert(authToken, userLat, userLng, ambulanceId) {
       return false;
     } else {
       alert(
-        "Emergency alert sent successfully! Available ambulance has been notified. Route displayed on map.",
+        `Emergency alert sent successfully! Ambulance ID: ${ambulanceId} has been notified. Route displayed on map.`,
       );
       return true;
     }
@@ -419,36 +416,31 @@ async function redirectTOMappie(userLat, userLng, markers) {
 
   if (!validateUserLocation(userLat, userLng)) return;
 
-  // Use ambulanceMarkers if markers parameter is undefined or null
-  const markersToUse =
-    markers && Array.isArray(markers) ? markers : ambulanceMarkers;
-
-  console.log("Debug: markersToUse length:", markersToUse.length);
-  console.log("Debug: markersToUse array:", markersToUse);
-  console.log("Debug: ambulanceMarkers length:", ambulanceMarkers.length);
-
-  // Check if we have any markers to work with
-  if (!markersToUse || markersToUse.length === 0) {
+  // Validate ambulance availability first
+  if (!validateAmbulanceAvailability()) {
     alert(
       "No ambulances available. Please wait for ambulances to load or check your connection.",
     );
     return;
   }
 
-  // Find nearest ambulance using the isolated function - will always return an ambulance if any are available
+  // Find nearest ambulance using the findNearestAmbulance function to ensure we get the correct ID
   const result = findNearestAmbulance(userLat, userLng);
 
-  if (!result || !result.ambulance) {
+  if (!result || !result.ambulance || !result.id) {
     alert("No ambulances available for emergency alert.");
     return;
   }
 
-  // Calculate route to nearest ambulance (even if it's the farthest, it's still the only one available)
+  // Alert the nearest ambulance ID
+  alert(`Nearest ambulance detected - ID: ${result.id}`);
+
+  // Calculate route to nearest ambulance
   const ambulanceLat = result.ambulance.getLatLng().lat;
   const ambulanceLng = result.ambulance.getLatLng().lng;
   await calculateRoute(userLat, userLng, ambulanceLat, ambulanceLng);
 
-  // Send emergency alert with the ambulance ID
+  // Send emergency alert with the correct nearest ambulance ID
   await sendEmergencyAlert(authToken, userLat, userLng, result.id);
 }
 

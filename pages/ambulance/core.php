@@ -31,11 +31,13 @@
 }
 </style>
 
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
 <script>
-  // Wait for Leaflet JS to load before using L
+  // Wait for Leaflet JS and Routing Machine to load before using L
   document.addEventListener('DOMContentLoaded', function() {
-    if (typeof L === 'undefined') {
-      // Do not alert, just return
+    if (typeof L === 'undefined' || typeof L.Routing === 'undefined') {
+      console.log('Leaflet or Leaflet Routing Machine not loaded');
       return;
     }
 
@@ -70,6 +72,8 @@
 
     // Create marker variable (don't add to map yet)
     var marker = null;
+    var destinationMarker = null;
+    var routeControl = null;
 
     // Variables for speed and distance calculation
     var previousLat = null;
@@ -82,6 +86,124 @@
     // Live location logic
     var lastLat = defaultLat;
     var lastLng = defaultLng;
+
+    // Audio for siren sound
+    var sirenAudio = null;
+    var hasTriggeredSiren = false;
+
+    // Function to initialize and play siren sound
+    function playSirenSound() {
+      if (!sirenAudio) {
+        sirenAudio = new Audio('./assets/sounds/siren.mp3');
+        sirenAudio.loop = true;
+      }
+
+      if (!hasTriggeredSiren) {
+        sirenAudio.play().catch(function(error) {
+          console.log('Could not play siren sound:', error);
+        });
+        hasTriggeredSiren = true;
+      }
+    }
+
+    // Function to fetch ambulance alert
+    function fetchAmbulanceAlert() {
+      fetch(API() + "/api/v1/Ambulance/alert?" + Date.now(), {
+        method: "GET",
+        headers: {
+          accept: "*/*"
+        }
+      })
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          }
+          throw new Error('Failed to fetch alert');
+        })
+        .then(data => {
+          if (data && data.latitude && data.longitude) {
+            // Trigger siren sound when alert data is found
+            playSirenSound();
+
+            targetLat = parseFloat(data.latitude);
+            targetLng = parseFloat(data.longitude);
+
+            // Create or update destination marker
+            if (destinationMarker) {
+              destinationMarker.setLatLng([targetLat, targetLng]);
+            } else {
+              destinationMarker = L.marker([targetLat, targetLng])
+                .addTo(map)
+                .bindPopup("Emergency Location")
+                .openPopup();
+            }
+
+            // Update route when target changes
+            updateRoute();
+
+            // Update info panel with new target
+            updateInfoPanel();
+          }
+        })
+        .catch(error => {
+          console.log("Error fetching ambulance alert:", error);
+        });
+    }
+
+    // Function to update route using Leaflet Routing Machine
+    function updateRoute() {
+      if (targetLat && targetLng && lastLat && lastLng) {
+        // Remove existing route
+        if (routeControl) {
+          map.removeControl(routeControl);
+          routeControl = null;
+        }
+
+        // Create new route using Leaflet Routing Machine
+        routeControl = L.Routing.control({
+          waypoints: [
+            L.latLng(lastLat, lastLng),
+            L.latLng(targetLat, targetLng)
+          ],
+          routeWhileDragging: false,
+          show: false,
+          addWaypoints: false,
+          createMarker: function() { return null; }, // Don't create markers
+          lineOptions: {
+            styles: [{ color: 'red', weight: 4, opacity: 0.7 }]
+          },
+          router: L.Routing.osrmv1({
+            serviceUrl: 'https://router.project-osrm.org/route/v1',
+            useHints: false, // Disable caching
+            suppressDemoServerWarning: true,
+            profile: 'driving' // Specify driving profile for better routing
+          })
+        }).on('routesfound', function(e) {
+          var routes = e.routes;
+          if (routes && routes.length > 0) {
+            var summary = routes[0].summary;
+
+            // Update distance and ETA based on routing machine calculation
+            var routeDistance = (summary.totalDistance / 1000).toFixed(2); // Convert to km
+            var routeTime = Math.round(summary.totalTime / 60); // Convert to minutes
+
+            document.getElementById('distance-display').textContent = 'Distance: ' + routeDistance + ' km';
+
+            if (routeTime < 60) {
+              document.getElementById('eta-display').textContent = 'ETA: ' + routeTime + ' min';
+            } else {
+              var hours = Math.floor(routeTime / 60);
+              var minutes = routeTime % 60;
+              document.getElementById('eta-display').textContent = 'ETA: ' + hours + 'h ' + minutes + 'm';
+            }
+          }
+        }).on('routingerror', function(e) {
+          console.log('Routing error:', e.error);
+          // Fall back to straight line calculation if routing fails
+          updateInfoPanel();
+        }).addTo(map);
+      }
+    }
 
     // Function to hide loading screen
     function hideLoadingScreen() {
@@ -132,29 +254,26 @@
     function updateInfoPanel() {
       document.getElementById('speed-display').textContent = 'Speed: ' + currentSpeed.toFixed(1) + ' km/h';
 
-      var distance = 0;
-      var eta = '';
-
-      if (targetLat && targetLng) {
-        distance = calculateDistance(lastLat, lastLng, targetLat, targetLng);
+      // If we don't have routing machine active or it failed, fall back to straight-line calculation
+      if ((!routeControl || !routeControl._routes) && targetLat && targetLng) {
+        var distance = calculateDistance(lastLat, lastLng, targetLat, targetLng);
         document.getElementById('distance-display').textContent = 'Distance: ' + distance.toFixed(2) + ' km';
 
         if (distance > 0 && currentSpeed > 0) {
           var etaHours = distance / currentSpeed;
           var etaMinutes = etaHours * 60;
           if (etaMinutes < 60) {
-            eta = 'ETA: ' + Math.round(etaMinutes) + ' min';
+            document.getElementById('eta-display').textContent = 'ETA: ' + Math.round(etaMinutes) + ' min';
           } else {
             var hours = Math.floor(etaHours);
             var minutes = Math.round((etaHours - hours) * 60);
-            eta = 'ETA: ' + hours + 'h ' + minutes + 'm';
+            document.getElementById('eta-display').textContent = 'ETA: ' + hours + 'h ' + minutes + 'm';
           }
         }
-      } else {
+      } else if (!targetLat || !targetLng) {
         document.getElementById('distance-display').textContent = 'Distance: 0 km';
+        document.getElementById('eta-display').textContent = '';
       }
-
-      document.getElementById('eta-display').textContent = eta;
     }
 
     // Function to update marker location
@@ -206,6 +325,11 @@
       // Update map view
       map.setView([lat, lng], map.getZoom());
 
+      // Update route when location changes
+      if (targetLat && targetLng) {
+        updateRoute();
+      }
+
       // Update info panel
       updateInfoPanel();
 
@@ -249,11 +373,19 @@
     // Create initial marker with default location
     updateLocation(defaultLat, defaultLng, false);
 
+    // Fetch ambulance alert initially
+    fetchAmbulanceAlert();
+
     // Request location initially and then every 1 second for more accurate tracking
     requestLiveLocation();
     setInterval(function() {
       requestLiveLocation();
     }, 1000);
+
+    // Fetch ambulance alert every 5 seconds to check for updates
+    setInterval(function() {
+      fetchAmbulanceAlert();
+    }, 5000);
 
     // Set a timeout to hide loading screen if location takes too long
     setTimeout(function() {
