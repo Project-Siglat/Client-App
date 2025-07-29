@@ -1,138 +1,202 @@
-<section class="flex flex-col gap-6 p-4 md:p-6 lg:p-8 bg-[#272822]">
-    <img
-        src="./assets/siglat.png"
-        alt=""
-        class="w-48 h-48 md:w-64 md:h-64 lg:w-72 lg:h-72 rounded-lg mx-auto"
-    />
-    <h1
-        class="font-bold text-3xl md:text-4xl lg:text-5xl mx-auto text-[#f8f8f2]"
-    >
-        Siglat Alert
-    </h1>
-    <p
-        class="w-full md:w-3/4 lg:w-2/3 xl:w-1/2 mx-auto text-center text-[#f8f8f2] text-sm md:text-base lg:text-lg"
-    >
-        SIGLAT provides immediate emergency rescue services 24/7 in Villaverde,
-        Nueva Vizcaya. Your reliable emergency response platform with real-time
-        disaster forecasting, instant emergency services, and community safety -
-        all in one app.
-    </p>
-
-    <button
-        class="bg-[#f92672] hover:bg-[#ff6188] text-[#f8f8f2] font-bold py-2 px-6 md:py-3 md:px-8 rounded w-full md:w-auto md:max-w-xs mx-auto transition-colors duration-200"
-        onclick="window.location.pathname = '/login'"
-    >
-        Login Now
-    </button>
-</section>
-
-<hr class="border-[#49483e]" />
-
 <section
-    class="flex flex-col py-8 md:py-12 lg:py-16 px-4 md:px-6 lg:px-8 bg-[#383830]"
+    class="bg-[#1d2021] flex items-center justify-center py-12 px-8 relative overflow-hidden"
 >
-    <section class="max-w-7xl mx-auto w-full">
-        <h1
-            class="font-bold text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-center mb-8 md:mb-10 lg:mb-12 text-[#f8f8f2]"
-        >
-            We Offer
+    <!-- Animated background elements -->
+    <div class="absolute inset-0 opacity-10">
+        <div
+            class="absolute top-10 left-10 w-2 h-2 bg-[#cc241d] rounded-full animate-pulse"
+        ></div>
+        <div
+            class="absolute top-32 right-20 w-1 h-1 bg-[#b8bb26] rounded-full animate-ping"
+            style="animation-delay: 0.5s"
+        ></div>
+        <div
+            class="absolute bottom-20 left-32 w-1.5 h-1.5 bg-[#d3869b] rounded-full animate-pulse"
+            style="animation-delay: 1s"
+        ></div>
+        <div
+            class="absolute bottom-40 right-16 w-1 h-1 bg-[#83a598] rounded-full animate-ping"
+            style="animation-delay: 1.5s"
+        ></div>
+        <div
+            class="absolute top-1/2 left-20 w-1 h-1 bg-[#fabd2f] rounded-full animate-pulse"
+            style="animation-delay: 2s"
+        ></div>
+    </div>
+
+    <!-- Subtle grid pattern -->
+    <div
+        class="absolute inset-0 opacity-5"
+        style="
+            background-image: radial-gradient(
+                circle at 1px 1px,
+                #ebdbb2 1px,
+                transparent 0
+            );
+            background-size: 20px 20px;
+        "
+    ></div>
+
+    <div class="max-w-3xl mx-auto text-center relative z-10">
+        <div class="relative inline-block mb-6">
+            <img
+                src="./assets/siglat.png"
+                alt="SIGLAT Emergency Response Logo"
+                class="w-28 h-28 mx-auto"
+            />
+        </div>
+
+        <h1 class="text-4xl font-light text-[#ebdbb2] mb-3 animate-fade-in">
+            <span
+                class="inline-block hover:text-[#cc241d] transition-colors duration-300"
+                >Siglat</span
+            >
+            <span
+                class="inline-block hover:text-[#b8bb26] transition-colors duration-300 delay-100"
+                >Alert</span
+            >
         </h1>
 
+        <div class="relative mb-8">
+            <p class="text-[#d5c4a1] text-lg leading-relaxed max-w-xl mx-auto">
+                <span class="text-[#cc241d] font-semibold animate pulse"
+                    >SIGLAT</span
+                >
+                provides immediate emergency rescue services 24/7 in Villaverde,
+                Nueva Vizcaya.<br />
+                Your reliable emergency response platform with
+                <span class="text-[#b8bb26]"
+                    >real-time disaster forecasting</span
+                >, instant emergency services, and community safety - all in one
+                app.
+            </p>
+        </div>
+
+        <button
+            class="bg-[#cc241d] hover:bg-[#fb4934] text-white font-medium py-3 px-10 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-[#cc241d]/25 relative overflow-hidden group"
+            onclick="window.location.pathname = '/login'"
+        >
+            <span class="relative z-10">Login Now</span>
+            <!-- Button shine effect -->
+            <div
+                class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+            ></div>
+        </button>
+
+        <!-- Status indicator -->
         <div
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8"
+            class="flex items-center justify-center mt-4 text-sm text-[#b8bb26]"
         >
             <div
-                class="bg-[#49483e] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-6 flex flex-col hover:bg-[#5a544e]"
+                class="w-2 h-2 bg-[#b8bb26] rounded-full animate-pulse mr-2"
+            ></div>
+            <span>Emergency Services Active</span>
+        </div>
+    </div>
+
+    <style>
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade-in {
+            animation: fade-in 1s ease-out;
+        }
+    </style>
+</section>
+
+<section class="bg-[#282828] py-16 px-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-[#ebdbb2] mb-4">We Offer</h2>
+            <div class="w-16 h-0.5 bg-[#b8bb26] mx-auto"></div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <div
+                class="bg-[#32302f] rounded-lg border border-[#504945] p-6 text-center"
             >
-                <div class="text-4xl md:text-5xl mb-4 text-center">🚨</div>
-                <h3
-                    class="text-lg md:text-xl font-semibold mb-3 text-center text-[#f8f8f2]"
-                >
+                <div class="text-4xl mb-4">🚨</div>
+                <h3 class="text-xl font-semibold text-[#ebdbb2] mb-4">
                     Emergency Response
                 </h3>
-                <p
-                    class="text-[#f8f8f2] text-center flex-grow text-sm md:text-base"
-                >
+                <p class="text-[#d5c4a1]">
                     Connect instantly with emergency services, ambulances, fire
                     departments, and police with real-time location tracking.
                 </p>
             </div>
 
             <div
-                class="bg-[#49483e] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-6 flex flex-col hover:bg-[#5a544e]"
+                class="bg-[#32302f] rounded-lg border border-[#504945] p-6 text-center"
             >
-                <div class="text-4xl md:text-5xl mb-4 text-center">🌊</div>
-                <h3
-                    class="text-lg md:text-xl font-semibold mb-3 text-center text-[#f8f8f2]"
-                >
+                <div class="text-4xl mb-4">🌊</div>
+                <h3 class="text-xl font-semibold text-[#ebdbb2] mb-4">
                     Flood Forecasting
                 </h3>
-                <p
-                    class="text-[#f8f8f2] text-center flex-grow text-sm md:text-base"
-                >
+                <p class="text-[#d5c4a1]">
                     Advanced AI-powered flood prediction system with real-time
                     water level monitoring and evacuation alerts.
                 </p>
             </div>
 
             <div
-                class="bg-[#49483e] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-6 flex flex-col hover:bg-[#5a544e]"
+                class="bg-[#32302f] rounded-lg border border-[#504945] p-6 text-center"
             >
-                <div class="text-4xl md:text-5xl mb-4 text-center">⚠️</div>
-                <h3
-                    class="text-lg md:text-xl font-semibold mb-3 text-center text-[#f8f8f2]"
-                >
+                <div class="text-4xl mb-4">⚠️</div>
+                <h3 class="text-xl font-semibold text-[#ebdbb2] mb-4">
                     Disaster Alerts
                 </h3>
-                <p
-                    class="text-[#f8f8f2] text-center flex-grow text-sm md:text-base"
-                >
+                <p class="text-[#d5c4a1]">
                     Comprehensive disaster forecasting including earthquakes,
                     storms, wildfires, and severe weather warnings.
                 </p>
             </div>
         </div>
-    </section>
+    </div>
 </section>
-
-<section class="bg-[#272822] p-4 md:p-6 lg:p-8">
-    <h1
-        class="text-2xl md:text-3xl lg:text-4xl font-bold text-[#f8f8f2] mb-4 md:mb-6 text-center"
-    >
-        Nueva Vizcaya Map
-    </h1>
-    <div
-        id="map-container"
-        class="relative rounded-lg overflow-hidden shadow-lg"
-    >
-        <div
-            id="map-loading"
-            class="absolute inset-0 bg-[#383830] flex items-center justify-center z-10"
-        >
-            <div class="text-center">
+<section class="bg-[#1d2021] py-16 px-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-[#ebdbb2] mb-4">
+                Nueva Vizcaya Map
+            </h2>
+            <div class="w-16 h-0.5 bg-[#b8bb26] mx-auto"></div>
+        </div>
+        <div class="bg-[#32302f] rounded-lg border border-[#504945] p-4">
+            <div
+                id="map-container"
+                class="relative rounded-lg overflow-hidden border border-[#665c54]"
+            >
                 <div
-                    class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#f92672] border-t-transparent"
-                ></div>
-                <p class="text-[#f8f8f2] mt-4">Loading map...</p>
+                    id="map-loading"
+                    class="absolute inset-0 bg-[#32302f] flex items-center justify-center z-10"
+                >
+                    <div class="text-center">
+                        <div
+                            class="inline-block animate-spin rounded-full h-12 w-12 border-2 border-[#cc241d] border-t-transparent"
+                        ></div>
+                        <p class="text-[#ebdbb2] mt-4">Loading map...</p>
+                    </div>
+                </div>
+                <div id="map" class="pointer-events-none"></div>
             </div>
         </div>
-        <div id="map"></div>
     </div>
     <style>
         #map,
         #map-container {
-            height: 250px;
+            height: 300px;
         }
         @media (min-width: 768px) {
             #map,
             #map-container {
                 height: 400px;
-            }
-        }
-        @media (min-width: 1024px) {
-            #map,
-            #map-container {
-                height: 500px;
             }
         }
         @keyframes spin {
@@ -143,132 +207,278 @@
         .animate-spin {
             animation: spin 1s linear infinite;
         }
+        #map {
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
     </style>
     <script src="./pages/landing-page/structure/map.js"></script>
 </section>
 
-<section class="bg-[#383830] p-4 md:p-6 lg:p-8">
+<section class="bg-[#282828] py-16 px-8">
     <div class="max-w-4xl mx-auto text-center">
-        <h1
-            class="text-2xl md:text-3xl lg:text-4xl font-bold text-[#f8f8f2] mb-4 md:mb-6"
-        >
-            Our App Works Better With
-        </h1>
-        <div
-            class="grid grid-cols-1 md:grid-cols-2 justify-center items-center gap-4 md:gap-8 mb-6 max-w-2xl mx-auto"
-        >
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-[#ebdbb2] mb-4">
+                Our App Works Better With
+            </h2>
+            <div class="w-16 h-0.5 bg-[#d3869b] mx-auto"></div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-8 max-w-2xl mx-auto">
             <div
-                class="bg-[#49483e] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-6 flex flex-col items-center hover:bg-[#5a544e]"
+                class="bg-[#32302f] rounded-lg border border-[#504945] p-6 flex flex-col items-center"
             >
-                <img
-                    src="./assets/brave.png"
-                    alt="Brave Browser"
-                    class="w-12 h-12 md:w-16 md:h-16 mb-3"
-                />
-                <h2 class="text-lg md:text-xl font-semibold text-[#f8f8f2]">
+                <div
+                    class="bg-[#3c3836] rounded-lg p-3 mb-4 border border-[#665c54]"
+                >
+                    <img
+                        src="./assets/brave.png"
+                        alt="Brave Browser"
+                        class="w-12 h-12"
+                    />
+                </div>
+                <h3 class="text-lg font-semibold text-[#ebdbb2]">
                     Brave Browser
-                </h2>
+                </h3>
             </div>
             <div
-                class="bg-[#49483e] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-6 flex flex-col items-center hover:bg-[#5a544e]"
+                class="bg-[#32302f] rounded-lg border border-[#504945] p-6 flex flex-col items-center"
             >
-                <img
-                    src="./assets/firefox.png"
-                    alt="Firefox Browser"
-                    class="w-12 h-12 md:w-16 md:h-16 mb-3"
-                />
-                <h2 class="text-lg md:text-xl font-semibold text-[#f8f8f2]">
-                    Firefox
-                </h2>
+                <div
+                    class="bg-[#3c3836] rounded-lg p-3 mb-4 border border-[#665c54]"
+                >
+                    <img
+                        src="./assets/firefox.png"
+                        alt="Firefox Browser"
+                        class="w-12 h-12"
+                    />
+                </div>
+                <h3 class="text-lg font-semibold text-[#ebdbb2]">Firefox</h3>
             </div>
         </div>
-        <div class="bg-[#49483e] rounded-lg p-4 md:p-6">
-            <h3 class="text-lg md:text-xl font-semibold text-[#f8f8f2] mb-3">
+
+        <div class="bg-[#32302f] rounded-lg border border-[#504945] p-6">
+            <h3 class="text-xl font-semibold text-[#ebdbb2] mb-4">
                 Important Tips for Better Experience
             </h3>
-            <ul
-                class="text-[#f8f8f2] text-sm md:text-base space-y-2 text-left max-w-2xl mx-auto"
-            >
-                <li>📍 Always allow location permission when prompted</li>
-                <li>🛰️ Enable GPS for better location accuracy</li>
-                <li>
-                    🔄 Keep location services turned on for real-time tracking
+            <div class="w-16 h-0.5 bg-[#b8bb26] mx-auto mb-6"></div>
+            <ul class="text-[#d5c4a1] space-y-3 text-left max-w-xl mx-auto">
+                <li class="flex items-center space-x-3">
+                    <span>📍</span>
+                    <span>Always allow location permission when prompted</span>
+                </li>
+                <li class="flex items-center space-x-3">
+                    <span>🛰️</span>
+                    <span>Enable GPS for better location accuracy</span>
+                </li>
+                <li class="flex items-center space-x-3">
+                    <span>🔄</span>
+                    <span
+                        >Keep location services turned on for real-time
+                        tracking</span
+                    >
                 </li>
             </ul>
         </div>
     </div>
 </section>
 
-<hr class="border-[#49483e]" />
-
-<section class="bg-[#383830] p-4 md:p-6 lg:p-8">
+<section class="bg-[#1d2021] py-16 px-8">
     <div class="max-w-4xl mx-auto">
-        <h1
-            class="text-2xl md:text-3xl lg:text-4xl font-bold text-[#f8f8f2] mb-4"
-        >
-            Get in Touch
-        </h1>
-        <h2 class="text-xl md:text-2xl font-semibold text-[#f8f8f2] mb-3">
-            Emergency Response & Disaster Management Contact
-        </h2>
-        <h3 class="text-lg md:text-xl font-semibold text-[#f8f8f2] mb-2">
-            Emergency Response Team
-        </h3>
-        <p class="text-[#f8f8f2] mb-4 text-sm md:text-base">
-            Contact our emergency response team for immediate assistance with
-            natural disasters, medical emergencies, and crisis situations. We're
-            here 24/7 to help.
-        </p>
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-[#ebdbb2] mb-4">Get in Touch</h2>
+            <div class="w-16 h-0.5 bg-[#cc241d] mx-auto"></div>
+        </div>
 
-        <ul
-            id="contact-list"
-            class="text-[#f92672] text-lg md:text-xl font-semibold"
-        >
-            <li class="animate-pulse">Loading contacts...</li>
-        </ul>
+        <div class="bg-[#32302f] rounded-lg border border-[#504945] p-6">
+            <h3 class="text-xl font-semibold text-[#ebdbb2] mb-4 text-center">
+                Emergency Response & Disaster Management Contact
+            </h3>
+            <p class="text-[#d5c4a1] mb-6 text-center max-w-2xl mx-auto">
+                Contact our emergency response team for immediate assistance
+                with natural disasters, medical emergencies, and crisis
+                situations. We're here 24/7 to help.
+            </p>
+
+            <div class="bg-[#3c3836] rounded-lg p-4 border border-[#665c54]">
+                <ul
+                    id="contact-list"
+                    class="text-[#cc241d] text-lg font-semibold space-y-2"
+                >
+                    <li class="animate-pulse text-center">
+                        Loading contacts...
+                    </li>
+                </ul>
+            </div>
+        </div>
         <script src="./pages/landing-page/structure/contact.js"></script>
     </div>
 </section>
-
-<hr class="border-[#49483e]" />
-
-<section class="bg-[#272822] p-4 md:p-6 lg:p-8">
-    <div class="max-w-4xl mx-auto grid md:grid-cols-3 gap-4 md:gap-6">
-        <div>
-            <h2 class="text-xl md:text-2xl font-bold text-[#f8f8f2] mb-2">
+<section class="bg-[#282828] py-12 px-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-[#ebdbb2] mb-4">
                 Emergency Response Hours
             </h2>
+            <div class="w-16 h-0.5 bg-[#cc241d] mx-auto"></div>
         </div>
-        <div>
-            <h3 class="text-lg font-semibold text-[#f8f8f2]">Emergency Line</h3>
-            <p class="text-[#f92672] font-medium">24/7 Available</p>
-        </div>
-        <div>
-            <h3 class="text-lg font-semibold text-[#f8f8f2]">
-                General Support
-            </h3>
-            <p class="text-[#f8f8f2]">8:00 AM - 8:00 PM</p>
-            <h3 class="text-lg font-semibold text-[#f8f8f2] mt-2">Weekend</h3>
-            <p class="text-[#f8f8f2]">Emergency Only</p>
-        </div>
-    </div>
-</section>
 
-<section class="bg-[#49483e] p-4 md:p-6 lg:p-8 text-center">
-    <div class="max-w-4xl mx-auto">
-        <h1
-            class="text-xl md:text-2xl lg:text-3xl font-bold text-[#f8f8f2] mb-4"
-        >
-            SIGLAT Emergency Response System
-        </h1>
-        <p class="text-[#f8f8f2] mb-4 text-sm md:text-base">
-            System for Integrated Government Locality Alert and Tracking -
-            Protecting communities through advanced emergency response
-            coordination and disaster management.
-        </p>
-        <p class="text-[#f92672] text-xs md:text-sm">
-            &copy; 2025 SIGLAT Emergency Services &bull; Emergency Response
-            Division &bull; All Rights Reserved
-        </p>
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div class="text-center md:text-left">
+                <div
+                    class="flex items-center justify-center md:justify-start mb-4"
+                >
+                    <div class="text-4xl mr-4">🚨</div>
+                    <h3 class="text-xl font-semibold text-[#ebdbb2]">
+                        Emergency Line
+                    </h3>
+                </div>
+                <p class="text-[#cc241d] font-bold text-2xl mb-2">
+                    24/7 Available
+                </p>
+                <p class="text-[#d5c4a1]">Always ready for emergencies</p>
+            </div>
+
+            <div class="text-center md:text-left">
+                <div
+                    class="flex items-center justify-center md:justify-start mb-4"
+                >
+                    <div class="text-4xl mr-4">📞</div>
+                    <h3 class="text-xl font-semibold text-[#ebdbb2]">
+                        General Support
+                    </h3>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <p class="text-[#ebdbb2] font-semibold text-lg">
+                            Weekdays
+                        </p>
+                        <p class="text-[#d5c4a1]">8:00 AM - 8:00 PM</p>
+                    </div>
+                    <div>
+                        <p class="text-[#ebdbb2] font-semibold text-lg">
+                            Weekends
+                        </p>
+                        <p class="text-[#cc241d]">Emergency Only</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
+<footer class="bg-[#1d2021] py-16 px-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Main Footer Content -->
+        <div class="grid md:grid-cols-3 gap-8 mb-8">
+            <!-- About Section -->
+            <div>
+                <div class="flex items-center mb-4">
+                    <img
+                        src="./assets/siglat.png"
+                        alt="SIGLAT Logo"
+                        class="w-12 h-12 mr-3"
+                    />
+                    <h3 class="text-xl font-bold text-[#ebdbb2]">SIGLAT</h3>
+                </div>
+                <p class="text-[#d5c4a1] mb-4">
+                    System for Integrated Government Locality Alert and Tracking
+                    - Protecting communities through advanced emergency response
+                    coordination and disaster management.
+                </p>
+                <div class="flex items-center text-[#b8bb26]">
+                    <div
+                        class="w-2 h-2 bg-[#b8bb26] rounded-full animate-pulse mr-2"
+                    ></div>
+                    <span class="text-sm">24/7 Emergency Services Active</span>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div>
+                <h4 class="text-lg font-semibold text-[#ebdbb2] mb-4">
+                    Quick Links
+                </h4>
+                <ul class="space-y-2">
+                    <li>
+                        <a
+                            href="#emergency"
+                            class="text-[#d5c4a1] hover:text-[#cc241d] transition-colors"
+                            >Emergency Response</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            href="#flood"
+                            class="text-[#d5c4a1] hover:text-[#cc241d] transition-colors"
+                            >Flood Forecasting</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            href="#alerts"
+                            class="text-[#d5c4a1] hover:text-[#cc241d] transition-colors"
+                            >Disaster Alerts</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            href="#contact"
+                            class="text-[#d5c4a1] hover:text-[#cc241d] transition-colors"
+                            >Contact Us</a
+                        >
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Emergency Contacts -->
+            <div>
+                <h4 class="text-lg font-semibold text-[#ebdbb2] mb-4">
+                    Emergency Contacts
+                </h4>
+                <div class="space-y-3">
+                    <div class="flex items-center">
+                        <span class="text-[#cc241d] mr-2">🚨</span>
+                        <div>
+                            <p class="text-[#ebdbb2] font-semibold">
+                                Emergency Hotline
+                            </p>
+                            <p class="text-[#d5c4a1] text-sm">24/7 Available</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-[#b8bb26] mr-2">📍</span>
+                        <div>
+                            <p class="text-[#ebdbb2] font-semibold">Location</p>
+                            <p class="text-[#d5c4a1] text-sm">
+                                Villaverde, Nueva Vizcaya
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="border-t border-[#504945] pt-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <!-- Copyright -->
+                <div class="text-center md:text-left mb-4 md:mb-0">
+                    <p class="text-[#cc241d] text-sm font-semibold">
+                        &copy; 2025 SIGLAT Emergency Services &bull; Emergency
+                        Response Division &bull; All Rights Reserved
+                    </p>
+                </div>
+
+                <!-- Additional Info -->
+                <div class="text-center md:text-right">
+                    <p class="text-[#d5c4a1] text-xs">
+                        Developed for community safety and disaster preparedness
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
