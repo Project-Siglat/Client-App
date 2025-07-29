@@ -83,19 +83,19 @@ fetch(`${API()}/api/v1/Admin/contact`)
 
       const li = document.createElement("li");
       li.className =
-        "bg-[#434c5e] rounded-lg p-4 hover:bg-[#4c566a] transition-all duration-300 shadow-md hover:shadow-lg";
+        "bg-[#3c3836] rounded-lg p-4 hover:bg-[#504945] transition-all duration-300 shadow-md hover:shadow-lg";
       li.innerHTML = `
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-[#88c0d0] rounded-full flex items-center justify-center text-[#2e3440]">
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <div class="w-12 h-12 bg-[#b8bb26] rounded-full flex items-center justify-center text-[#1d2021] flex-shrink-0">
                             ${contactDetails.icon}
                         </div>
-                        <div>
-                            <h4 class="text-[#eceff4] font-semibold text-base md:text-lg">${contact.label}</h4>
-                            <p class="text-[#88c0d0] text-sm md:text-base break-all">${contact.contactInformation}</p>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="text-[#ebdbb2] font-semibold text-base md:text-lg truncate">${contact.label}</h4>
+                            <p class="text-[#83a598] text-sm md:text-base truncate">${contact.contactInformation}</p>
                         </div>
                     </div>
-                    <a href="${contactDetails.href}" class="bg-[#88c0d0] hover:bg-[#8fbcbb] text-[#2e3440] rounded-full p-3 transition-colors duration-200">
+                    <a href="${contactDetails.href}" class="bg-[#b8bb26] hover:bg-[#98971a] text-[#1d2021] rounded-full p-3 transition-colors duration-200 flex-shrink-0 ml-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
@@ -142,14 +142,14 @@ fetch(`${API()}/api/v1/Admin/contact`)
   .catch((error) => {
     const contactList = document.getElementById("contact-list");
     contactList.innerHTML = `
-            <li class="bg-[#434c5e] rounded-lg p-4 border-2 border-[#bf616a]">
+            <li class="bg-[#3c3836] rounded-lg p-4 border-2 border-[#fb4934]">
                 <div class="flex items-center gap-3">
-                    <div class="text-[#bf616a]">
+                    <div class="text-[#fb4934]">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
                     </div>
-                    <span class="text-[#bf616a]">Failed to load contacts. Please try again later.</span>
+                    <span class="text-[#fb4934]">Failed to load contacts. Please try again later.</span>
                 </div>
             </li>
         `;

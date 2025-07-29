@@ -108,11 +108,7 @@
     </svg>
 </div>
 
-<div id="sirenButton" class="button-animate" style="width: 60px; height: 60px; border-radius: 50%; background: #EF4444; z-index: 2147483647; position: fixed; bottom: 20px; right: 85px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: bold; box-shadow: 0 2px 8px rgba(239,68,68,0.2); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);" onclick="handleSiren()">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="transition: transform 0.2s ease;">
-        <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
-    </svg>
-</div>
+<?php include "./pages/client/alert/main.html"; ?>
 
 <div id="mainButton" class="button-animate" style="width: 60px; height: 60px; border-radius: 50%; background: #1F2937; z-index: 2147483647; position: fixed; bottom: 20px; right: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: bold; box-shadow: 0 2px 8px rgba(31,41,55,0.2); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);" onclick="toggleOptions()">
     <svg id="mainButtonIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="transition: transform 0.3s ease;">
@@ -206,16 +202,6 @@ function handleChat() {
     // Add your chat logic here
 }
 
-function handleSiren() {
-    // Add click animation
-    const button = document.getElementById('sirenButton');
-    button.style.animation = 'buttonPulse 0.3s ease';
-    setTimeout(() => button.style.animation = '', 300);
-
-    // alert('siren button clicked');
-    // Add your siren logic here
-    redirectTOMappie()
-}
 
 function handleRecenter() {
     // Add click animation

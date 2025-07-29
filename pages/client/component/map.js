@@ -410,38 +410,95 @@ async function sendEmergencyAlert(authToken, userLat, userLng, ambulanceId) {
 // =============================================================================
 async function redirectTOMappie(userLat, userLng, markers) {
   console.log("=== EMERGENCY ALERT STARTED ===");
+  console.log("Input userLat:", userLat);
+  console.log("Input userLng:", userLng);
+  console.log("Current coordinates - lat:", currentLat, "lng:", currentLng);
+  console.log("ambulanceMarkers length:", ambulanceMarkers.length);
+  console.log("ambulanceData length:", ambulanceData.length);
 
   const authToken = validateAuthToken();
   if (!authToken) return;
 
-  if (!validateUserLocation(userLat, userLng)) return;
+  // Use current location if user coordinates not provided or null
+  const finalUserLat = userLat !== null ? userLat : currentLat;
+  const finalUserLng = userLng !== null ? userLng : currentLng;
 
-  // Validate ambulance availability first
-  if (!validateAmbulanceAvailability()) {
+  console.log(
+    "Final user coordinates - lat:",
+    finalUserLat,
+    "lng:",
+    finalUserLng,
+  );
+
+  if (!validateUserLocation(finalUserLat, finalUserLng)) return;
+
+  // Log detailed ambulance state
+  console.log("=== DETAILED AMBULANCE STATE ===");
+  console.log("ambulanceMarkers:", ambulanceMarkers);
+  console.log("ambulanceData:", ambulanceData);
+
+  // Check if we have any ambulances at all
+  if (!ambulanceMarkers || ambulanceMarkers.length === 0) {
+    console.log("No ambulance markers found");
     alert(
       "No ambulances available. Please wait for ambulances to load or check your connection.",
     );
     return;
   }
 
-  // Find nearest ambulance using the findNearestAmbulance function to ensure we get the correct ID
-  const result = findNearestAmbulance(userLat, userLng);
-
-  if (!result || !result.ambulance || !result.id) {
-    alert("No ambulances available for emergency alert.");
+  if (!ambulanceData || ambulanceData.length === 0) {
+    console.log("No ambulance data found");
+    alert(
+      "Ambulance data not available. Please wait for ambulances to load or check your connection.",
+    );
     return;
   }
 
+  // Find nearest ambulance using the findNearestAmbulance function
+  const result = findNearestAmbulance(finalUserLat, finalUserLng);
+
+  console.log("findNearestAmbulance result:", result);
+
+  if (!result) {
+    console.log("findNearestAmbulance returned null");
+    alert("No ambulances available for emergency alert - result is null.");
+    return;
+  }
+
+  if (!result.ambulance) {
+    console.log("No ambulance in result");
+    alert(
+      "No ambulances available for emergency alert - no ambulance in result.",
+    );
+    return;
+  }
+
+  // Handle case where ID might be null but ambulance exists
+  let ambulanceId = result.id;
+  if (!ambulanceId) {
+    console.log("No ambulance ID found, attempting to find from data");
+    // Try to find the ambulance index and get ID from there
+    const ambulanceIndex = ambulanceMarkers.indexOf(result.ambulance);
+    if (ambulanceIndex >= 0 && ambulanceData[ambulanceIndex]) {
+      ambulanceId = ambulanceData[ambulanceIndex].id;
+      console.log("Found ambulance ID from index:", ambulanceId);
+    } else {
+      // Generate a fallback ID if we still can't find one
+      ambulanceId = "UNKNOWN_" + Date.now();
+      console.log("Using fallback ambulance ID:", ambulanceId);
+    }
+  }
+
   // Alert the nearest ambulance ID
-  alert(`Nearest ambulance detected - ID: ${result.id}`);
+  alert(`Nearest ambulance detected - ID: ${ambulanceId}`);
 
   // Calculate route to nearest ambulance
   const ambulanceLat = result.ambulance.getLatLng().lat;
   const ambulanceLng = result.ambulance.getLatLng().lng;
-  await calculateRoute(userLat, userLng, ambulanceLat, ambulanceLng);
+  await calculateRoute(finalUserLat, finalUserLng, ambulanceLat, ambulanceLng);
 
-  // Send emergency alert with the correct nearest ambulance ID
-  await sendEmergencyAlert(authToken, userLat, userLng, result.id);
+  // Send emergency alert with the ambulance ID
+  await sendEmergencyAlert(authToken, finalUserLat, finalUserLng, ambulanceId);
 }
 
 // =============================================================================
@@ -525,6 +582,7 @@ function createAmbulanceMarker(ambulance) {
 
     const marker = L.marker([lat, lng], {
       icon: ambulanceIcon,
+      draggable: true,
     }).addTo(map);
 
     marker.bindPopup(`
