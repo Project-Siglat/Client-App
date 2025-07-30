@@ -49,6 +49,7 @@ function validateAmbulanceAvailability() {
 }
 
 function findNearestAmbulance(userLat, userLng) {
+  alert("Number of ambulances on the map: " + ambulanceData.length);
   console.log("Hello World");
   return null;
 }
@@ -94,7 +95,12 @@ async function toggleRoutingMode() {
 }
 
 function reCenter() {
-  console.log("Hello World");
+  if (currentLat !== null && currentLng !== null && userMarker) {
+    map.setView([currentLat, currentLng], 15);
+    console.log("Map recentered to user location:", currentLat, currentLng);
+  } else {
+    console.log("Cannot recenter: user location not available");
+  }
 }
 
 // =============================================================================
