@@ -261,6 +261,22 @@
         .bindPopup("SIGLAT Rescue - Villaverde, Nueva Vizcaya")
         .openPopup();
 
+    // Function to calculate distance between two points using Haversine formula
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Radius of the Earth in kilometers
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLon = ((lon2 - lon1) * Math.PI) / 180;
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos((lat1 * Math.PI) / 180) *
+                Math.cos((lat2 * Math.PI) / 180) *
+                Math.sin(dLon / 2) *
+                Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c; // Distance in kilometers
+        return distance;
+    }
+
     // Function to fetch ambulance data from API
     async function fetchAmbulanceData() {
         try {
@@ -324,7 +340,7 @@
         }).addTo(map);
     }
 
-    // Function to find nearest ambulance using API endpoint
+    // Function to find nearest ambulance using client-side calculation
     async function findNearestAmbulance() {
         if (!userLocation) {
             alert("User location not available. Please allow location access.");
@@ -332,23 +348,37 @@
         }
 
         try {
-            const response = await fetch(API() + "/api/v1/Ambulance", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    accept: "*/*",
-                },
-                body: JSON.stringify({
-                    latitude: userLocation[0],
-                    longitude: userLocation[1],
-                }),
-            });
+            // First fetch the latest ambulance data
+            await fetchAmbulanceData();
 
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
+            if (ambulanceData.length === 0) {
+                alert("No ambulances available.");
+                return;
             }
 
-            const nearestAmbulance = await response.json();
+            let nearestAmbulance = null;
+            let shortestDistance = Infinity;
+
+            // Calculate distance to each ambulance and find the nearest one
+            ambulanceData.forEach(function (ambulance) {
+                const ambulanceLat = parseFloat(ambulance.latitude);
+                const ambulanceLng = parseFloat(ambulance.longitude);
+
+                const distance = calculateDistance(
+                    userLocation[0],
+                    userLocation[1],
+                    ambulanceLat,
+                    ambulanceLng,
+                );
+
+                if (distance < shortestDistance) {
+                    shortestDistance = distance;
+                    nearestAmbulance = {
+                        ...ambulance,
+                        distance: distance,
+                    };
+                }
+            });
 
             if (nearestAmbulance) {
                 const nearestLat = parseFloat(nearestAmbulance.latitude);
@@ -357,11 +387,9 @@
                 alert(
                     "Nearest ambulance is Unit " +
                         nearestAmbulance.id +
-                        (nearestAmbulance.distance
-                            ? " at distance: " +
-                              nearestAmbulance.distance.toFixed(2) +
-                              " km"
-                            : ""),
+                        " at distance: " +
+                        nearestAmbulance.distance.toFixed(2) +
+                        " km",
                 );
 
                 // Create route to nearest ambulance
@@ -379,7 +407,7 @@
             }
         } catch (error) {
             console.error("Error finding nearest ambulance:", error);
-            alert("Failed to find nearest ambulance from server");
+            alert("Failed to find nearest ambulance");
         }
     }
 
