@@ -1,0 +1,236 @@
+<div id="map" style="height: calc(100vh - 72px); width: 100%"></div>
+<button
+    id="findNearestAmbulance"
+    style="
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 9999;
+        padding: 10px 15px;
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+    "
+>
+    Find Nearest Ambulance
+</button>
+<script>
+    // Load Leaflet Routing Machine CSS
+    var cssLink = document.createElement("link");
+    cssLink.rel = "stylesheet";
+    cssLink.href =
+        "https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css";
+    document.head.appendChild(cssLink);
+
+    // Load Leaflet Routing Machine JS
+    var script = document.createElement("script");
+    script.src =
+        "https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js";
+    document.head.appendChild(script);
+
+    var map = L.map("map").setView([16.2467, -87.6833], 13);
+    var userLocation = null;
+    var ambulanceData = [];
+    var ambulanceMarkers = [];
+    var routingControl = null;
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+    }).addTo(map);
+
+    // Create custom icon
+    var customIcon = L.icon({
+        iconUrl: "./assets/pin.png",
+        iconSize: [80, 42],
+        iconAnchor: [21, 42],
+        popupAnchor: [0, -42],
+    });
+
+    // Create ambulance icon
+    var ambulanceIcon = L.icon({
+        iconUrl: "./assets/aid.png",
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+        popupAnchor: [0, -40],
+    });
+
+    // SIGLAT Rescue marker
+    L.marker([16.2467, -87.6833], { icon: customIcon })
+        .addTo(map)
+        .bindPopup("SIGLAT Rescue - Villaverde, Nueva Vizcaya")
+        .openPopup();
+
+    // Function to fetch ambulance data from API
+    async function fetchAmbulanceData() {
+        try {
+            const response = await fetch(API() + "/api/v1/Ambulance", {
+                method: "GET",
+                headers: {
+                    accept: "*/*",
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            const data = await response.json();
+            ambulanceData = data;
+
+            // Clear existing ambulance markers
+            ambulanceMarkers.forEach((marker) => {
+                map.removeLayer(marker);
+            });
+            ambulanceMarkers = [];
+
+            // Add ambulance markers from API data
+            ambulanceData.forEach(function (ambulance, index) {
+                const lat = parseFloat(ambulance.latitude);
+                const lng = parseFloat(ambulance.longitude);
+
+                const marker = L.marker([lat, lng], { icon: ambulanceIcon })
+                    .addTo(map)
+                    .bindPopup("Ambulance Unit " + ambulance.id);
+
+                ambulanceMarkers.push(marker);
+            });
+        } catch (error) {
+            console.error("Error fetching ambulance data:", error);
+            alert("Failed to load ambulance data from server");
+        }
+    }
+
+    // Function to calculate distance between two points
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        var R = 6371; // Radius of the Earth in kilometers
+        var dLat = ((lat2 - lat1) * Math.PI) / 180;
+        var dLon = ((lon2 - lon1) * Math.PI) / 180;
+        var a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos((lat1 * Math.PI) / 180) *
+                Math.cos((lat2 * Math.PI) / 180) *
+                Math.sin(dLon / 2) *
+                Math.sin(dLon / 2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        var distance = R * c;
+        return distance;
+    }
+
+    // Function to create route between user and ambulance
+    function createRoute(userLat, userLng, ambulanceLat, ambulanceLng) {
+        // Remove existing route if any
+        if (routingControl) {
+            map.removeControl(routingControl);
+        }
+
+        // Create new routing control
+        routingControl = L.Routing.control({
+            waypoints: [
+                L.latLng(userLat, userLng),
+                L.latLng(ambulanceLat, ambulanceLng),
+            ],
+            routeWhileDragging: false,
+            createMarker: function () {
+                return null;
+            }, // Don't create default markers
+            lineOptions: {
+                styles: [{ color: "#dc3545", weight: 4, opacity: 0.7 }],
+            },
+        }).addTo(map);
+    }
+
+    // Function to find nearest ambulance
+    function findNearestAmbulance() {
+        if (!userLocation) {
+            alert("User location not available. Please allow location access.");
+            return;
+        }
+
+        if (ambulanceData.length === 0) {
+            alert("No ambulance data available.");
+            return;
+        }
+
+        var nearestDistance = Infinity;
+        var nearestAmbulanceIndex = -1;
+
+        ambulanceData.forEach(function (ambulance, index) {
+            const lat = parseFloat(ambulance.latitude);
+            const lng = parseFloat(ambulance.longitude);
+
+            var distance = calculateDistance(
+                userLocation[0],
+                userLocation[1],
+                lat,
+                lng,
+            );
+
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestAmbulanceIndex = index;
+            }
+        });
+
+        if (nearestAmbulanceIndex !== -1) {
+            var nearestAmbulance = ambulanceData[nearestAmbulanceIndex];
+            const nearestLat = parseFloat(nearestAmbulance.latitude);
+            const nearestLng = parseFloat(nearestAmbulance.longitude);
+
+            alert(
+                "Nearest ambulance is Unit " +
+                    nearestAmbulance.id +
+                    " at distance: " +
+                    nearestDistance.toFixed(2) +
+                    " km",
+            );
+
+            // Create route to nearest ambulance
+            createRoute(
+                userLocation[0],
+                userLocation[1],
+                nearestLat,
+                nearestLng,
+            );
+
+            // Center map on nearest ambulance
+            map.setView([nearestLat, nearestLng], 15);
+        }
+    }
+
+    // Add event listener to button
+    document
+        .getElementById("findNearestAmbulance")
+        .addEventListener("click", findNearestAmbulance);
+
+    // Get user's current location
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                var userLat = position.coords.latitude;
+                var userLng = position.coords.longitude;
+                userLocation = [userLat, userLng];
+
+                // Add marker for user's location
+                L.marker([userLat, userLng], { icon: customIcon })
+                    .addTo(map)
+                    .bindPopup("Your Location")
+                    .openPopup();
+
+                // Center map on user's location
+                map.setView([userLat, userLng], 13);
+            },
+            function (error) {
+                console.log("Error getting location: " + error.message);
+                // Keep default view if location access fails
+            },
+        );
+    } else {
+        console.log("Geolocation is not supported by this browser.");
+    }
+
+    // Fetch ambulance data on page load
+    fetchAmbulanceData();
+</script>
