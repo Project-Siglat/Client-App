@@ -1,22 +1,220 @@
 <div id="map" style="height: calc(100vh - 72px); width: 100%"></div>
-<button
+<div
     id="findNearestAmbulance"
     style="
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #ef4444;
+        z-index: 2147483647;
         position: fixed;
         bottom: 20px;
-        right: 20px;
-        z-index: 9999;
-        padding: 10px 15px;
-        background-color: #dc3545;
-        color: white;
-        border: none;
-        border-radius: 5px;
+        right: 85px;
         cursor: pointer;
-        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     "
 >
-    Find Nearest Ambulance
-</button>
+    <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        style="transition: transform 0.2s ease"
+    >
+        <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
+    </svg>
+</div>
+
+<!-- Emergency Modal -->
+<div
+    id="emergencyModal"
+    style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+    "
+>
+    <div
+        style="
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        "
+    >
+        <h3 style="margin-top: 0; color: #dc3545">Emergency Request</h3>
+
+        <div style="margin: 20px 0">
+            <label
+                style="display: block; margin-bottom: 10px; font-weight: bold"
+                >Emergency Type:</label
+            >
+            <select
+                id="emergencyType"
+                style="
+                    width: 100%;
+                    padding: 8px;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    font-size: 14px;
+                "
+            >
+                <option value="accident">Accident</option>
+                <option value="fire">Fire</option>
+                <option value="medical">Medical Emergency</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+
+        <div style="margin: 20px 0">
+            <label
+                style="display: block; margin-bottom: 10px; font-weight: bold"
+                >Number of Patients:</label
+            >
+            <input
+                type="number"
+                id="patientCount"
+                min="1"
+                value="1"
+                style="
+                    width: 100%;
+                    padding: 8px;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    font-size: 14px;
+                    box-sizing: border-box;
+                "
+            />
+        </div>
+
+        <div
+            style="
+                font-size: 24px;
+                font-weight: bold;
+                color: #dc3545;
+                margin: 20px 0;
+            "
+        >
+            Auto-dispatch in: <span id="countdown">10</span>s
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center">
+            <button
+                id="confirmEmergency"
+                style="
+                    padding: 10px 20px;
+                    background-color: #dc3545;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: bold;
+                "
+            >
+                Confirm Now
+            </button>
+            <button
+                id="cancelEmergency"
+                style="
+                    padding: 10px 20px;
+                    background-color: #6c757d;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 14px;
+                "
+            >
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let countdownTimer;
+    let countdownValue = 10;
+
+    // Show emergency modal
+    function showEmergencyModal() {
+        document.getElementById("emergencyModal").style.display = "flex";
+        countdownValue = 10;
+        document.getElementById("countdown").textContent = countdownValue;
+
+        countdownTimer = setInterval(() => {
+            countdownValue--;
+            document.getElementById("countdown").textContent = countdownValue;
+
+            if (countdownValue <= 0) {
+                clearInterval(countdownTimer);
+                processEmergencyRequest();
+            }
+        }, 1000);
+    }
+
+    // Hide emergency modal
+    function hideEmergencyModal() {
+        document.getElementById("emergencyModal").style.display = "none";
+        if (countdownTimer) {
+            clearInterval(countdownTimer);
+        }
+    }
+
+    // Process emergency request
+    function processEmergencyRequest() {
+        const emergencyType = document.getElementById("emergencyType").value;
+        const patientCount = document.getElementById("patientCount").value;
+
+        hideEmergencyModal();
+
+        // Call the original findNearestAmbulance function
+        findNearestAmbulance();
+
+        // You can add additional logic here to handle the emergency type and patient count
+        console.log("Emergency Type:", emergencyType);
+        console.log("Patient Count:", patientCount);
+    }
+
+    // Event listeners
+    document
+        .getElementById("findNearestAmbulance")
+        .addEventListener("click", function (e) {
+            e.preventDefault();
+            showEmergencyModal();
+        });
+
+    document
+        .getElementById("confirmEmergency")
+        .addEventListener("click", function () {
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+            }
+            processEmergencyRequest();
+        });
+
+    document
+        .getElementById("cancelEmergency")
+        .addEventListener("click", function () {
+            hideEmergencyModal();
+        });
+</script>
 <script>
     // Load Leaflet Routing Machine CSS
     var cssLink = document.createElement("link");
@@ -103,22 +301,6 @@
         }
     }
 
-    // Function to calculate distance between two points
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-        var R = 6371; // Radius of the Earth in kilometers
-        var dLat = ((lat2 - lat1) * Math.PI) / 180;
-        var dLon = ((lon2 - lon1) * Math.PI) / 180;
-        var a =
-            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos((lat1 * Math.PI) / 180) *
-                Math.cos((lat2 * Math.PI) / 180) *
-                Math.sin(dLon / 2) *
-                Math.sin(dLon / 2);
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        var distance = R * c;
-        return distance;
-    }
-
     // Function to create route between user and ambulance
     function createRoute(userLat, userLng, ambulanceLat, ambulanceLng) {
         // Remove existing route if any
@@ -142,68 +324,64 @@
         }).addTo(map);
     }
 
-    // Function to find nearest ambulance
-    function findNearestAmbulance() {
+    // Function to find nearest ambulance using API endpoint
+    async function findNearestAmbulance() {
         if (!userLocation) {
             alert("User location not available. Please allow location access.");
             return;
         }
 
-        if (ambulanceData.length === 0) {
-            alert("No ambulance data available.");
-            return;
-        }
+        try {
+            const response = await fetch(API() + "/ambulance", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    accept: "*/*",
+                },
+                body: JSON.stringify({
+                    latitude: userLocation[0],
+                    longitude: userLocation[1],
+                }),
+            });
 
-        var nearestDistance = Infinity;
-        var nearestAmbulanceIndex = -1;
-
-        ambulanceData.forEach(function (ambulance, index) {
-            const lat = parseFloat(ambulance.latitude);
-            const lng = parseFloat(ambulance.longitude);
-
-            var distance = calculateDistance(
-                userLocation[0],
-                userLocation[1],
-                lat,
-                lng,
-            );
-
-            if (distance < nearestDistance) {
-                nearestDistance = distance;
-                nearestAmbulanceIndex = index;
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
             }
-        });
 
-        if (nearestAmbulanceIndex !== -1) {
-            var nearestAmbulance = ambulanceData[nearestAmbulanceIndex];
-            const nearestLat = parseFloat(nearestAmbulance.latitude);
-            const nearestLng = parseFloat(nearestAmbulance.longitude);
+            const nearestAmbulance = await response.json();
 
-            alert(
-                "Nearest ambulance is Unit " +
-                    nearestAmbulance.id +
-                    " at distance: " +
-                    nearestDistance.toFixed(2) +
-                    " km",
-            );
+            if (nearestAmbulance) {
+                const nearestLat = parseFloat(nearestAmbulance.latitude);
+                const nearestLng = parseFloat(nearestAmbulance.longitude);
 
-            // Create route to nearest ambulance
-            createRoute(
-                userLocation[0],
-                userLocation[1],
-                nearestLat,
-                nearestLng,
-            );
+                alert(
+                    "Nearest ambulance is Unit " +
+                        nearestAmbulance.id +
+                        (nearestAmbulance.distance
+                            ? " at distance: " +
+                              nearestAmbulance.distance.toFixed(2) +
+                              " km"
+                            : ""),
+                );
 
-            // Center map on nearest ambulance
-            map.setView([nearestLat, nearestLng], 15);
+                // Create route to nearest ambulance
+                createRoute(
+                    userLocation[0],
+                    userLocation[1],
+                    nearestLat,
+                    nearestLng,
+                );
+
+                // Center map on nearest ambulance
+                map.setView([nearestLat, nearestLng], 15);
+            } else {
+                alert("No ambulance found.");
+            }
+        } catch (error) {
+            console.error("Error finding nearest ambulance:", error);
+            alert("Failed to find nearest ambulance from server");
         }
     }
-
-    // Add event listener to button
-    document
-        .getElementById("findNearestAmbulance")
-        .addEventListener("click", findNearestAmbulance);
 
     // Get user's current location
     if (navigator.geolocation) {
