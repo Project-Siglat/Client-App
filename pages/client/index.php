@@ -1,20 +1,13 @@
-<script>
-<?php include "./config/session.js"; ?>
+<script src="./config/session.js"></script>
 
-</script>
+
 <?php
 // include "./pages/client/component/topbar.php";
 include "./components/topbar.html";
 
-$DEBUG = false;
+include "./pages/client/component/map/index.html";
 
-if (!$DEBUG) {
-    include "./pages/client/component/map.html";
-} else {
-    include "./pages/client/component/debugmap.html";
-}
-
-include "./pages/client/widget/frame.php";
+// include "./pages/client/widget/frame.php";
 
 
 ?>
