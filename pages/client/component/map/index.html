@@ -1,4 +1,26 @@
 <div id="map" style="height: calc(100vh - 72px); width: 100%"></div>
+
+<!-- Loading message -->
+<div
+    id="locationLoading"
+    style="
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        z-index: 1000;
+        font-size: 16px;
+        font-weight: bold;
+    "
+>
+    Your location is still fetching..........
+</div>
+
 <div
     id="findNearestAmbulance"
     style="
@@ -148,6 +170,19 @@
     </div>
 </div>
 
+<style>
+    .leaflet-routing-alternatives-container {
+        display: none !important;
+    }
+    .leaflet-routing-container {
+        display: none !important;
+    }
+    .leaflet-bar a,
+    .leaflet-bar a:hover {
+        display: none !important;
+    }
+</style>
+
 <script>
     let countdownTimer;
     let countdownValue = 10;
@@ -214,6 +249,12 @@
         .addEventListener("click", function () {
             hideEmergencyModal();
         });
+
+    function reCenter() {
+        if (userLocation) {
+            map.setView([userLocation[0], userLocation[1]], 15);
+        }
+    }
 </script>
 <script>
     // Load Leaflet Routing Machine CSS
@@ -234,6 +275,9 @@
     var ambulanceData = [];
     var ambulanceMarkers = [];
     var routingControl = null;
+    var userLocationMarker = null;
+    var locationWatchId = null;
+    var isFirstLocationUpdate = true;
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "© OpenStreetMap contributors",
@@ -337,7 +381,50 @@
             lineOptions: {
                 styles: [{ color: "#dc3545", weight: 4, opacity: 0.7 }],
             },
+            show: false,
+            addWaypoints: false,
+            fitSelectedRoutes: false,
+            collapsible: false,
         }).addTo(map);
+
+        // Force hide the routing alternatives container after it's added
+        setTimeout(() => {
+            const routingContainers = document.querySelectorAll(
+                ".leaflet-routing-alternatives-container, .leaflet-routing-container",
+            );
+            routingContainers.forEach((container) => {
+                container.style.display = "none !important";
+                container.style.visibility = "hidden";
+                container.style.opacity = "0";
+                container.remove();
+            });
+        }, 100);
+    }
+
+    // Function to update user location
+    function updateUserLocation(position) {
+        var userLat = position.coords.latitude;
+        var userLng = position.coords.longitude;
+        userLocation = [userLat, userLng];
+
+        // Hide loading message
+        document.getElementById("locationLoading").style.display = "none";
+
+        // Remove existing user location marker if it exists
+        if (userLocationMarker) {
+            map.removeLayer(userLocationMarker);
+        }
+
+        // Add new marker for user's location
+        userLocationMarker = L.marker([userLat, userLng], { icon: customIcon })
+            .addTo(map)
+            .bindPopup("Your Location");
+
+        // Only center map on first load
+        if (isFirstLocationUpdate) {
+            map.setView([userLat, userLng], 13);
+            isFirstLocationUpdate = false;
+        }
     }
 
     // Function to find nearest ambulance using client-side calculation
@@ -411,30 +498,38 @@
         }
     }
 
-    // Get user's current location
+    // Get user's current location and set up continuous tracking
     if (navigator.geolocation) {
+        // Get initial position
         navigator.geolocation.getCurrentPosition(
-            function (position) {
-                var userLat = position.coords.latitude;
-                var userLng = position.coords.longitude;
-                userLocation = [userLat, userLng];
-
-                // Add marker for user's location
-                L.marker([userLat, userLng], { icon: customIcon })
-                    .addTo(map)
-                    .bindPopup("Your Location")
-                    .openPopup();
-
-                // Center map on user's location
-                map.setView([userLat, userLng], 13);
-            },
+            updateUserLocation,
             function (error) {
                 console.log("Error getting location: " + error.message);
+                // Hide loading message even on error
+                document.getElementById("locationLoading").style.display =
+                    "none";
                 // Keep default view if location access fails
             },
         );
+
+        // Set up continuous location tracking every 0.5 seconds
+        setInterval(() => {
+            navigator.geolocation.getCurrentPosition(
+                updateUserLocation,
+                function (error) {
+                    console.log("Error updating location: " + error.message);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0,
+                },
+            );
+        }, 500);
     } else {
         console.log("Geolocation is not supported by this browser.");
+        // Hide loading message if geolocation is not supported
+        document.getElementById("locationLoading").style.display = "none";
     }
 
     // Fetch ambulance data on page load
