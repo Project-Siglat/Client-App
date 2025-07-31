@@ -61,12 +61,12 @@
 
 /* Mobile styles */
 @media (max-width: 768px) {
-    #recenterButton, #chatButton, #sirenButton, #mainButton {
+    #recenterButton, #chatButton, #findNearestAmbulance, #mainButton {
         width: 45px !important;
         height: 45px !important;
     }
 
-    #recenterButton svg, #chatButton svg, #sirenButton svg, #mainButtonIcon {
+    #recenterButton svg, #chatButton svg, #findNearestAmbulance svg, #mainButtonIcon {
         width: 18px !important;
         height: 18px !important;
     }
@@ -75,7 +75,7 @@
         right: 125px !important;
     }
 
-    #sirenButton {
+    #findNearestAmbulance {
         right: 70px !important;
     }
 
