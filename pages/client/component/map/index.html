@@ -321,6 +321,41 @@
         return distance;
     }
 
+    // Function to post user coordinates to API
+    async function postUserCoordinates(latitude, longitude) {
+        try {
+            const authToken = sessionStorage.getItem("authToken");
+            if (!authToken) {
+                console.log("No auth token found in session storage");
+                return;
+            }
+
+            // You'll need to replace this with the actual user ID
+            // For now using a placeholder - you should get this from your user session/storage
+            const userId = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
+
+            const response = await fetch(API() + "/api/v1/User/coordinates", {
+                method: "POST",
+                headers: {
+                    accept: "*/*",
+                    Authorization: `Bearer ${authToken}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    id: userId,
+                    latitude: latitude.toString(),
+                    longitude: longitude.toString(),
+                }),
+            });
+
+            if (!response.ok) {
+                console.error("Failed to post coordinates:", response.status);
+            }
+        } catch (error) {
+            console.error("Error posting coordinates:", error);
+        }
+    }
+
     // Function to fetch ambulance data from API
     async function fetchAmbulanceData() {
         try {
@@ -425,6 +460,9 @@
             map.setView([userLat, userLng], 13);
             isFirstLocationUpdate = false;
         }
+
+        // Post coordinates to API
+        postUserCoordinates(userLat, userLng);
     }
 
     // Function to find nearest ambulance using client-side calculation
@@ -534,4 +572,9 @@
 
     // Fetch ambulance data on page load
     fetchAmbulanceData();
+
+    // Set up continuous ambulance data fetching every 0.5 seconds
+    setInterval(() => {
+        fetchAmbulanceData();
+    }, 500);
 </script>
