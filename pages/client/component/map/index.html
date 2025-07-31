@@ -21,6 +21,28 @@
     Your location is still fetching..........
 </div>
 
+<!-- Ambulance Status Message -->
+<div
+    id="ambulanceStatusMessage"
+    style="
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 165, 0, 0.9);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        text-align: center;
+        z-index: 1000;
+        font-size: 14px;
+        font-weight: bold;
+        display: none;
+    "
+>
+    Ambulance is on the way! Status: <span id="ambulanceStatus">pending</span>
+</div>
+
 <div
     id="findNearestAmbulance"
     style="
@@ -186,9 +208,127 @@
 <script>
     let countdownTimer;
     let countdownValue = 10;
+    let currentAlertStatus = null;
+
+    // Function to check current ambulance alert status
+    async function checkCurrentAlert() {
+        try {
+            const authToken = sessionStorage.getItem("authToken");
+            if (!authToken) {
+                return null;
+            }
+
+            const response = await fetch(
+                API() + "/api/v1/Ambulance/alert/current",
+                {
+                    method: "GET",
+                    headers: {
+                        accept: "*/*",
+                        Authorization: `Bearer ${authToken}`,
+                    },
+                },
+            );
+
+            if (response.ok) {
+                const alertData = await response.json();
+                return alertData;
+            }
+            return null;
+        } catch (error) {
+            console.error("Error checking current alert:", error);
+            return null;
+        }
+    }
+
+    // Function to update UI based on alert status
+    function updateUIBasedOnAlert(alertData) {
+        const button = document.getElementById("findNearestAmbulance");
+        const statusMessage = document.getElementById("ambulanceStatusMessage");
+        const statusSpan = document.getElementById("ambulanceStatus");
+
+        if (alertData && alertData.status === "done") {
+            // Alert is done, make modal usable
+            currentAlertStatus = "done";
+            button.style.pointerEvents = "auto";
+            button.style.opacity = "1";
+            statusMessage.style.display = "none";
+        } else if (alertData) {
+            // Alert exists (pending or any other status), disable modal, show status, and auto pathfind
+            currentAlertStatus = alertData.status;
+            button.style.pointerEvents = "none";
+            button.style.opacity = "0.6";
+
+            statusMessage.style.display = "block";
+            statusSpan.textContent = alertData.status;
+
+            // Auto pathfind to nearest ambulance
+            findNearestAmbulance();
+
+            // Change background color based on status
+            if (alertData.status === "pending") {
+                statusMessage.style.background = "rgba(255, 165, 0, 0.9)";
+            } else {
+                statusMessage.style.background = "rgba(0, 123, 255, 0.9)";
+            }
+        } else {
+            // No current alert, make modal usable
+            currentAlertStatus = null;
+            button.style.pointerEvents = "auto";
+            button.style.opacity = "1";
+            statusMessage.style.display = "none";
+        }
+    }
+
+    // Function to send ambulance alert
+    async function sendAmbulanceAlert() {
+        try {
+            const emergencyType =
+                document.getElementById("emergencyType").value;
+            const patientCount = document.getElementById("patientCount").value;
+
+            if (!userLocation) {
+                console.error("User location not available");
+                return;
+            }
+
+            const alertData = {
+                id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                uid: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                responder: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                what: emergencyType,
+                status: "pending",
+                respondedAt: new Date().toISOString(),
+                longitude: userLocation[1].toString(),
+                latitude: userLocation[0].toString(),
+            };
+
+            const response = await fetch(API() + "/api/v1/Ambulance/alert", {
+                method: "POST",
+                headers: {
+                    accept: "*/*",
+                    Authorization: `Bearer ${sessionStorage.getItem("authToken")}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(alertData),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            console.log("Ambulance alert sent successfully");
+        } catch (error) {
+            console.error("Error sending ambulance alert:", error);
+        }
+    }
 
     // Show emergency modal
     function showEmergencyModal() {
+        // Check if there's a current alert that would prevent showing the modal
+        if (currentAlertStatus && currentAlertStatus !== "done") {
+            return; // Don't show modal if ambulance is already in action
+        }
+
         document.getElementById("emergencyModal").style.display = "flex";
         countdownValue = 10;
         document.getElementById("countdown").textContent = countdownValue;
@@ -213,11 +353,14 @@
     }
 
     // Process emergency request
-    function processEmergencyRequest() {
+    async function processEmergencyRequest() {
         const emergencyType = document.getElementById("emergencyType").value;
         const patientCount = document.getElementById("patientCount").value;
 
         hideEmergencyModal();
+
+        // Send ambulance alert
+        await sendAmbulanceAlert();
 
         // Call the original findNearestAmbulance function
         findNearestAmbulance();
@@ -255,6 +398,12 @@
             map.setView([userLocation[0], userLocation[1]], 15);
         }
     }
+
+    // Check alert status periodically
+    setInterval(async () => {
+        const alertData = await checkCurrentAlert();
+        updateUIBasedOnAlert(alertData);
+    }, 2000);
 </script>
 <script>
     // Load Leaflet Routing Machine CSS
