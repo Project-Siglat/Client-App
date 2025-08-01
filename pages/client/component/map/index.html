@@ -209,6 +209,7 @@
     let countdownTimer;
     let countdownValue = 10;
     let currentAlertStatus = null;
+    let currentAlertData = null;
 
     // Function to check current ambulance alert status
     async function checkCurrentAlert() {
@@ -240,6 +241,27 @@
         }
     }
 
+    // Function to auto pathfind to alert coordinates
+    function autoPathfindToAlert(alertData) {
+        if (!alertData || !alertData.latitude || !alertData.longitude) {
+            return;
+        }
+
+        if (!userLocation) {
+            console.error("User location not available for pathfinding");
+            return;
+        }
+
+        const alertLat = parseFloat(alertData.latitude);
+        const alertLng = parseFloat(alertData.longitude);
+
+        // Create route to the alert coordinates
+        createRoute(userLocation[0], userLocation[1], alertLat, alertLng);
+
+        // Center map on alert location
+        map.setView([alertLat, alertLng], 15);
+    }
+
     // Function to update UI based on alert status
     function updateUIBasedOnAlert(alertData) {
         const button = document.getElementById("findNearestAmbulance");
@@ -249,20 +271,22 @@
         if (alertData && alertData.status === "done") {
             // Alert is done, make modal usable
             currentAlertStatus = "done";
+            currentAlertData = alertData;
             button.style.pointerEvents = "auto";
             button.style.opacity = "1";
             statusMessage.style.display = "none";
         } else if (alertData) {
             // Alert exists (pending or any other status), disable modal, show status, and auto pathfind
             currentAlertStatus = alertData.status;
+            currentAlertData = alertData;
             button.style.pointerEvents = "none";
             button.style.opacity = "0.6";
 
             statusMessage.style.display = "block";
             statusSpan.textContent = alertData.status;
 
-            // Auto pathfind to nearest ambulance
-            findNearestAmbulance();
+            // Auto pathfind to the alert coordinates instead of nearest ambulance
+            autoPathfindToAlert(alertData);
 
             // Change background color based on status
             if (alertData.status === "pending") {
@@ -273,6 +297,7 @@
         } else {
             // No current alert, make modal usable
             currentAlertStatus = null;
+            currentAlertData = null;
             button.style.pointerEvents = "auto";
             button.style.opacity = "1";
             statusMessage.style.display = "none";
