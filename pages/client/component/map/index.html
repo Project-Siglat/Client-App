@@ -211,6 +211,7 @@
     let currentAlertStatus = null;
     let currentAlertData = null;
     let routeCreatedForAlert = false; // Track if route was already created for current alert
+    let lastAmbulancePosition = null; // Track last known ambulance position
 
     // Function to check current ambulance alert status
     async function checkCurrentAlert() {
@@ -239,6 +240,45 @@
         } catch (error) {
             console.error("Error checking current alert:", error);
             return null;
+        }
+    }
+
+    // Function to dynamically update route between user and assigned ambulance
+    function updateLiveRoute() {
+        // Check if we have an active alert with an assigned ambulance
+        if (!currentAlertData || !currentAlertData.responder || !userLocation) {
+            return;
+        }
+
+        // Find the assigned ambulance in ambulanceData
+        const assignedAmbulance = ambulanceData.find(
+            (ambulance) => ambulance.id === currentAlertData.responder,
+        );
+
+        if (!assignedAmbulance) {
+            return; // Assigned ambulance not found in data
+        }
+
+        const ambulanceLat = parseFloat(assignedAmbulance.latitude);
+        const ambulanceLng = parseFloat(assignedAmbulance.longitude);
+
+        // Check if ambulance position has changed
+        const currentAmbulancePosition = `${ambulanceLat},${ambulanceLng}`;
+
+        if (lastAmbulancePosition !== currentAmbulancePosition) {
+            // Ambulance has moved, update the route
+            console.log("Ambulance moved, updating route...");
+
+            // Create route between user and assigned ambulance
+            createRoute(
+                userLocation[0],
+                userLocation[1],
+                ambulanceLat,
+                ambulanceLng,
+            );
+
+            // Update last known position
+            lastAmbulancePosition = currentAmbulancePosition;
         }
     }
 
@@ -279,6 +319,7 @@
             currentAlertStatus = "done";
             currentAlertData = alertData;
             routeCreatedForAlert = false; // Reset for next alert
+            lastAmbulancePosition = null; // Reset ambulance position tracking
             button.style.pointerEvents = "auto";
             button.style.opacity = "1";
             statusMessage.style.display = "none";
@@ -286,6 +327,7 @@
             // Check if this is a new alert
             if (!currentAlertData || currentAlertData.id !== alertData.id) {
                 routeCreatedForAlert = false; // Reset for new alert
+                lastAmbulancePosition = null; // Reset ambulance position tracking
             }
 
             // Alert exists (pending or any other status), disable modal, show status, and auto pathfind
@@ -311,6 +353,7 @@
             currentAlertStatus = null;
             currentAlertData = null;
             routeCreatedForAlert = false; // Reset
+            lastAmbulancePosition = null; // Reset ambulance position tracking
             button.style.pointerEvents = "auto";
             button.style.opacity = "1";
             statusMessage.style.display = "none";
@@ -488,10 +531,11 @@
         }
     }
 
-    // Check alert status periodically
+    // Check alert status periodically and update live route
     setInterval(async () => {
         const alertData = await checkCurrentAlert();
         updateUIBasedOnAlert(alertData);
+        updateLiveRoute(); // Update live route if ambulance has moved
     }, 2000);
 </script>
 <script>
@@ -704,6 +748,11 @@
 
         // Post coordinates to API
         postUserCoordinates(userLat, userLng);
+
+        // Update live route if user location changed and there's an active alert
+        if (currentAlertData && currentAlertData.responder) {
+            updateLiveRoute();
+        }
     }
 
     // Function to find nearest ambulance using client-side calculation
