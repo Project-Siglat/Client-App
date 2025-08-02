@@ -1,0 +1,88 @@
+<div
+    id="contactModal"
+    class="hidden fixed inset-0 w-full h-full z-[9999] flex items-center justify-center"
+>
+    <div
+        class="rounded-xl w-[90%] max-w-md max-h-[80vh] shadow-2xl relative bg-[#282828]"
+    >
+        <div
+            class="p-5 border-b border-[#504945] flex justify-between items-center"
+        >
+            <h3 class="m-0 text-[#ebdbb2] text-lg font-semibold">
+                Contact Information
+            </h3>
+            <div class="flex gap-2">
+                <button
+                    onclick="toggleContactModal()"
+                    class="bg-transparent border-none text-2xl cursor-pointer text-[#a89984] p-0 w-8 h-8 flex items-center justify-center hover:text-[#ebdbb2] transition-colors"
+                >
+                    &times;
+                </button>
+            </div>
+        </div>
+        <div id="contactList" class="p-5 max-h-[50vh] overflow-y-auto">
+            <div
+                id="loadingSpinner"
+                class="hidden flex items-center justify-center py-8"
+            >
+                <div
+                    class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#fe8019]"
+                ></div>
+                <span class="ml-3 text-[#a89984]">Loading contacts...</span>
+            </div>
+        </div>
+        <div id="addContactForm" class="hidden p-5 border-t border-[#504945]">
+            <div class="mb-3">
+                <label class="block text-[#fe8019] text-sm font-medium mb-1"
+                    >Label</label
+                >
+                <input
+                    id="newContactLabel"
+                    type="text"
+                    class="w-full p-2 rounded bg-[#3c3836] text-[#ebdbb2] border border-[#504945]"
+                    placeholder="Enter label"
+                />
+            </div>
+            <div class="mb-3">
+                <label class="block text-[#fe8019] text-sm font-medium mb-1"
+                    >Type</label
+                >
+                <select
+                    id="newContactType"
+                    class="w-full p-2 rounded bg-[#3c3836] text-[#ebdbb2] border border-[#504945]"
+                >
+                    <option value="email">Email</option>
+                    <option value="phone">Phone</option>
+                    <option value="facebook">Facebook</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="block text-[#fe8019] text-sm font-medium mb-1"
+                    >Contact Information</label
+                >
+                <input
+                    id="newContactInfo"
+                    type="text"
+                    class="w-full p-2 rounded bg-[#3c3836] text-[#ebdbb2] border border-[#504945]"
+                    placeholder="Enter contact information"
+                />
+            </div>
+            <div class="flex gap-2">
+                <button
+                    onclick="addContact()"
+                    class="bg-[#b8bb26] hover:bg-[#98971a] text-[#1d2021] px-4 py-2 rounded cursor-pointer border-none transition-colors"
+                >
+                    Save
+                </button>
+                <button
+                    onclick="cancelAddContact()"
+                    class="bg-[#fb4934] hover:bg-[#cc241d] text-[#ebdbb2] px-4 py-2 rounded cursor-pointer border-none transition-colors"
+                >
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="./pages/client/widget/contact/contact.js"></script>

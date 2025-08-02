@@ -1,0 +1,80 @@
+<div
+    id="weather-drawer"
+    style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 90vh;
+        background: white;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+        z-index: 2147483647;
+        transform: translateY(100%);
+        transition: transform 0.3s ease-in-out;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+    "
+>
+    <div
+        id="drawer-header"
+        style="
+            padding: 10px;
+            text-align: center;
+            background: #f0f0f0;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            cursor: grab;
+        "
+    >
+        <div
+            style="
+                width: 40px;
+                height: 4px;
+                background: #ccc;
+                border-radius: 2px;
+                margin: 0 auto;
+                cursor: pointer;
+            "
+            onclick="toggleWeatherDrawer()"
+        ></div>
+        <h3 style="margin: 10px 0 5px 0; font-size: 16px">Weather Forecast</h3>
+    </div>
+    <iframe
+        src="https://www.accuweather.com/en/ph/villaverde/265132/hourly-weather-forecast/265132"
+        style="
+            width: 100%;
+            height: calc(100% - 60px);
+            border: none;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        "
+        frameborder="0"
+    ></iframe>
+</div>
+<div
+    id="weather-icon"
+    style="
+        position: fixed;
+        top: 85px;
+        right: 20px;
+        background: white;
+        padding: 10px;
+        border-radius: 50%;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 2147483647;
+        font-size: 24px;
+        text-align: center;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    "
+    onclick="toggleWeatherDrawer()"
+>
+    ☀️
+</div>
+<script src="./pages/client/widget/weather/weather.js"">
+
+</script>

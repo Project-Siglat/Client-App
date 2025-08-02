@@ -1,0 +1,299 @@
+<div
+    id="userSidebar"
+    class="fixed top-0 right-0 w-96 max-w-[90vw] h-screen shadow-2xl z-[2147483647] p-6 box-border overflow-y-auto transform translate-x-full transition-transform duration-300 ease-in-out"
+    style="background-color: #282828"
+>
+    <!-- Toast notification container -->
+    <div
+        id="toastContainer"
+        class="fixed top-4 right-4 hidden"
+        <!-- style="z-index: 2147483647" -->
+    >
+        <div
+            id="toast"
+            class="px-4 py-3 rounded-lg shadow-lg text-sm font-medium transition-all duration-300 transform translate-x-full"
+            style="background-color: #3c3836; color: #ebdbb2"
+        >
+            <div class="flex items-center justify-between">
+                <span id="toastMessage"></span>
+                <button
+                    onclick="hideToast()"
+                    class="ml-3 text-lg font-bold bg-transparent border-none cursor-pointer"
+                    style="color: #ebdbb2"
+                >
+                    ×
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div
+        class="flex justify-between items-center mb-6 pb-4"
+        style="border-bottom: 1px solid #504945"
+    >
+        <h2 class="m-0 text-2xl font-semibold" style="color: #ebdbb2">
+            User Profile
+        </h2>
+        <button
+            onclick="toggleUserSidebar()"
+            class="bg-transparent border-none text-2xl cursor-pointer w-8 h-8 flex items-center justify-center rounded-md transition-colors duration-200"
+            style="color: #a89984"
+            onmouseover="this.style.backgroundColor='#504945'"
+            onmouseout="this.style.backgroundColor='transparent'"
+        >
+            ×
+        </button>
+    </div>
+
+    <div class="text-center mb-6">
+        <div id="userNameDisplay">
+            <h3
+                id="userName"
+                class="m-0 mb-2 text-xl font-medium"
+                style="color: #ebdbb2"
+            >
+                Loading...
+            </h3>
+        </div>
+        <div id="userNameEdit" style="display: none">
+            <input
+                id="firstNameEdit"
+                type="text"
+                placeholder="First Name"
+                class="w-full mb-3 p-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                style="background-color: #3c3836; border: 1px solid #504945; color: #ebdbb2; focus:ring-color: #83a598;"
+            />
+            <input
+                id="middleNameEdit"
+                type="text"
+                placeholder="Middle Name"
+                class="w-full mb-3 p-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                style="background-color: #3c3836; border: 1px solid #504945; color: #ebdbb2; focus:ring-color: #83a598;"
+            />
+            <input
+                id="lastNameEdit"
+                type="text"
+                placeholder="Last Name"
+                class="w-full mb-3 p-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                style="background-color: #3c3836; border: 1px solid #504945; color: #ebdbb2; focus:ring-color: #83a598;"
+            />
+        </div>
+        <p id="userEmail" class="m-0 text-sm" style="color: #83a598">
+            Loading...
+        </p>
+    </div>
+
+    <div class="pt-4" style="border-top: 1px solid #504945">
+        <div class="mb-6">
+            <h4 class="m-0 mb-3 text-base font-semibold" style="color: #ebdbb2">
+                Account Information
+            </h4>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium" style="color: #a89984"
+                        >Member since:</span
+                    >
+                    <span
+                        id="memberSince"
+                        class="text-sm"
+                        style="color: #83a598"
+                        >Loading...</span
+                    >
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium" style="color: #a89984"
+                        >Role:</span
+                    >
+                    <span
+                        id="userRoleDisplay"
+                        class="text-sm"
+                        style="color: #83a598"
+                        >Loading...</span
+                    >
+                    <input
+                        id="userRoleEdit"
+                        type="text"
+                        class="ml-2 p-2 rounded text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                        style="display: none; background-color: #3c3836; border: 1px solid #504945; color: #ebdbb2; focus:ring-color: #83a598;"
+                    />
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium" style="color: #a89984"
+                        >Gender:</span
+                    >
+                    <span
+                        id="userGenderDisplay"
+                        class="text-sm"
+                        style="color: #83a598"
+                        >Loading...</span
+                    >
+                    <input
+                        id="userGenderEdit"
+                        type="text"
+                        class="ml-2 p-2 rounded text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                        style="display: none; background-color: #3c3836; border: 1px solid #504945; color: #ebdbb2; focus:ring-color: #83a598;"
+                    />
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium" style="color: #a89984"
+                        >Verification Status:</span
+                    >
+                    <div class="flex items-center gap-2">
+                        <span
+                            id="verificationStatusDisplay"
+                            class="text-sm font-medium px-2 py-1 rounded"
+                            style="color: #83a598"
+                            >Loading...</span
+                        >
+                        <button
+                            id="toggleVerificationBtn"
+                            onclick="toggleVerificationForm()"
+                            class="bg-transparent border-none text-sm cursor-pointer px-2 py-1 rounded transition-colors duration-200"
+                            style="color: #83a598; border: 1px solid #83a598"
+                            onmouseover="this.style.backgroundColor='#83a598'; this.style.color='#282828'"
+                            onmouseout="this.style.backgroundColor='transparent'; this.style.color='#83a598'"
+                        >
+                            Verify
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="verificationSection" class="mb-6" style="display: none">
+            <h4 class="m-0 mb-3 text-base font-semibold" style="color: #ebdbb2">
+                Account Verification
+            </h4>
+            <div class="space-y-3">
+                <div></div>
+                <label
+                    class="block text-sm font-medium mb-2"
+                    style="color: #a89984"
+                >
+                    Upload Verification Document:
+                </label>
+                <input
+                    id="verificationFileUpload"
+                    type="file"
+                    accept="image/*"
+                    class="w-full p-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                    style="background-color: #3c3836; border: 1px solid #504945; color: #ebdbb2; focus:ring-color: #83a598;"
+                />
+            </div>
+            <div>
+                <label
+                    class="block text-sm font-medium mb-2"
+                    style="color: #a89984"
+                >
+                    Document Type:
+                </label>
+                <select
+                    id="documentTypeSelect"
+                    class="w-full p-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                    style="background-color: #3c3836; border: 1px solid #504945; color: #ebdbb2; focus:ring-color: #83a598;"
+                >
+                    <option value="">Select document type</option>
+                    <option value="passport">Passport</option>
+                    <option value="drivers_license">Driver's License</option>
+                    <option value="national_id">National ID</option>
+                    <option value="valid id">Valid ID</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <button
+                id="submitVerificationBtn"
+                onclick="submitVerificationV2()"
+                class="w-full p-3 border-none rounded-lg cursor-pointer text-base font-medium transition-all duration-200 mt-3"
+                style="background-color: #b8bb26; color: #282828"
+                onmouseover="this.style.backgroundColor='#98971a'"
+                onmouseout="this.style.backgroundColor='#b8bb26'"
+            >
+                Submit for Verification
+            </button>
+            <div
+                id="verificationErrorMessage"
+                class="w-full p-3 rounded-lg text-sm font-medium mt-3"
+                style="display: none; background-color: #cc241d; color: #ebdbb2; border: 1px solid #fb4934;"
+            >
+                <span id="verificationErrorText">An error occurred during verification.</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-6">
+        <h4 class="m-0 mb-3 text-base font-semibold" style="color: #ebdbb2">
+            Contact Details
+        </h4>
+        <div class="space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-sm font-medium" style="color: #a89984"
+                    >Phone:</span
+                >
+                <span
+                    id="userPhoneDisplay"
+                    class="text-sm"
+                    style="color: #83a598"
+                    >Loading...</span
+                >
+                <input
+                    id="userPhoneEdit"
+                    type="text"
+                    class="ml-2 p-2 rounded text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                    style="display: none; background-color: #3c3836; border: 1px solid #504945; color: #ebdbb2; focus:ring-color: #83a598;"
+                />
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm font-medium" style="color: #a89984"
+                    >Address:</span
+                >
+                <span
+                    id="userAddressDisplay"
+                    class="text-sm"
+                    style="color: #83a598"
+                    >Loading...</span
+                >
+                <input
+                    id="userAddressEdit"
+                    type="text"
+                    class="ml-2 p-2 rounded text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2"
+                    style="display: none; background-color: #3c3836; border: 1px solid #504945; color: #ebdbb2; focus:ring-color: #83a598;"
+                />
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-8 space-y-3">
+        <button
+            id="editProfileBtn"
+            onclick="toggleEditMode()"
+            class="w-full p-3 border-none rounded-lg cursor-pointer text-base font-medium transition-all duration-200"
+            style="background-color: #458588; color: #ebdbb2"
+            onmouseover="this.style.backgroundColor='#83a598'"
+            onmouseout="this.style.backgroundColor='#458588'"
+        >
+            Edit Profile
+        </button>
+        <button
+            id="saveProfileBtn"
+            onclick="saveUserProfile()"
+            class="w-full p-3 border-none rounded-lg cursor-pointer text-base font-medium transition-all duration-200"
+            style="display: none; background-color: #b8bb26; color: #282828"
+            onmouseover="this.style.backgroundColor='#98971a'"
+            onmouseout="this.style.backgroundColor='#b8bb26'"
+        >
+            Save Changes
+        </button>
+        <button
+            id="cancelEditBtn"
+            onclick="cancelEdit()"
+            class="w-full p-3 border-none rounded-lg cursor-pointer text-base font-medium transition-all duration-200"
+            style="display: none; background-color: #cc241d; color: #ebdbb2"
+            onmouseover="this.style.backgroundColor='#fb4934'"
+            onmouseout="this.style.backgroundColor='#cc241d'"
+        >
+            Cancel
+        </button>
+    </div>
+</div>
+
+<script src="./pages/client/widget/user/user.js"></script>
