@@ -265,6 +265,15 @@
             map.setView([alertLat, alertLng], 15);
 
             routeCreatedForAlert = true;
+        } else if (routingControl && userLocation) {
+            // Update existing route with new user coordinates
+            const alertLat = parseFloat(alertData.latitude);
+            const alertLng = parseFloat(alertData.longitude);
+
+            routingControl.setWaypoints([
+                L.latLng(userLocation[0], userLocation[1]),
+                L.latLng(alertLat, alertLng),
+            ]);
         }
     }
 
@@ -488,11 +497,11 @@
         }
     }
 
-    // Check alert status periodically
+    // Check alert status periodically every 0.5 seconds
     setInterval(async () => {
         const alertData = await checkCurrentAlert();
         updateUIBasedOnAlert(alertData);
-    }, 2000);
+    }, 500);
 </script>
 <script>
     // Load Leaflet Routing Machine CSS
