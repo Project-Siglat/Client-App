@@ -317,6 +317,50 @@
         }
     }
 
+    // Function to find nearest ambulance and get its ID
+    async function findNearestAmbulanceId() {
+        if (!userLocation) {
+            console.error("User location not available");
+            return null;
+        }
+
+        try {
+            // First fetch the latest ambulance data
+            await fetchAmbulanceData();
+
+            if (ambulanceData.length === 0) {
+                console.error("No ambulances available");
+                return null;
+            }
+
+            let nearestAmbulance = null;
+            let shortestDistance = Infinity;
+
+            // Calculate distance to each ambulance and find the nearest one
+            ambulanceData.forEach(function (ambulance) {
+                const ambulanceLat = parseFloat(ambulance.latitude);
+                const ambulanceLng = parseFloat(ambulance.longitude);
+
+                const distance = calculateDistance(
+                    userLocation[0],
+                    userLocation[1],
+                    ambulanceLat,
+                    ambulanceLng,
+                );
+
+                if (distance < shortestDistance) {
+                    shortestDistance = distance;
+                    nearestAmbulance = ambulance;
+                }
+            });
+
+            return nearestAmbulance ? nearestAmbulance.id : null;
+        } catch (error) {
+            console.error("Error finding nearest ambulance:", error);
+            return null;
+        }
+    }
+
     // Function to send ambulance alert
     async function sendAmbulanceAlert() {
         try {
@@ -329,10 +373,17 @@
                 return;
             }
 
+            // Get the nearest ambulance ID
+            const nearestAmbulanceId = await findNearestAmbulanceId();
+            if (!nearestAmbulanceId) {
+                console.error("No ambulance available to respond");
+                return;
+            }
+
             const alertData = {
                 id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
                 uid: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                responder: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                responder: nearestAmbulanceId,
                 what: emergencyType,
                 status: "pending",
                 respondedAt: new Date().toISOString(),
