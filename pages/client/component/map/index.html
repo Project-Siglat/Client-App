@@ -210,6 +210,7 @@
     let countdownValue = 10;
     let currentAlertStatus = null;
     let currentAlertData = null;
+    let routeCreatedForAlert = false; // Track if route was already created for current alert
 
     // Function to check current ambulance alert status
     async function checkCurrentAlert() {
@@ -252,14 +253,19 @@
             return;
         }
 
-        const alertLat = parseFloat(alertData.latitude);
-        const alertLng = parseFloat(alertData.longitude);
+        // Only create route and center once per alert
+        if (!routeCreatedForAlert) {
+            const alertLat = parseFloat(alertData.latitude);
+            const alertLng = parseFloat(alertData.longitude);
 
-        // Create route to the alert coordinates
-        createRoute(userLocation[0], userLocation[1], alertLat, alertLng);
+            // Create route to the alert coordinates
+            createRoute(userLocation[0], userLocation[1], alertLat, alertLng);
 
-        // Center map on alert location
-        map.setView([alertLat, alertLng], 15);
+            // Center map on alert location only once
+            map.setView([alertLat, alertLng], 15);
+
+            routeCreatedForAlert = true;
+        }
     }
 
     // Function to update UI based on alert status
@@ -272,10 +278,16 @@
             // Alert is done, make modal usable
             currentAlertStatus = "done";
             currentAlertData = alertData;
+            routeCreatedForAlert = false; // Reset for next alert
             button.style.pointerEvents = "auto";
             button.style.opacity = "1";
             statusMessage.style.display = "none";
         } else if (alertData) {
+            // Check if this is a new alert
+            if (!currentAlertData || currentAlertData.id !== alertData.id) {
+                routeCreatedForAlert = false; // Reset for new alert
+            }
+
             // Alert exists (pending or any other status), disable modal, show status, and auto pathfind
             currentAlertStatus = alertData.status;
             currentAlertData = alertData;
@@ -298,6 +310,7 @@
             // No current alert, make modal usable
             currentAlertStatus = null;
             currentAlertData = null;
+            routeCreatedForAlert = false; // Reset
             button.style.pointerEvents = "auto";
             button.style.opacity = "1";
             statusMessage.style.display = "none";
@@ -629,8 +642,11 @@
             .addTo(map)
             .bindPopup("Your Location");
 
-        // Only center map on first load
-        if (isFirstLocationUpdate) {
+        // Only center map on first load or when no ambulance is active
+        if (
+            isFirstLocationUpdate &&
+            (!currentAlertStatus || currentAlertStatus === "done")
+        ) {
             map.setView([userLat, userLng], 13);
             isFirstLocationUpdate = false;
         }
