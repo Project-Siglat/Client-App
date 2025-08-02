@@ -173,6 +173,7 @@
 <script>
     let countdownTimer;
     let countdownValue = 10;
+    let ambulanceDispatched = false;
 
     function handleSiren() {
         // Add click animation
@@ -231,6 +232,9 @@
         // Close modal
         closeSirenModal();
 
+        // Set ambulance as dispatched to prevent auto re-centering
+        ambulanceDispatched = true;
+
         // Handle the emergency with the collected data
         redirectTOMappie();
 
@@ -261,4 +265,14 @@
                 closeSirenModal();
             }
         });
+
+    // Function to check if ambulance is on the way (prevents auto re-centering)
+    function isAmbulanceDispatched() {
+        return ambulanceDispatched;
+    }
+
+    // Function to reset ambulance status (call when ambulance arrives or emergency ends)
+    function resetAmbulanceStatus() {
+        ambulanceDispatched = false;
+    }
 </script>
