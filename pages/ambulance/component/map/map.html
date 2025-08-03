@@ -123,6 +123,9 @@
         // Variable to store location update interval
         var locationUpdateInterval = null;
 
+        // Variable to store API update interval
+        var apiUpdateInterval = null;
+
         // Initialize map
         var map = L.map("map").setView([defaultLat, defaultLng], 16);
 
@@ -145,6 +148,52 @@
             if (loadingScreen) {
                 loadingScreen.style.display = "none";
             }
+        }
+
+        // Function to send coordinates to API
+        function sendCoordinatesToAPI(lat, lng) {
+            var authToken = sessionStorage.getItem("authToken");
+            if (!authToken) {
+                console.log("No auth token found");
+                return;
+            }
+
+            var payload = {
+                id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                latitude: lat.toString(),
+                longitude: lng.toString(),
+            };
+
+            fetch("http://localhost:5069/api/v1/User/coordinates", {
+                method: "POST",
+                headers: {
+                    accept: "*/*",
+                    Authorization: "Bearer " + authToken,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    // Check if response has content before parsing JSON
+                    const contentType = response.headers.get("content-type");
+                    if (
+                        contentType &&
+                        contentType.indexOf("application/json") !== -1
+                    ) {
+                        return response.json();
+                    } else {
+                        return response.text(); // Return as text if not JSON
+                    }
+                })
+                .then((data) => {
+                    console.log("Coordinates sent successfully:", data);
+                })
+                .catch((error) => {
+                    console.error("Error sending coordinates:", error);
+                });
         }
 
         // Function to update location and marker
@@ -218,6 +267,15 @@
             }
 
             locationUpdateInterval = setInterval(updateLocation, 500);
+
+            // Start continuous API updates every 0.5 seconds
+            if (apiUpdateInterval) {
+                clearInterval(apiUpdateInterval);
+            }
+
+            apiUpdateInterval = setInterval(function () {
+                sendCoordinatesToAPI(currentLat, currentLng);
+            }, 500);
         }
 
         // Recenter function
