@@ -3,6 +3,7 @@
 <?php
 include "./components/topbar.html";
 include "./pages/ambulance/component/map/map.html";
+include "./pages/ambulance/component/widget/stat.php";
 
 // collection of widgets
 include "./pages/ambulance/widget/weather/weather.html";

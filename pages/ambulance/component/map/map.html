@@ -116,6 +116,9 @@
         // Variable to store current location marker
         var currentLocationMarker = null;
 
+        // Variable to store alert marker
+        var alertMarker = null;
+
         // Store current location coordinates
         var currentLat = defaultLat;
         var currentLng = defaultLng;
@@ -123,8 +126,10 @@
         // Variable to store location update interval
         var locationUpdateInterval = null;
 
-        // Variable to store API update interval
-        var apiUpdateInterval = null;
+        // Variables to track async operations
+        var isLocationUpdating = false;
+        var isApiUpdating = false;
+        var isAlertChecking = false;
 
         // Initialize map
         var map = L.map("map").setView([defaultLat, defaultLng], 16);
@@ -134,12 +139,22 @@
             attribution: "© OpenStreetMap",
         }).addTo(map);
 
-        // Custom icon for current location
+        // Custom icon for current location (aid ambulance)
         var currentLocationIcon = L.icon({
             iconUrl: "./assets/aid.png",
-            iconSize: [32, 32],
-            iconAnchor: [16, 16],
-            popupAnchor: [0, -16],
+            iconSize: [45, 45],
+            iconAnchor: [20, 20],
+            popupAnchor: [0, -20],
+            zIndexOffset: 1000,
+        });
+
+        // Custom icon for alert location (emergency pin)
+        var alertIcon = L.icon({
+            iconUrl: "./assets/pin.png",
+            iconSize: [32, 48],
+            iconAnchor: [16, 48],
+            popupAnchor: [0, -48],
+            zIndexOffset: 500,
         });
 
         // Function to hide loading screen
@@ -150,103 +165,199 @@
             }
         }
 
-        // Function to send coordinates to API
-        function sendCoordinatesToAPI(lat, lng) {
-            var authToken = sessionStorage.getItem("authToken");
-            if (!authToken) {
-                console.log("No auth token found");
-                return;
-            }
+        // Function to get current alert (async)
+        async function getCurrentAlert() {
+            if (isAlertChecking) return;
+            isAlertChecking = true;
 
-            var payload = {
-                id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                latitude: lat.toString(),
-                longitude: lng.toString(),
-            };
+            try {
+                var authToken = sessionStorage.getItem("authToken");
+                if (!authToken) {
+                    console.log("No auth token found");
+                    return;
+                }
 
-            fetch("http://localhost:5069/api/v1/User/coordinates", {
-                method: "POST",
-                headers: {
-                    accept: "*/*",
-                    Authorization: "Bearer " + authToken,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-            })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error("Network response was not ok");
+                const myHeaders = new Headers();
+                myHeaders.append("Authorization", "Bearer " + authToken);
+                myHeaders.append("Accept", "*/*");
+
+                const requestOptions = {
+                    method: "GET",
+                    headers: myHeaders,
+                    redirect: "follow",
+                };
+
+                const response = await fetch(
+                    "http://localhost:5069/api/v1/Ambulance/alert/current/amb",
+                    requestOptions,
+                );
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        // No current alert, remove existing marker if any
+                        if (alertMarker) {
+                            map.removeLayer(alertMarker);
+                            alertMarker = null;
+                        }
+                        return;
                     }
-                    // Check if response has content before parsing JSON
-                    const contentType = response.headers.get("content-type");
-                    if (
-                        contentType &&
-                        contentType.indexOf("application/json") !== -1
-                    ) {
-                        return response.json();
-                    } else {
-                        return response.text(); // Return as text if not JSON
-                    }
-                })
-                .then((data) => {
-                    console.log("Coordinates sent successfully:", data);
-                })
-                .catch((error) => {
-                    console.error("Error sending coordinates:", error);
-                });
-        }
+                    throw new Error("Network response was not ok");
+                }
 
-        // Function to update location and marker
-        function updateLocation() {
-            if (!navigator.geolocation) {
-                return;
-            }
+                const result = await response.text();
+                if (result) {
+                    var data = JSON.parse(result);
+                    console.log("Current alert:", data);
 
-            var options = {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 0,
-            };
+                    var alertLat = parseFloat(data.latitude);
+                    var alertLng = parseFloat(data.longitude);
 
-            navigator.geolocation.getCurrentPosition(
-                function (position) {
-                    var lat = position.coords.latitude;
-                    var lng = position.coords.longitude;
-
-                    // Update current coordinates
-                    currentLat = lat;
-                    currentLng = lng;
-
-                    // Remove existing marker if it exists
-                    if (currentLocationMarker) {
-                        map.removeLayer(currentLocationMarker);
+                    // Remove existing alert marker if it exists
+                    if (alertMarker) {
+                        map.removeLayer(alertMarker);
                     }
 
-                    // Add marker at current location
-                    currentLocationMarker = L.marker([lat, lng], {
-                        icon: currentLocationIcon,
+                    // Add marker at alert location
+                    alertMarker = L.marker([alertLat, alertLng], {
+                        icon: alertIcon,
                     }).addTo(map);
 
-                    // Only center map view on first location update
-                    if (!hasRealLocation) {
-                        map.setView([lat, lng], map.getZoom());
-                    }
+                    // Add popup with alert information
+                    var popupContent = `
+                        <div style="font-family: Arial, sans-serif;">
+                            <h3 style="margin: 0 0 8px 0; color: #dc2626;">Emergency Alert</h3>
+                            <p style="margin: 4px 0;"><strong>Type:</strong> ${data.what}</p>
+                            <p style="margin: 4px 0;"><strong>Status:</strong> ${data.status}</p>
+                            <p style="margin: 4px 0;"><strong>Time:</strong> ${new Date(data.respondedAt).toLocaleString()}</p>
+                            <p style="margin: 4px 0;"><strong>Location:</strong> ${alertLat.toFixed(6)}, ${alertLng.toFixed(6)}</p>
+                        </div>
+                    `;
+                    alertMarker.bindPopup(popupContent);
+                }
+            } catch (error) {
+                console.error("Error getting current alert:", error);
+            } finally {
+                isAlertChecking = false;
+            }
+        }
 
-                    // Hide loading screen once we have real location
-                    if (!hasRealLocation) {
-                        hasRealLocation = true;
-                        hideLoadingScreen();
-                    }
-                },
-                function (error) {
-                    console.log("Geolocation error:", error);
-                    // If error and no real location yet, hide loading
-                    if (!hasRealLocation) {
-                        hideLoadingScreen();
-                    }
-                },
-                options,
-            );
+        // Function to send coordinates to API (async)
+        async function sendCoordinatesToAPI(lat, lng) {
+            if (isApiUpdating) return;
+            isApiUpdating = true;
+
+            try {
+                var authToken = sessionStorage.getItem("authToken");
+                if (!authToken) {
+                    console.log("No auth token found");
+                    return;
+                }
+
+                var payload = {
+                    id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    latitude: lat.toString(),
+                    longitude: lng.toString(),
+                };
+
+                const response = await fetch(
+                    "http://localhost:5069/api/v1/User/coordinates",
+                    {
+                        method: "POST",
+                        headers: {
+                            accept: "*/*",
+                            Authorization: "Bearer " + authToken,
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(payload),
+                    },
+                );
+
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+
+                // Check if response has content before parsing JSON
+                const contentType = response.headers.get("content-type");
+                let data;
+                if (
+                    contentType &&
+                    contentType.indexOf("application/json") !== -1
+                ) {
+                    data = await response.json();
+                } else {
+                    data = await response.text();
+                }
+
+                console.log("Coordinates sent successfully:", data);
+            } catch (error) {
+                console.error("Error sending coordinates:", error);
+            } finally {
+                isApiUpdating = false;
+            }
+        }
+
+        // Function to update location and marker (async)
+        async function updateLocation() {
+            if (isLocationUpdating) return;
+            isLocationUpdating = true;
+
+            try {
+                if (!navigator.geolocation) {
+                    return;
+                }
+
+                var options = {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0,
+                };
+
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        var lat = position.coords.latitude;
+                        var lng = position.coords.longitude;
+
+                        // Update current coordinates
+                        currentLat = lat;
+                        currentLng = lng;
+
+                        // Remove existing marker if it exists
+                        if (currentLocationMarker) {
+                            map.removeLayer(currentLocationMarker);
+                        }
+
+                        // Add marker at current location
+                        currentLocationMarker = L.marker([lat, lng], {
+                            icon: currentLocationIcon,
+                        }).addTo(map);
+
+                        // Only center map view on first location update
+                        if (!hasRealLocation) {
+                            map.setView([lat, lng], map.getZoom());
+                        }
+
+                        // Hide loading screen once we have real location
+                        if (!hasRealLocation) {
+                            hasRealLocation = true;
+                            hideLoadingScreen();
+                        }
+
+                        isLocationUpdating = false;
+                    },
+                    function (error) {
+                        console.log("Geolocation error:", error);
+                        // If error and no real location yet, hide loading
+                        if (!hasRealLocation) {
+                            hideLoadingScreen();
+                        }
+                        isLocationUpdating = false;
+                    },
+                    options,
+                );
+            } catch (error) {
+                console.error("Error updating location:", error);
+                isLocationUpdating = false;
+            }
         }
 
         function requestLiveLocation() {
@@ -261,21 +372,28 @@
             // Get initial location
             updateLocation();
 
-            // Start continuous location updates every 0.5 seconds
+            // Start continuous location updates every 1 second
             if (locationUpdateInterval) {
                 clearInterval(locationUpdateInterval);
             }
 
-            locationUpdateInterval = setInterval(updateLocation, 500);
+            locationUpdateInterval = setInterval(async function () {
+                await updateLocation();
+            }, 1000);
 
-            // Start continuous API updates every 0.5 seconds
-            if (apiUpdateInterval) {
-                clearInterval(apiUpdateInterval);
-            }
-
-            apiUpdateInterval = setInterval(function () {
-                sendCoordinatesToAPI(currentLat, currentLng);
+            // Start continuous API updates every 2 seconds (staggered)
+            setTimeout(function () {
+                setInterval(async function () {
+                    await sendCoordinatesToAPI(currentLat, currentLng);
+                }, 2000);
             }, 500);
+
+            // Start continuous alert checking every 3 seconds (staggered)
+            setTimeout(function () {
+                setInterval(async function () {
+                    await getCurrentAlert();
+                }, 3000);
+            }, 1000);
         }
 
         // Recenter function
