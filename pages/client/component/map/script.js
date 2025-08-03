@@ -137,7 +137,7 @@ function updateUIBasedOnAlert(alertData) {
     autoPathfindToAlert(alertData);
 
     // Change background color based on status
-    if (alertData.status === "pending") {
+    if (alertData.status.toLowerCase() === "pending") {
       statusMessage.style.background = "rgba(255, 165, 0, 0.9)";
     } else {
       statusMessage.style.background = "rgba(0, 123, 255, 0.9)";

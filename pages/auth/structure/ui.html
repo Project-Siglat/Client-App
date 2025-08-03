@@ -828,3 +828,41 @@
 </style>
 
 <script src="./pages/auth/structure/script.js"></script>
+
+<script>
+    // Show/Hide Password functionality
+    document.addEventListener("DOMContentLoaded", function () {
+        // Login form password toggle
+        const loginPasswordToggle =
+            document.getElementById("showLoginPassword");
+        const loginPasswordField = document.getElementById("loginPassword");
+
+        if (loginPasswordToggle && loginPasswordField) {
+            loginPasswordToggle.addEventListener("change", function () {
+                loginPasswordField.type = this.checked ? "text" : "password";
+            });
+        }
+
+        // Register form password toggle
+        const passwordToggle = document.getElementById("showPassword");
+        const passwordField = document.getElementById("password");
+
+        if (passwordToggle && passwordField) {
+            passwordToggle.addEventListener("change", function () {
+                passwordField.type = this.checked ? "text" : "password";
+            });
+        }
+
+        // Register form confirm password toggle
+        const confirmPasswordToggle = document.getElementById(
+            "showConfirmPassword",
+        );
+        const confirmPasswordField = document.getElementById("confirmPassword");
+
+        if (confirmPasswordToggle && confirmPasswordField) {
+            confirmPasswordToggle.addEventListener("change", function () {
+                confirmPasswordField.type = this.checked ? "text" : "password";
+            });
+        }
+    });
+</script>
