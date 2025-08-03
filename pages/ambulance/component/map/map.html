@@ -82,7 +82,7 @@
         style="transition: transform 0.2s ease"
     >
         <path
-            d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"
+            d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7-7z"
         />
     </svg>
 </div>
@@ -97,6 +97,8 @@
         }
     }
 </style>
+
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
 <script>
     // Wait for Leaflet JS to load before using L
@@ -119,9 +121,20 @@
         // Variable to store alert marker
         var alertMarker = null;
 
+        // Variable to store route control
+        var routeControl = null;
+
         // Store current location coordinates
         var currentLat = defaultLat;
         var currentLng = defaultLng;
+
+        // Store previous location coordinates for comparison
+        var previousLat = null;
+        var previousLng = null;
+
+        // Store alert coordinates
+        var alertLat = null;
+        var alertLng = null;
 
         // Variable to store location update interval
         var locationUpdateInterval = null;
@@ -130,6 +143,9 @@
         var isLocationUpdating = false;
         var isApiUpdating = false;
         var isAlertChecking = false;
+
+        // Variable to track if there's an active alert
+        var hasActiveAlert = false;
 
         // Initialize map
         var map = L.map("map").setView([defaultLat, defaultLng], 16);
@@ -165,6 +181,189 @@
             }
         }
 
+        // Haversine formula to calculate distance between two points
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371; // Radius of the Earth in kilometers
+            const dLat = ((lat2 - lat1) * Math.PI) / 180;
+            const dLng = ((lng2 - lng1) * Math.PI) / 180;
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos((lat1 * Math.PI) / 180) *
+                    Math.cos((lat2 * Math.PI) / 180) *
+                    Math.sin(dLng / 2) *
+                    Math.sin(dLng / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distance = R * c; // Distance in kilometers
+            return distance;
+        }
+
+        // Function to check if ambulance has moved significantly
+        function hasLocationChanged(newLat, newLng) {
+            if (previousLat === null || previousLng === null) {
+                return true;
+            }
+
+            // Consider movement significant if distance is more than 10 meters
+            const distance = calculateDistance(
+                previousLat,
+                previousLng,
+                newLat,
+                newLng,
+            );
+            return distance > 0.01; // 0.01 km = 10 meters
+        }
+
+        // Function to find nearest ambulance using Haversine formula
+        async function findNearestAmbulance(userLat, userLng) {
+            try {
+                var authToken = sessionStorage.getItem("authToken");
+                if (!authToken) {
+                    console.log("No auth token found");
+                    return null;
+                }
+
+                const response = await fetch(API() + "/api/v1/Ambulance/all", {
+                    method: "GET",
+                    headers: {
+                        Authorization: "Bearer " + authToken,
+                        Accept: "*/*",
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch ambulances");
+                }
+
+                const ambulances = await response.json();
+                let nearestAmbulance = null;
+                let shortestDistance = Infinity;
+
+                ambulances.forEach((ambulance) => {
+                    if (ambulance.latitude && ambulance.longitude) {
+                        const distance = calculateDistance(
+                            userLat,
+                            userLng,
+                            parseFloat(ambulance.latitude),
+                            parseFloat(ambulance.longitude),
+                        );
+
+                        if (distance < shortestDistance) {
+                            shortestDistance = distance;
+                            nearestAmbulance = ambulance;
+                        }
+                    }
+                });
+
+                return nearestAmbulance;
+            } catch (error) {
+                console.error("Error finding nearest ambulance:", error);
+                return null;
+            }
+        }
+
+        // Function to handle manual assistance request
+        async function handleManualAssistanceRequest(userLat, userLng) {
+            if (hasActiveAlert) {
+                console.log("Alert already active, skipping manual assistance");
+                return;
+            }
+
+            const nearestAmbulance = await findNearestAmbulance(
+                userLat,
+                userLng,
+            );
+            if (nearestAmbulance) {
+                const ambulanceLat = parseFloat(nearestAmbulance.latitude);
+                const ambulanceLng = parseFloat(nearestAmbulance.longitude);
+
+                // Draw route from user to nearest ambulance
+                drawRoute(userLat, userLng, ambulanceLat, ambulanceLng);
+
+                console.log(
+                    "Route drawn to nearest ambulance:",
+                    nearestAmbulance,
+                );
+            }
+        }
+
+        // Function to calculate and draw route between two points
+        function drawRoute(startLat, startLng, endLat, endLng) {
+            try {
+                // Remove existing route if it exists
+                if (routeControl) {
+                    map.removeControl(routeControl);
+                    routeControl = null;
+                }
+
+                // Use Leaflet Routing Machine for routing
+                routeControl = L.Routing.control({
+                    waypoints: [
+                        L.latLng(startLat, startLng),
+                        L.latLng(endLat, endLng),
+                    ],
+                    routeWhileDragging: false,
+                    addWaypoints: false,
+                    createMarker: function () {
+                        return null;
+                    }, // Don't create default markers
+                    lineOptions: {
+                        styles: [
+                            {
+                                color: "#ff0000",
+                                weight: 4,
+                                opacity: 0.7,
+                                dashArray: "10, 5",
+                            },
+                        ],
+                    },
+                    show: false,
+                    routeWhileDragging: false,
+                }).addTo(map);
+
+                // Hide the routing instructions panel
+                if (routeControl.getContainer()) {
+                    routeControl.getContainer().style.display = "none";
+                }
+            } catch (error) {
+                console.error("Error drawing route:", error);
+                // Fallback to simple straight line
+                if (routeControl) {
+                    map.removeControl(routeControl);
+                    routeControl = null;
+                }
+                routeControl = L.polyline(
+                    [
+                        [startLat, startLng],
+                        [endLat, endLng],
+                    ],
+                    {
+                        color: "#ff0000",
+                        weight: 3,
+                        opacity: 0.6,
+                        dashArray: "5, 5",
+                    },
+                ).addTo(map);
+            }
+        }
+
+        // Function to update route if both locations are available
+        function updateRoute() {
+            if (
+                hasActiveAlert &&
+                currentLocationMarker &&
+                alertMarker &&
+                alertLat &&
+                alertLng
+            ) {
+                // Only redraw route if ambulance has moved significantly
+                if (hasLocationChanged(currentLat, currentLng)) {
+                    drawRoute(currentLat, currentLng, alertLat, alertLng);
+                    previousLat = currentLat;
+                    previousLng = currentLng;
+                }
+            }
+        }
+
         // Function to get current alert (async)
         async function getCurrentAlert() {
             if (isAlertChecking) return;
@@ -188,17 +387,26 @@
                 };
 
                 const response = await fetch(
-                    "http://localhost:5069/api/v1/Ambulance/alert/current/amb",
+                    API() + "/api/v1/Ambulance/alert/current/amb",
                     requestOptions,
                 );
 
                 if (!response.ok) {
                     if (response.status === 404) {
-                        // No current alert, remove existing marker if any
+                        // No current alert, remove existing marker and route if any
+                        hasActiveAlert = false;
                         if (alertMarker) {
                             map.removeLayer(alertMarker);
                             alertMarker = null;
                         }
+                        if (routeControl) {
+                            map.removeControl(routeControl);
+                            routeControl = null;
+                        }
+                        alertLat = null;
+                        alertLng = null;
+                        previousLat = null;
+                        previousLng = null;
                         return;
                     }
                     throw new Error("Network response was not ok");
@@ -209,8 +417,9 @@
                     var data = JSON.parse(result);
                     console.log("Current alert:", data);
 
-                    var alertLat = parseFloat(data.latitude);
-                    var alertLng = parseFloat(data.longitude);
+                    hasActiveAlert = true;
+                    alertLat = parseFloat(data.latitude);
+                    alertLng = parseFloat(data.longitude);
 
                     // Remove existing alert marker if it exists
                     if (alertMarker) {
@@ -233,6 +442,9 @@
                         </div>
                     `;
                     alertMarker.bindPopup(popupContent);
+
+                    // Update route if current location is available
+                    updateRoute();
                 }
             } catch (error) {
                 console.error("Error getting current alert:", error);
@@ -260,7 +472,7 @@
                 };
 
                 const response = await fetch(
-                    "http://localhost:5069/api/v1/User/coordinates",
+                    API() + "/api/v1/User/coordinates",
                     {
                         method: "POST",
                         headers: {
@@ -342,6 +554,9 @@
                             hideLoadingScreen();
                         }
 
+                        // Update route if alert location is available
+                        updateRoute();
+
                         isLocationUpdating = false;
                     },
                     function (error) {
@@ -409,8 +624,9 @@
             map.setView([currentLat, currentLng], 16);
         }
 
-        // Make handleRecenter globally accessible
+        // Make functions globally accessible
         window.handleRecenter = handleRecenter;
+        window.handleManualAssistanceRequest = handleManualAssistanceRequest;
 
         // Request location initially
         requestLiveLocation();
