@@ -26,7 +26,7 @@ switch ($request_uri) {
 
     // here is the ambulance set
     case "/ambulance":
-        include "./pages/ambulance/core.php";
+        include "./pages/ambulance/index.php";
         break;
     default:
         http_response_code(404);

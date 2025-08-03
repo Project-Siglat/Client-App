@@ -103,7 +103,7 @@
 </div>
 
 
-<?php include "./pages/client/widget/chat/chat.html"; ?>
+<?php include "./components/general-pack/frame/chat/chat.html"; ?>
 
 <div id="mainButton" class="button-animate" style="width: 60px; height: 60px; border-radius: 50%; background: #1F2937; z-index: 2147483647; position: fixed; bottom: 20px; right: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: bold; box-shadow: 0 2px 8px rgba(31,41,55,0.2); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);" onclick="toggleOptions()">
     <svg id="mainButtonIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="transition: transform 0.3s ease;">
@@ -111,13 +111,13 @@
     </svg>
 </div>
 <!-- here -->
-<?php include "./pages/client/widget/weather/weather.html"; ?>
-<?php include "./pages/client/widget/user/user.html"; ?>
-<?php include "./pages/client/widget/contact/contactlist.html"; ?>
+<?php include "./components/general-pack/frame/weather/weather.html"; ?>
+<?php include "./components/general-pack/frame/user/user.html"; ?>
+<?php include "./components/general-pack/frame/contact/contactlist.html"; ?>
 
 <div id="optionsContainer" style="position: fixed; bottom: 90px; right: 25px; z-index: 2147483640; opacity: 0; transform: translateY(20px) scale(0.8); pointer-events: none; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-    <?php include "./pages/client/widget/major/account.html"; ?>
-    <?php include "./pages/client/widget/major/contact.html"; ?>
+    <?php include "./components/general-pack/frame/major/account.html"; ?>
+    <?php include "./components/general-pack/frame/major/contact.html"; ?>
 
     <!-- <div class="option-button" style="width: 45px; height: 45px; border-radius: 50%; background: #F59E0B; margin-bottom: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #FFFFFF; box-shadow: 0 2px 6px rgba(245,158,11,0.2); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; transform: translateY(10px);" onclick="handleOption('settings')" onmouseenter="this.style.transform='scale(1.1) translateY(0)'; this.style.boxShadow='0 4px 15px rgba(245,158,11,0.4)'" onmouseleave="this.style.transform='scale(1) translateY(0)'; this.style.boxShadow='0 2px 6px rgba(245,158,11,0.2)'" onmousedown="this.style.transform='scale(0.95) translateY(0)'" onmouseup="this.style.transform='scale(1.1) translateY(0)'">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -125,7 +125,7 @@
         </svg>
     </div> -->
 
-    <?php include "./pages/client/widget/logout.html"; ?>
+    <?php include "./components/general-pack/frame/logout.html"; ?>
 </div>
 
 
