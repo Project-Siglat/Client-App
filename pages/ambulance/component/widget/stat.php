@@ -342,6 +342,23 @@
 
 <script>
 let currentAlertData = null;
+let sirenAudio = null;
+let lastStatus = null;
+let hasPendingPlayedOnce = false;
+
+// Initialize audio element
+function initializeSiren() {
+    if (!sirenAudio) {
+        sirenAudio = new Audio('./assets/sounds/siren.mp3');
+    }
+}
+
+// Play siren sound once for pending status
+function playSirenForPending() {
+    initializeSiren();
+    sirenAudio.currentTime = 0;
+    sirenAudio.play().catch(e => console.log('Error playing siren:', e));
+}
 
 // Fetch current alert status from API
 async function fetchAlertStatus() {
@@ -518,6 +535,12 @@ function updateStatusDisplay(status) {
             deliveryButton.style.pointerEvents = 'auto';
             deliveryButton.style.opacity = '1';
             doneButton.style.display = 'flex';
+
+            // Play siren sound only once when status first becomes pending
+            if (lastStatus !== 'pending' && !hasPendingPlayedOnce) {
+                playSirenForPending();
+                hasPendingPlayedOnce = true;
+            }
             break;
 
         case 'done':
@@ -587,6 +610,9 @@ function updateStatusDisplay(status) {
             deliveryButton.style.opacity = '1';
             doneButton.style.display = 'flex';
     }
+
+    // Update last status
+    lastStatus = status.toLowerCase();
 }
 
 function openStatusModal() {
