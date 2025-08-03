@@ -39,6 +39,11 @@ function updateLiveRoute() {
     return;
   }
 
+  // Don't update route if status is done
+  if (currentAlertStatus === "Done") {
+    return;
+  }
+
   // Find the assigned ambulance in ambulanceData
   const assignedAmbulance = ambulanceData.find(
     (ambulance) => ambulance.id === currentAlertData.responder,
@@ -74,6 +79,11 @@ function autoPathfindToAlert(alertData) {
 
   if (!userLocation) {
     console.error("User location not available for pathfinding");
+    return;
+  }
+
+  // Don't auto pathfind if status is done
+  if (alertData.status === "done") {
     return;
   }
 

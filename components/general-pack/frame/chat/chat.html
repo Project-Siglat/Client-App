@@ -75,9 +75,10 @@
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
             "
         >
-            <span style="font-weight: 600; font-size: clamp(16px, 4vw, 18px)"
-                >Messages</span
-            >
+            <span
+                id="chatHeaderTitle"
+                style="font-weight: 600; font-size: clamp(16px, 4vw, 18px)"
+            ></span>
             <button
                 onclick="closeChat()"
                 style="
@@ -394,10 +395,19 @@
         },
     };
 
+    function updateChatHeaderTitle() {
+        const userRole = sessionStorage.getItem("userRole") || "Messages";
+        const titleElement = document.getElementById("chatHeaderTitle");
+        if (titleElement) {
+            titleElement.textContent = userRole;
+        }
+    }
+
     function showConversationList() {
         document.getElementById("conversationList").style.display = "flex";
         document.getElementById("conversationView").style.display = "none";
         currentView = "list";
+        updateChatHeaderTitle();
         loadConversationList();
     }
 
