@@ -102,15 +102,8 @@
     </svg>
 </div>
 
-<div id="chatButton" class="button-animate" style="width: 60px; height: 60px; border-radius: 50%; background: #10B981; z-index: 2147483647; position: fixed; bottom: 20px; right: 155px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: bold; box-shadow: 0 2px 8px rgba(16,185,129,0.2); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);" onclick="handleChat()">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="transition: transform 0.2s ease;">
-        <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-    </svg>
-</div>
 
-<?php
-//include "./pages/client/alert/main.html";
-?>
+<?php include "./pages/client/widget/chat/chat.html"; ?>
 
 <div id="mainButton" class="button-animate" style="width: 60px; height: 60px; border-radius: 50%; background: #1F2937; z-index: 2147483647; position: fixed; bottom: 20px; right: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: bold; box-shadow: 0 2px 8px rgba(31,41,55,0.2); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);" onclick="toggleOptions()">
     <svg id="mainButtonIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="transition: transform 0.3s ease;">
@@ -194,13 +187,5 @@ function handleOption(option) {
     toggleOptions(); // Hide options after selection
 }
 
-function handleChat() {
-    // Add click animation
-    const button = document.getElementById('chatButton');
-    button.style.animation = 'buttonPulse 0.3s ease';
-    setTimeout(() => button.style.animation = '', 300);
 
-    alert('chat button clicked');
-    // Add your chat logic here
-}
 </script>

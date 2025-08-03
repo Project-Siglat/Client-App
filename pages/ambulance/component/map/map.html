@@ -1,0 +1,249 @@
+<!-- Loading screen -->
+<div
+    id="loading-screen"
+    style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-family: Arial, sans-serif;
+    "
+>
+    <div style="text-align: center">
+        <div style="font-size: 18px; margin-bottom: 10px">
+            Getting your location...
+        </div>
+        <div style="font-size: 14px; color: #ccc">
+            Please allow location access for accurate tracking
+        </div>
+        <div style="margin-top: 20px">
+            <div
+                style="
+                    width: 40px;
+                    height: 40px;
+                    border: 4px solid #f3f3f3;
+                    border-top: 4px solid #3498db;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto;
+                "
+            ></div>
+        </div>
+    </div>
+</div>
+
+<div
+    id="map"
+    class="h-screen w-screen m-0 p-0"
+    style="
+        height: calc(100vh - 82px);
+        max-height: calc(100vh - 82px);
+        width: 100vw;
+        margin: 0;
+        padding: 0;
+    "
+></div>
+
+<div
+    id="recenterButton"
+    class="button-animate"
+    style="
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #6366f1;
+        z-index: 2147483647;
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    "
+    onclick="handleRecenter()"
+>
+    <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        style="transition: transform 0.2s ease"
+    >
+        <path
+            d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"
+        />
+    </svg>
+</div>
+
+<style>
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<script>
+    // Wait for Leaflet JS to load before using L
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof L === "undefined") {
+            console.log("Leaflet not loaded");
+            return;
+        }
+
+        // Default coordinates (fallback only)
+        var defaultLat = 16.606254918019598;
+        var defaultLng = 121.18314743041994;
+
+        // Track if we have gotten actual location
+        var hasRealLocation = false;
+
+        // Variable to store current location marker
+        var currentLocationMarker = null;
+
+        // Store current location coordinates
+        var currentLat = defaultLat;
+        var currentLng = defaultLng;
+
+        // Variable to store location update interval
+        var locationUpdateInterval = null;
+
+        // Initialize map
+        var map = L.map("map").setView([defaultLat, defaultLng], 16);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: "© OpenStreetMap",
+        }).addTo(map);
+
+        // Custom icon for current location
+        var currentLocationIcon = L.icon({
+            iconUrl: "./assets/aid.png",
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+            popupAnchor: [0, -16],
+        });
+
+        // Function to hide loading screen
+        function hideLoadingScreen() {
+            var loadingScreen = document.getElementById("loading-screen");
+            if (loadingScreen) {
+                loadingScreen.style.display = "none";
+            }
+        }
+
+        // Function to update location and marker
+        function updateLocation() {
+            if (!navigator.geolocation) {
+                return;
+            }
+
+            var options = {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0,
+            };
+
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    var lat = position.coords.latitude;
+                    var lng = position.coords.longitude;
+
+                    // Update current coordinates
+                    currentLat = lat;
+                    currentLng = lng;
+
+                    // Remove existing marker if it exists
+                    if (currentLocationMarker) {
+                        map.removeLayer(currentLocationMarker);
+                    }
+
+                    // Add marker at current location
+                    currentLocationMarker = L.marker([lat, lng], {
+                        icon: currentLocationIcon,
+                    }).addTo(map);
+
+                    // Only center map view on first location update
+                    if (!hasRealLocation) {
+                        map.setView([lat, lng], map.getZoom());
+                    }
+
+                    // Hide loading screen once we have real location
+                    if (!hasRealLocation) {
+                        hasRealLocation = true;
+                        hideLoadingScreen();
+                    }
+                },
+                function (error) {
+                    console.log("Geolocation error:", error);
+                    // If error and no real location yet, hide loading
+                    if (!hasRealLocation) {
+                        hideLoadingScreen();
+                    }
+                },
+                options,
+            );
+        }
+
+        function requestLiveLocation() {
+            if (!navigator.geolocation) {
+                // Geolocation not available, hide loading
+                if (!hasRealLocation) {
+                    hideLoadingScreen();
+                }
+                return;
+            }
+
+            // Get initial location
+            updateLocation();
+
+            // Start continuous location updates every 0.5 seconds
+            if (locationUpdateInterval) {
+                clearInterval(locationUpdateInterval);
+            }
+
+            locationUpdateInterval = setInterval(updateLocation, 500);
+        }
+
+        // Recenter function
+        function handleRecenter() {
+            // Add button animation
+            var button = document.getElementById("recenterButton");
+            button.style.transform = "scale(0.9)";
+            setTimeout(function () {
+                button.style.transform = "scale(1)";
+            }, 150);
+
+            // Immediately center to current location with no delay
+            map.setView([currentLat, currentLng], 16);
+        }
+
+        // Make handleRecenter globally accessible
+        window.handleRecenter = handleRecenter;
+
+        // Request location initially
+        requestLiveLocation();
+
+        // Set a timeout to hide loading screen if location takes too long
+        setTimeout(function () {
+            if (!hasRealLocation) {
+                hideLoadingScreen();
+            }
+        }, 10000); // 10 seconds timeout
+    });
+</script>
