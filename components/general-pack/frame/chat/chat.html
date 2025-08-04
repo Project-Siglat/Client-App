@@ -341,10 +341,9 @@
             let endpoint;
 
             if (userRole === "Ambulance") {
-                endpoint = "http://localhost:5069/api/v1/Chat/contactable-user";
+                endpoint = API() + "/api/v1/Chat/contactable-user";
             } else {
-                endpoint =
-                    "http://localhost:5069/api/v1/Chat/contactable-ambulance";
+                endpoint = API() + "/api/v1/Chat/contactable-ambulance";
             }
 
             const response = await fetch(endpoint);
@@ -659,9 +658,8 @@
             }
 
             // Fetch messages from API
-            const response = await fetch(
-                `http://localhost:5069/api/v1/Chat/all-messages`,
-            );
+
+            const response = await fetch(`${API()}/api/v1/Chat/all-messages`);
 
             console.log("API Response:", response);
             console.log("API Messages:", await response.clone().json());
@@ -865,7 +863,7 @@
 
                     // Send image message to API
                     const response = await fetch(
-                        "http://localhost:5069/api/v1/Chat/send-image",
+                        API() + "/api/v1/Chat/send-image",
                         {
                             method: "POST",
                             headers: {
@@ -913,17 +911,14 @@
                     };
 
                     // Send message to API
-                    const response = await fetch(
-                        "http://localhost:5069/api/v1/Chat/send",
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                Authorization: `Bearer ${sessionStorage.getItem("authToken")}`,
-                            },
-                            body: JSON.stringify(payload),
+                    const response = await fetch(API() + "/api/v1/Chat/send", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${sessionStorage.getItem("authToken")}`,
                         },
-                    );
+                        body: JSON.stringify(payload),
+                    });
 
                     if (response.ok) {
                         // Add to conversation data only if API call succeeds
