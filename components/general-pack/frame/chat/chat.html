@@ -198,29 +198,54 @@
                     ></span>
                 </div>
             </div>
-            <button
-                onclick="closeChat()"
-                style="
-                    background: rgba(235, 219, 178, 0.2);
-                    border: none;
-                    color: #ebdbb2;
-                    font-size: 20px;
-                    cursor: pointer;
-                    padding: 8px;
-                    width: 32px;
-                    height: 32px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 6px;
-                    flex-shrink: 0;
-                    transition: background-color 0.2s ease;
-                "
-                onmouseover="this.style.backgroundColor='rgba(235, 219, 178, 0.3)'"
-                onmouseout="this.style.backgroundColor='rgba(235, 219, 178, 0.2)'"
-            >
-                ×
-            </button>
+            <div style="display: flex; align-items: center; gap: 8px">
+                <button
+                    onclick="callUser()"
+                    style="
+                        background: #10b981;
+                        border: none;
+                        color: #ebdbb2;
+                        font-size: 16px;
+                        cursor: pointer;
+                        padding: 8px;
+                        width: 32px;
+                        height: 32px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 6px;
+                        flex-shrink: 0;
+                        transition: background-color 0.2s ease;
+                    "
+                    onmouseover="this.style.backgroundColor='#059669'"
+                    onmouseout="this.style.backgroundColor='#10b981'"
+                >
+                    📞
+                </button>
+                <button
+                    onclick="closeChat()"
+                    style="
+                        background: rgba(235, 219, 178, 0.2);
+                        border: none;
+                        color: #ebdbb2;
+                        font-size: 20px;
+                        cursor: pointer;
+                        padding: 8px;
+                        width: 32px;
+                        height: 32px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 6px;
+                        flex-shrink: 0;
+                        transition: background-color 0.2s ease;
+                    "
+                    onmouseover="this.style.backgroundColor='rgba(235, 219, 178, 0.3)'"
+                    onmouseout="this.style.backgroundColor='rgba(235, 219, 178, 0.2)'"
+                >
+                    ×
+                </button>
+            </div>
         </div>
 
         <div
@@ -305,101 +330,175 @@
     let dragStartY = 0;
     let drawerStartBottom = 0;
     let isOpen = false;
-    let currentConversation = "andrew";
+    let currentConversation = null;
     let currentView = "list"; // "list" or "conversation"
+    let conversations = {};
 
-    const conversations = {
-        andrew: {
-            name: "Andrew",
-            lastMessage:
-                "Of course! I'd be happy to help you with your order. Can you provide me with your order number?",
-            lastTime: "10:33 AM",
-            unread: 0,
-            messages: [
-                {
-                    type: "received",
-                    message: "Hey there! How can I help you today?",
-                    time: "10:30 AM",
-                },
-                {
-                    type: "sent",
-                    message: "Hi! I'm looking for some help with my order.",
-                    time: "10:32 AM",
-                },
-                {
-                    type: "received",
-                    message:
-                        "Of course! I'd be happy to help you with your order. Can you provide me with your order number?",
-                    time: "10:33 AM",
-                },
-            ],
-        },
-        mike: {
-            name: "Mike",
-            lastMessage: "Hello Mike! I need help with technical support.",
-            lastTime: "09:16 AM",
-            unread: 2,
-            messages: [
-                {
-                    type: "received",
-                    message: "Hi! Mike here, what can I do for you?",
-                    time: "09:15 AM",
-                },
-                {
-                    type: "sent",
-                    message: "Hello Mike! I need help with technical support.",
-                    time: "09:16 AM",
-                },
-            ],
-        },
-        sarah: {
-            name: "Sarah",
-            lastMessage:
-                "Hello! Sarah from customer service. How may I assist you?",
-            lastTime: "11:20 AM",
-            unread: 1,
-            messages: [
-                {
-                    type: "received",
-                    message:
-                        "Hello! Sarah from customer service. How may I assist you?",
-                    time: "11:20 AM",
-                },
-            ],
-        },
-        jessica: {
-            name: "Jessica",
-            lastMessage:
-                "Perfect! I can definitely help with billing. What specific questions do you have?",
-            lastTime: "02:47 PM",
-            unread: 0,
-            messages: [
-                {
-                    type: "received",
-                    message:
-                        "Hey! Jessica here. Ready to help with any questions!",
-                    time: "02:45 PM",
-                },
-                {
-                    type: "sent",
-                    message: "Great! I have some billing questions.",
-                    time: "02:46 PM",
-                },
-                {
-                    type: "received",
-                    message:
-                        "Perfect! I can definitely help with billing. What specific questions do you have?",
-                    time: "02:47 PM",
-                },
-            ],
-        },
-    };
+    // Fetch contactable data based on user role
+    async function fetchContactableUsers() {
+        try {
+            const userRole = sessionStorage.getItem("userRole");
+            let endpoint;
+
+            if (userRole === "Ambulance") {
+                endpoint = "http://localhost:5069/api/v1/Chat/contactable-user";
+            } else {
+                endpoint =
+                    "http://localhost:5069/api/v1/Chat/contactable-ambulance";
+            }
+
+            const response = await fetch(endpoint);
+
+            if (response.ok) {
+                const contacts = await response.json();
+
+                // Convert API data to conversations format
+                conversations = {};
+                contacts.forEach((contact) => {
+                    const key = contact.id;
+                    conversations[key] = {
+                        name: `${contact.firstName} ${contact.lastName}`.trim(),
+                        lastMessage:
+                            userRole === "Ambulance"
+                                ? `${contact.firstName} needs assistance`
+                                : `${contact.firstName} is available to help`,
+                        lastTime: new Date().toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        }),
+                        unread: 0,
+                        messages: [
+                            {
+                                type: "received",
+                                message:
+                                    userRole === "Ambulance"
+                                        ? `Hello! I need emergency assistance. Can you help me?`
+                                        : `Hello! I'm ${contact.firstName} from ambulance services. How can I help you today?`,
+                                time: new Date().toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                }),
+                            },
+                        ],
+                        contactData: contact,
+                    };
+                });
+
+                // Set first conversation as current if available
+                if (Object.keys(conversations).length > 0) {
+                    currentConversation = Object.keys(conversations)[0];
+                }
+            } else {
+                console.error("Failed to fetch contactable data");
+                // Fallback to default conversations
+                setDefaultConversations();
+            }
+        } catch (error) {
+            console.error("Error fetching contactable data:", error);
+            // Fallback to default conversations
+            setDefaultConversations();
+        }
+    }
+
+    function setDefaultConversations() {
+        conversations = {
+            andrew: {
+                name: "Andrew",
+                lastMessage:
+                    "Of course! I'd be happy to help you with your order. Can you provide me with your order number?",
+                lastTime: "10:33 AM",
+                unread: 0,
+                messages: [
+                    {
+                        type: "received",
+                        message: "Hey there! How can I help you today?",
+                        time: "10:30 AM",
+                    },
+                    {
+                        type: "sent",
+                        message: "Hi! I'm looking for some help with my order.",
+                        time: "10:32 AM",
+                    },
+                    {
+                        type: "received",
+                        message:
+                            "Of course! I'd be happy to help you with your order. Can you provide me with your order number?",
+                        time: "10:33 AM",
+                    },
+                ],
+            },
+            mike: {
+                name: "Mike",
+                lastMessage: "Hello Mike! I need help with technical support.",
+                lastTime: "09:16 AM",
+                unread: 2,
+                messages: [
+                    {
+                        type: "received",
+                        message: "Hi! Mike here, what can I do for you?",
+                        time: "09:15 AM",
+                    },
+                    {
+                        type: "sent",
+                        message:
+                            "Hello Mike! I need help with technical support.",
+                        time: "09:16 AM",
+                    },
+                ],
+            },
+            sarah: {
+                name: "Sarah",
+                lastMessage:
+                    "Hello! Sarah from customer service. How may I assist you?",
+                lastTime: "11:20 AM",
+                unread: 1,
+                messages: [
+                    {
+                        type: "received",
+                        message:
+                            "Hello! Sarah from customer service. How may I assist you?",
+                        time: "11:20 AM",
+                    },
+                ],
+            },
+            jessica: {
+                name: "Jessica",
+                lastMessage:
+                    "Perfect! I can definitely help with billing. What specific questions do you have?",
+                lastTime: "02:47 PM",
+                unread: 0,
+                messages: [
+                    {
+                        type: "received",
+                        message:
+                            "Hey! Jessica here. Ready to help with any questions!",
+                        time: "02:45 PM",
+                    },
+                    {
+                        type: "sent",
+                        message: "Great! I have some billing questions.",
+                        time: "02:46 PM",
+                    },
+                    {
+                        type: "received",
+                        message:
+                            "Perfect! I can definitely help with billing. What specific questions do you have?",
+                        time: "02:47 PM",
+                    },
+                ],
+            },
+        };
+        currentConversation = "andrew";
+    }
 
     function updateChatHeaderTitle() {
         const userRole = sessionStorage.getItem("userRole") || "Messages";
         const titleElement = document.getElementById("chatHeaderTitle");
         if (titleElement) {
-            titleElement.textContent = userRole;
+            titleElement.textContent =
+                userRole === "Ambulance"
+                    ? "User Contacts"
+                    : "Ambulance Contacts";
         }
     }
 
@@ -431,6 +530,28 @@
         loadConversation();
     }
 
+    function callUser() {
+        if (currentConversation) {
+            const contact = conversations[currentConversation];
+            if (
+                contact &&
+                contact.contactData &&
+                contact.contactData.phoneNumber
+            ) {
+                const phoneNumber = contact.contactData.phoneNumber;
+                // Try to initiate a call using tel: protocol
+                window.location.href = `tel:${phoneNumber}`;
+
+                // Also show an alert with the phone number for confirmation
+                alert(`Calling ${contact.name} at ${phoneNumber}`);
+            } else {
+                alert("Phone number not available for this contact.");
+            }
+        } else {
+            alert("No contact selected.");
+        }
+    }
+
     function loadConversationList() {
         const listContainer = document.getElementById("conversationListItems");
         listContainer.innerHTML = "";
@@ -439,15 +560,15 @@
             const convo = conversations[key];
             const listItem = document.createElement("div");
             listItem.style.cssText = `
-                padding: 16px 20px;
-                border-bottom: 1px solid #3c3836;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                transition: background-color 0.2s ease;
-                background: #282828;
-            `;
+                    padding: 16px 20px;
+                    border-bottom: 1px solid #3c3836;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    transition: background-color 0.2s ease;
+                    background: #282828;
+                `;
 
             listItem.addEventListener("mouseenter", () => {
                 listItem.style.backgroundColor = "#3c3836";
@@ -462,54 +583,54 @@
             const unreadBadge =
                 convo.unread > 0
                     ? `<div style="
-                    background: #b16286;
-                    color: #ebdbb2;
-                    border-radius: 50%;
-                    width: 20px;
-                    height: 20px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 12px;
-                    font-weight: 600;
-                    margin-left: auto;
-                    box-shadow: 0 2px 4px rgba(177, 98, 134, 0.3);
-                ">${convo.unread}</div>`
+                        background: #b16286;
+                        color: #ebdbb2;
+                        border-radius: 50%;
+                        width: 20px;
+                        height: 20px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 12px;
+                        font-weight: 600;
+                        margin-left: auto;
+                        box-shadow: 0 2px 4px rgba(177, 98, 134, 0.3);
+                    ">${convo.unread}</div>`
                     : "";
 
             listItem.innerHTML = `
-                <div style="
-                    width: 48px;
-                    height: 48px;
-                    border-radius: 50%;
-                    background: #b16286;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: #ebdbb2;
-                    font-weight: 600;
-                    font-size: 18px;
-                    box-shadow: 0 2px 4px rgba(177, 98, 134, 0.3);
-                ">${convo.name[0].toUpperCase()}</div>
-
-                <div style="flex: 1; min-width: 0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <span style="font-weight: 600; color: #ebdbb2; font-size: 16px;">${convo.name}</span>
-                        <small style="color: #a89984; font-size: 12px;">${convo.lastTime}</small>
-                    </div>
                     <div style="
-                        color: #a89984;
-                        font-size: 14px;
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        max-width: 280px;
-                        line-height: 1.4;
-                    ">${convo.lastMessage}</div>
-                </div>
+                        width: 48px;
+                        height: 48px;
+                        border-radius: 50%;
+                        background: #b16286;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: #ebdbb2;
+                        font-weight: 600;
+                        font-size: 18px;
+                        box-shadow: 0 2px 4px rgba(177, 98, 134, 0.3);
+                    ">${convo.name[0].toUpperCase()}</div>
 
-                ${unreadBadge}
-            `;
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span style="font-weight: 600; color: #ebdbb2; font-size: 16px;">${convo.name}</span>
+                            <small style="color: #a89984; font-size: 12px;">${convo.lastTime}</small>
+                        </div>
+                        <div style="
+                            color: #a89984;
+                            font-size: 14px;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            max-width: 280px;
+                            line-height: 1.4;
+                        ">${convo.lastMessage}</div>
+                    </div>
+
+                    ${unreadBadge}
+                `;
 
             listContainer.appendChild(listItem);
         });
@@ -520,62 +641,169 @@
         currentConversation = select.value;
         loadConversation();
     }
-
-    function loadConversation() {
+    async function loadConversation() {
         const messagesContainer = document.getElementById("chatMessages");
         messagesContainer.innerHTML = "";
 
-        const messages = conversations[currentConversation].messages;
-        messages.forEach((msg) => {
-            const messageDiv = document.createElement("div");
-            if (msg.type === "received") {
-                messageDiv.style.cssText = "margin-bottom: 16px;";
-                messageDiv.innerHTML = `
-                    <div style="
-                        background: #3c3836;
-                        padding: 12px 16px;
-                        border-radius: 18px;
-                        max-width: 70%;
-                        margin-bottom: 4px;
-                        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-                        border: 1px solid #504945;
-                        color: #ebdbb2;
-                        line-height: 1.4;
-                    ">
-                        ${msg.message}
-                    </div>
-                    <small style="color: #a89984; font-size: 12px; margin-left: 4px;">${msg.time}</small>
-                `;
-            } else {
-                messageDiv.style.cssText =
-                    "margin-bottom: 16px; text-align: right;";
-                messageDiv.innerHTML = `
-                    <div style="
-                        background: #b16286;
-                        color: #ebdbb2;
-                        padding: 12px 16px;
-                        border-radius: 18px;
-                        max-width: 70%;
-                        margin-left: auto;
-                        margin-bottom: 4px;
-                        box-shadow: 0 2px 4px rgba(177, 98, 134, 0.3);
-                        line-height: 1.4;
-                    ">
-                        ${msg.message}
-                    </div>
-                    <small style="color: #a89984; font-size: 12px; margin-right: 4px;">${msg.time}</small>
-                `;
+        try {
+            // Get current user ID and contact ID
+            const currentUserId = sessionStorage.getItem("userId");
+            const contactData = conversations[currentConversation].contactData;
+            const contactId = contactData ? contactData.id : null;
+
+            if (!currentUserId || !contactId) {
+                console.error("Missing user or contact ID");
+                // Fallback to local messages if API fails
+                loadLocalMessages();
+                return;
             }
-            messagesContainer.appendChild(messageDiv);
-        });
+
+            // Fetch messages from API
+            const response = await fetch(
+                `http://localhost:5069/api/v1/Chat/all-messages`,
+            );
+
+            console.log("API Response:", response);
+            console.log("API Messages:", await response.clone().json());
+
+            if (response.ok) {
+                const apiMessages = await response.json();
+
+                // Filter messages for current conversation (between current user and contact)
+                const conversationMessages = apiMessages.filter(
+                    (msg) =>
+                        (msg.sender === currentUserId &&
+                            msg.reciever === contactId) ||
+                        (msg.sender === contactId &&
+                            msg.reciever === currentUserId),
+                );
+
+                // Sort messages by sentAt timestamp
+                conversationMessages.sort(
+                    (a, b) => new Date(a.sentAt) - new Date(b.sentAt),
+                );
+
+                // Convert API messages to display format
+                conversationMessages.forEach((apiMsg) => {
+                    const messageDiv = document.createElement("div");
+                    const isReceived = apiMsg.sender !== currentUserId;
+                    const messageTime = new Date(
+                        apiMsg.sentAt,
+                    ).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                    });
+
+                    if (isReceived) {
+                        messageDiv.style.cssText = "margin-bottom: 16px;";
+                        messageDiv.innerHTML = `
+                                <div style="
+                                    background: #3c3836;
+                                    padding: 12px 16px;
+                                    border-radius: 18px;
+                                    max-width: 70%;
+                                    margin-bottom: 4px;
+                                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                                    border: 1px solid #504945;
+                                    color: #ebdbb2;
+                                    line-height: 1.4;
+                                ">
+                                    ${apiMsg.message}
+                                </div>
+                                <small style="color: #a89984; font-size: 12px; margin-left: 4px;">${messageTime}</small>
+                            `;
+                    } else {
+                        messageDiv.style.cssText =
+                            "margin-bottom: 16px; text-align: right;";
+                        messageDiv.innerHTML = `
+                                <div style="
+                                    background: #b16286;
+                                    color: #ebdbb2;
+                                    padding: 12px 16px;
+                                    border-radius: 18px;
+                                    max-width: 70%;
+                                    margin-left: auto;
+                                    margin-bottom: 4px;
+                                    box-shadow: 0 2px 4px rgba(177, 98, 134, 0.3);
+                                    line-height: 1.4;
+                                ">
+                                    ${apiMsg.message}
+                                </div>
+                                <small style="color: #a89984; font-size: 12px; margin-right: 4px;">${messageTime}</small>
+                            `;
+                    }
+                    messagesContainer.appendChild(messageDiv);
+                });
+            } else {
+                console.error("Failed to fetch messages from API");
+                // Fallback to local messages if API fails
+                loadLocalMessages();
+            }
+        } catch (error) {
+            console.error("Error fetching messages:", error);
+            // Fallback to local messages if API fails
+            loadLocalMessages();
+        }
+
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        function loadLocalMessages() {
+            const messages = conversations[currentConversation].messages;
+            messages.forEach((msg) => {
+                const messageDiv = document.createElement("div");
+                if (msg.type === "received") {
+                    messageDiv.style.cssText = "margin-bottom: 16px;";
+                    messageDiv.innerHTML = `
+                            <div style="
+                                background: #3c3836;
+                                padding: 12px 16px;
+                                border-radius: 18px;
+                                max-width: 70%;
+                                margin-bottom: 4px;
+                                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                                border: 1px solid #504945;
+                                color: #ebdbb2;
+                                line-height: 1.4;
+                            ">
+                                ${msg.message}
+                            </div>
+                            <small style="color: #a89984; font-size: 12px; margin-left: 4px;">${msg.time}</small>
+                        `;
+                } else {
+                    messageDiv.style.cssText =
+                        "margin-bottom: 16px; text-align: right;";
+                    messageDiv.innerHTML = `
+                            <div style="
+                                background: #b16286;
+                                color: #ebdbb2;
+                                padding: 12px 16px;
+                                border-radius: 18px;
+                                max-width: 70%;
+                                margin-left: auto;
+                                margin-bottom: 4px;
+                                box-shadow: 0 2px 4px rgba(177, 98, 134, 0.3);
+                                line-height: 1.4;
+                            ">
+                                ${msg.message}
+                            </div>
+                            <small style="color: #a89984; font-size: 12px; margin-right: 4px;">${msg.time}</small>
+                        `;
+                }
+                messagesContainer.appendChild(messageDiv);
+            });
+        }
     }
 
-    function handleChat() {
+    async function handleChat() {
         // Add click animation
         const button = document.getElementById("chatButton");
         button.style.animation = "buttonPulse 0.3s ease";
         setTimeout(() => (button.style.animation = ""), 300);
+
+        // Fetch contacts if conversations is empty
+        if (Object.keys(conversations).length === 0) {
+            await fetchContactableUsers();
+        }
 
         toggleChat();
     }
@@ -602,31 +830,162 @@
         isOpen = false;
     }
 
-    function sendMessage() {
+    async function sendMessage() {
         const input = document.getElementById("chatInput");
+        const fileInput = document.getElementById("imageInput");
         const message = input.value.trim();
+        const file = fileInput ? fileInput.files[0] : null;
 
-        if (message) {
+        if (message || file) {
             const now = new Date();
             const timeString = now.toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
             });
 
-            // Add to conversation data
-            conversations[currentConversation].messages.push({
-                type: "sent",
-                message: message,
-                time: timeString,
-            });
+            try {
+                // Get current user ID and receiver ID
+                const currentUserId = sessionStorage.getItem("userId");
+                const contactData =
+                    conversations[currentConversation].contactData;
+                const receiverId = contactData
+                    ? contactData.id
+                    : currentConversation;
 
-            // Update last message info
-            conversations[currentConversation].lastMessage = message;
-            conversations[currentConversation].lastTime = timeString;
+                if (file) {
+                    // Handle image upload
+                    const formData = new FormData();
+                    formData.append("id", crypto.randomUUID());
+                    formData.append("reciever", receiverId);
+                    formData.append("image", file);
+                    formData.append("sentAt", now.toISOString());
+                    if (message) {
+                        formData.append("message", message);
+                    }
 
-            // Reload conversation to show new message
-            loadConversation();
-            input.value = "";
+                    // Send image message to API
+                    const response = await fetch(
+                        "http://localhost:5069/api/v1/Chat/send-image",
+                        {
+                            method: "POST",
+                            headers: {
+                                Authorization: `Bearer ${sessionStorage.getItem("authToken")}`,
+                            },
+                            body: formData,
+                        },
+                    );
+
+                    if (response.ok) {
+                        // Add to conversation data only if API call succeeds
+                        const imageUrl = URL.createObjectURL(file);
+                        conversations[currentConversation].messages.push({
+                            type: "sent",
+                            message: message || "",
+                            image: imageUrl,
+                            time: timeString,
+                        });
+
+                        // Update last message info
+                        conversations[currentConversation].lastMessage =
+                            message || "📷 Image";
+                        conversations[currentConversation].lastTime =
+                            timeString;
+
+                        // Reload conversation to show new message
+                        loadConversation();
+                        input.value = "";
+                        fileInput.value = "";
+                    } else {
+                        console.error(
+                            "Failed to send image:",
+                            response.statusText,
+                        );
+                        alert("Failed to send image. Please try again.");
+                    }
+                } else {
+                    // Handle text message
+                    // Prepare the payload
+                    const payload = {
+                        id: crypto.randomUUID(), // Generate a new UUID for the message
+                        reciever: receiverId, // Note: keeping the API's spelling of "reciever"
+                        message: message,
+                        sentAt: now.toISOString(),
+                    };
+
+                    // Send message to API
+                    const response = await fetch(
+                        "http://localhost:5069/api/v1/Chat/send",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${sessionStorage.getItem("authToken")}`,
+                            },
+                            body: JSON.stringify(payload),
+                        },
+                    );
+
+                    if (response.ok) {
+                        // Add to conversation data only if API call succeeds
+                        conversations[currentConversation].messages.push({
+                            type: "sent",
+                            message: message,
+                            time: timeString,
+                        });
+
+                        // Update last message info
+                        conversations[currentConversation].lastMessage =
+                            message;
+                        conversations[currentConversation].lastTime =
+                            timeString;
+
+                        // Reload conversation to show new message
+                        loadConversation();
+                        input.value = "";
+                    } else {
+                        console.error(
+                            "Failed to send message:",
+                            response.statusText,
+                        );
+                        alert("Failed to send message. Please try again.");
+                    }
+                }
+            } catch (error) {
+                console.error("Error sending message:", error);
+                alert(
+                    "Error sending message. Please check your connection and try again.",
+                );
+            }
+        }
+    }
+
+    function triggerImageUpload() {
+        const fileInput = document.getElementById("imageInput");
+        if (fileInput) {
+            fileInput.click();
+        }
+    }
+
+    function handleImageSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Validate file type
+            if (!file.type.startsWith("image/")) {
+                alert("Please select an image file.");
+                event.target.value = "";
+                return;
+            }
+
+            // Validate file size (e.g., max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert("Image size must be less than 5MB.");
+                event.target.value = "";
+                return;
+            }
+
+            // Show preview or filename
+            const input = document.getElementById("chatInput");
+            input.placeholder = `Image selected: ${file.name}`;
         }
     }
 
@@ -721,4 +1080,9 @@
         originalShowConversation(conversationId);
         updateDragHandlers();
     };
+
+    // Initialize conversations on page load
+    document.addEventListener("DOMContentLoaded", function () {
+        fetchContactableUsers();
+    });
 </script>
