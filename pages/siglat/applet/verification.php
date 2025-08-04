@@ -537,7 +537,7 @@ function displayVerifications() {
             <div class="verification-card">
                 <div>${imageContent}</div>
                 <div class="verification-details">
-                    <h3>ID: ${verification.id || 'N/A'}</h3>
+                    <h3>Name: ${verification.name || 'N/A'}</h3>
                     <p><strong>Type:</strong> ${verification.verificationType || 'N/A'}</p>
                     <p><strong>Status:</strong> <span class="status-badge status-${statusClass}">${statusLabel}</span></p>
                     <p><strong>Created:</strong> ${verification.createdAt ? new Date(verification.createdAt).toLocaleDateString() : 'N/A'}</p>
@@ -707,6 +707,7 @@ async function updateVerificationStatus(id, status, remarks) {
         // Create payload
         const requestPayload = {
             Id: verification.id,
+            Name: verification.name,
             VerificationType: verification.verificationType,
             B64Image: verification.b64Image || '',
             Remarks: remarks,

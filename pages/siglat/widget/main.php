@@ -1,10 +1,10 @@
 <!-- Drawer Button -->
-<button id="drawerBtn" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: #88c0d0; color: #2e3440; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: transform 0.2s ease;">
+<button id="drawerBtn" style="position: fixed; bottom: 20px; right: 20px; z-index: 2147483647; background: #88c0d0; color: #2e3440; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: transform 0.2s ease;">
     ☰
 </button>
 
 <!-- Drawer -->
-<div id="drawer" style="position: fixed; bottom: -100%; left: 0; right: 0; height: 95%; background: #2e3440; z-index: 9998; transition: bottom 0.3s ease; border-top: 1px solid #434c5e; border-radius: 15px 15px 0 0; box-shadow: 0 -4px 20px rgba(0,0,0,0.2);">
+<div id="drawer" style="position: fixed; bottom: -100%; left: 0; right: 0; height: 95%; background: #2e3440; z-index: 2147483647; transition: bottom 0.3s ease; border-top: 1px solid #434c5e; border-radius: 15px 15px 0 0; box-shadow: 0 -4px 20px rgba(0,0,0,0.2);">
     <!-- Drawer Header -->
     <div style="padding: 15px 20px; border-bottom: 1px solid #434c5e; display: flex; justify-content: space-between; align-items: center;">
         <h3 style="margin: 0; color: #eceff4; font-size: clamp(1.1rem, 4vw, 1.3rem);">Dashboard</h3>
