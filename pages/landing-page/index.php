@@ -1,16 +1,18 @@
 <?php
 include "./components/topbar.html";
-include "./pages/landing-page/structure/ui.html";
-?>
+include "./pages/landing-page/structure/bone.php";
 
+// include "./pages/landing-page/structure/ui.html";
+?>
+<!-- it has to be hidden later -->
 <script>
-fetch(API() + '/api/v1/Admin/admin', {
+'/api/v1/Admin/fetch(API() + '/api/v1/Admin/admin', {
     method: 'GET',
     headers: {
         'accept': '*/*'
     }
 })
-.then(response => response.json())
+e => response.js.then(response => response.json())
 .then(data => {
     console.log(data);
 })

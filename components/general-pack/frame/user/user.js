@@ -142,6 +142,10 @@ async function loadVerificationStatus() {
 
     const status = await response.text();
     verificationStatus = status.replace(/"/g, ""); // Remove quotes if present
+
+    // Store status in localStorage
+    localStorage.setItem("status", verificationStatus);
+
     updateVerificationDisplay(verificationStatus);
   } catch (error) {
     console.error("Error loading verification status:", error);
@@ -153,8 +157,18 @@ async function loadVerificationStatus() {
 function updateVerificationDisplay(status) {
   const statusDisplay = document.getElementById("verificationStatusDisplay");
   const toggleBtn = document.getElementById("toggleVerificationBtn");
+  const editBtn = document.getElementById("editProfileBtn");
 
   statusDisplay.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+
+  // Hide buttons if verified
+  if (status === "accepted") {
+    if (editBtn) editBtn.style.display = "none";
+    if (toggleBtn) toggleBtn.style.display = "none";
+  } else {
+    if (editBtn) editBtn.style.display = "block";
+    if (toggleBtn) toggleBtn.style.display = "inline-block";
+  }
 
   // Apply color coding and update button text
   switch (status) {

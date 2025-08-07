@@ -1,0 +1,81 @@
+<!-- Map Section with Enhanced Design -->
+<section class="bg-white py-20 px-8">
+    <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">
+                Nueva Vizcaya Coverage Map
+            </h2>
+            <div
+                class="w-24 h-1 bg-gradient-to-r from-red-500 to-red-600 mx-auto rounded-full mb-6"
+            ></div>
+            <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                Real-time monitoring and emergency response coverage across
+                Nueva Vizcaya
+            </p>
+        </div>
+        <div
+            class="bg-gradient-to-br from-white to-red-50 rounded-3xl shadow-2xl p-6 border border-red-200"
+        >
+            <div
+                id="map-container"
+                class="relative overflow-hidden rounded-2xl border-2 border-red-200 shadow-inner"
+            >
+                <div
+                    id="map-loading"
+                    class="absolute inset-0 bg-gradient-to-br from-white to-red-50 flex items-center justify-center z-10"
+                >
+                    <div class="text-center">
+                        <div class="relative">
+                            <div
+                                class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-red-200 border-t-red-600 shadow-lg"
+                            ></div>
+                            <div
+                                class="absolute inset-0 rounded-full bg-red-50 blur-xl opacity-50"
+                            ></div>
+                        </div>
+                        <p class="text-gray-700 mt-6 font-medium text-lg">
+                            Loading interactive map...
+                        </p>
+                        <p class="text-gray-500 text-sm mt-2">
+                            Please wait while we prepare your location data
+                        </p>
+                    </div>
+                </div>
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+    <style>
+        #map,
+        #map-container {
+            height: 350px;
+        }
+        @media (min-width: 768px) {
+            #map,
+            #map-container {
+                height: 450px;
+            }
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+    <script src="./pages/landing-page/script/map.js"></script>
+</section>
