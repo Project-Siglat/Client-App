@@ -292,30 +292,30 @@
         line-height: 1.6;
     }
 
-    /* Gruvbox Dark Theme Colors */
+    /* White and Red Theme Colors */
     :root {
-        --nord0: #282828;
-        --nord1: #3c3836;
-        --nord2: #504945;
-        --nord3: #665c54;
-        --nord4: #ebdbb2;
-        --nord5: #fbf1c7;
-        --nord6: #f9f5d7;
-        --nord7: #8ec07c;
-        --nord8: #83a598;
-        --nord9: #7c6f64;
-        --nord10: #458588;
-        --nord11: #cc241d;
-        --nord12: #d65d0e;
-        --nord13: #d79921;
-        --nord14: #98971a;
-        --nord15: #b16286;
+        --nord0: #ffffff;
+        --nord1: #f8f9fa;
+        --nord2: #e9ecef;
+        --nord3: #dee2e6;
+        --nord4: #495057;
+        --nord5: #343a40;
+        --nord6: #212529;
+        --nord7: #dc3545;
+        --nord8: #c82333;
+        --nord9: #6c757d;
+        --nord10: #dc3545;
+        --nord11: #dc3545;
+        --nord12: #fd7e14;
+        --nord13: #ffc107;
+        --nord14: #28a745;
+        --nord15: #6f42c1;
     }
 
     .nord-container {
         min-height: 100vh;
         background-color: var(--nord0);
-        color: var(--nord4);
+        color: var(--nord5);
         position: relative;
         overflow-x: hidden;
         overflow-y: auto;
@@ -328,14 +328,14 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        color: var(--nord4);
+        color: var(--nord5);
         text-decoration: none;
         transition: color 0.2s;
         z-index: 10;
     }
 
     .nord-back-button:hover {
-        color: var(--nord8);
+        color: var(--nord10);
     }
 
     .nord-icon {
@@ -438,25 +438,25 @@
     .nord-title {
         font-size: 3rem;
         font-weight: bold;
-        color: var(--nord6);
+        color: var(--nord10);
         margin-bottom: 0.5rem;
         margin: 0 0 0.5rem 0;
     }
 
     .nord-subtitle {
         font-size: 1.125rem;
-        color: var(--nord4);
+        color: var(--nord5);
         margin: 0;
     }
 
     .nord-tabs-container {
-        background-color: var(--nord1);
+        background-color: var(--nord0);
         border-radius: 0.75rem;
         padding: 2rem;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         width: 100%;
         max-width: 36rem;
-        border: 1px solid var(--nord2);
+        border: 1px solid var(--nord3);
     }
 
     .nord-tabs {
@@ -491,7 +491,7 @@
         padding: 0.75rem 1rem;
         border: none;
         background-color: transparent;
-        color: var(--nord4);
+        color: var(--nord5);
         font-size: 0.875rem;
         font-weight: 500;
         border-radius: 0.375rem;
@@ -502,11 +502,11 @@
     }
 
     .nord-tab[aria-selected="true"] {
-        color: var(--nord6);
+        color: var(--nord0);
     }
 
     .nord-tab:hover:not([aria-selected="true"]) {
-        color: var(--nord5);
+        color: var(--nord6);
     }
 
     .nord-panel {
@@ -536,7 +536,7 @@
     .nord-select {
         width: 100%;
         padding: 0.875rem 1rem;
-        background-color: var(--nord2);
+        background-color: var(--nord0);
         border: 2px solid var(--nord3);
         border-radius: 0.5rem;
         color: var(--nord6);
@@ -546,7 +546,7 @@
     }
 
     .nord-label {
-        color: var(--nord4);
+        color: var(--nord5);
         font-size: 0.875rem;
         font-weight: 500;
         display: block;
@@ -557,7 +557,7 @@
     .nord-select:focus {
         border-color: var(--nord10);
         background-color: var(--nord1);
-        box-shadow: 0 0 0 3px rgba(69, 133, 136, 0.1);
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
     }
 
     .nord-floating-label:focus-within .nord-label {
@@ -569,8 +569,8 @@
     }
 
     .nord-select option {
-        background-color: var(--nord1);
-        color: var(--nord4);
+        background-color: var(--nord0);
+        color: var(--nord5);
     }
 
     .nord-checkbox-container {
@@ -583,7 +583,7 @@
     .nord-checkbox {
         width: 1rem;
         height: 1rem;
-        background-color: var(--nord2);
+        background-color: var(--nord0);
         border: 2px solid var(--nord3);
         border-radius: 0.25rem;
         cursor: pointer;
@@ -600,7 +600,7 @@
     .nord-checkbox:checked::after {
         content: "✓";
         position: absolute;
-        color: var(--nord6);
+        color: var(--nord0);
         font-size: 0.75rem;
         top: 50%;
         left: 50%;
@@ -608,7 +608,7 @@
     }
 
     .nord-checkbox-label {
-        color: var(--nord4);
+        color: var(--nord5);
         font-size: 0.8125rem;
         cursor: pointer;
         user-select: none;
@@ -618,7 +618,7 @@
         width: 100%;
         padding: 0.875rem 1rem;
         background-color: var(--nord10);
-        color: var(--nord6);
+        color: var(--nord0);
         border: none;
         border-radius: 0.5rem;
         font-size: 1rem;
@@ -631,7 +631,7 @@
     .nord-button:hover {
         background-color: var(--nord8);
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(69, 133, 136, 0.3);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
     }
 
     .nord-button:active {
@@ -642,8 +642,8 @@
         width: 100%;
         padding: 0.625rem 1rem;
         background-color: transparent;
-        color: var(--nord8);
-        border: 1px solid var(--nord8);
+        color: var(--nord10);
+        border: 1px solid var(--nord10);
         border-radius: 0.5rem;
         font-size: 0.875rem;
         font-weight: 500;
@@ -653,8 +653,8 @@
     }
 
     .nord-forgot-password:hover {
-        background-color: var(--nord8);
-        color: var(--nord6);
+        background-color: var(--nord10);
+        color: var(--nord0);
         transform: translateY(-1px);
     }
 
@@ -663,14 +663,14 @@
     }
 
     .nord-toast {
-        background-color: var(--nord1);
-        color: var(--nord4);
+        background-color: var(--nord0);
+        color: var(--nord5);
         padding: 1rem 1.5rem;
         border-radius: 0.5rem;
         margin-bottom: 0.5rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         animation: slideIn 0.3s ease;
-        border: 1px solid var(--nord2);
+        border: 1px solid var(--nord3);
     }
 
     .nord-toast.success {
