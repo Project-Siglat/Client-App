@@ -1,37 +1,49 @@
 <?php
 include "./config/env.php";
 $request_uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
-switch ($request_uri) {
-    // here is the landing page
-    case "/":
-        include "./pages/landing-page/index.php";
-        break;
-    case "/login":
-        include "./pages/auth/index.php";
-        break;
-    case "/env":
-        $env = $_ENV["ENVIRONMENT"];
-        echo $env;
-        break;
 
-    // siglat
-    case "/siglat":
-        include "./pages/siglat/index.php";
-        break;
+$page_folders = [];
+$page_directory = "./page";
 
-    // here is the user set
-    case "/client":
-        include "./pages/client/index.php";
-        break;
+if (is_dir($page_directory)) {
+    $dir_handle = opendir($page_directory);
+    while (($item = readdir($dir_handle)) !== false) {
+        if (
+            $item != "." &&
+            $item != ".." &&
+            is_dir($page_directory . "/" . $item)
+        ) {
+            $page_folders[] = $item;
+        }
+    }
+    closedir($dir_handle);
+}
 
-    // here is the ambulance set
-    case "/ambulance":
-        include "./pages/ambulance/index.php";
+$page_found = false;
+
+foreach ($page_folders as $folder) {
+    if ($folder == "index" && $request_uri == "/") {
+        $index_file = $page_directory . "/" . $folder . "/index.php";
+        if (file_exists($index_file)) {
+            include $index_file;
+            $page_found = true;
+        }
         break;
-    default:
-        http_response_code(404);
-        include "./pages/error/404.php";
+    } elseif ($request_uri == "/" . $folder) {
+        $index_file = $page_directory . "/" . $folder . "/index.php";
+        if (file_exists($index_file)) {
+            include $index_file;
+            $page_found = true;
+        }
         break;
+    }
+}
+
+if (!$page_found) {
+    $not_found_file = $page_directory . "/404/index.php";
+    if (file_exists($not_found_file)) {
+        include $not_found_file;
+    }
 }
 
 ?>
