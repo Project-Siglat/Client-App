@@ -13,7 +13,7 @@ var myPin = L.icon({
 
 (async () => {
   const location = await setUserLocation();
-  console.log(location);
+  alert(`Latitude: ${location.lat}, Longitude: ${location.lng}`);
   if (location) {
     L.marker([location.lat, location.lng], { icon: myPin }).addTo(map);
   }
