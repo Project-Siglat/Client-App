@@ -9,6 +9,22 @@ function onMapClick(e) {
 // sample usage
 // map.on("click", onMapClick);
 
+// Create custom icon
+var myPin = L.icon({
+  iconUrl: "./assets/pin.png",
+  iconSize: [80, 42],
+  iconAnchor: [21, 42],
+  popupAnchor: [0, -42],
+});
+
+// Create ambulance icon
+var ambulanceIcon = L.icon({
+  iconUrl: "./assets/aid.png",
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+  popupAnchor: [0, -40],
+});
+
 async function setUserLocation() {
   if (navigator.geolocation) {
     try {
@@ -19,6 +35,7 @@ async function setUserLocation() {
       const userLng = position.coords.longitude;
       console.log(`User location: ${userLat}, ${userLng}`);
       map.setView([userLat, userLng], 13);
+      L.marker([userLat, userLng], { icon: myPin }).addTo(map);
       return {
         lat: userLat,
         lng: userLng,
