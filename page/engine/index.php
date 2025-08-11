@@ -1,7 +1,7 @@
 <?php
 $env = $_ENV["ENVIRONMENT"];
 
-if ($env == "localhost" && "develop") {
+if ($env == "localhost" || "develop") {
     include "./components/topbar.html";
 
     $package = ["map", "map-api"];
