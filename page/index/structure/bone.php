@@ -1,5 +1,5 @@
 <?php
-$WIDPAK_PATH = "./pages/landing-page/";
+$WIDPAK_PATH = "./page/index/";
 $STRUCTURE = $WIDPAK_PATH . "structure/";
 $WIDGET = $WIDPAK_PATH . "widget/";
 

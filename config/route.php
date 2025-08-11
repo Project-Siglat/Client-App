@@ -1,37 +1,33 @@
 <?php
 include "./config/env.php";
 $request_uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
-switch ($request_uri) {
-    // here is the landing page
-    case "/":
-        include "./pages/landing-page/index.php";
-        break;
-    case "/login":
-        include "./pages/auth/index.php";
-        break;
-    case "/env":
-        $env = $_ENV["ENVIRONMENT"];
-        echo $env;
-        break;
 
-    // siglat
-    case "/siglat":
-        include "./pages/siglat/index.php";
-        break;
+$page_directory = "./page";
 
-    // here is the user set
-    case "/client":
-        include "./pages/client/index.php";
-        break;
+// Handle root path directly
+if ($request_uri === "/") {
+    $index_file = $page_directory . "/index/index.php";
+    if (file_exists($index_file)) {
+        include $index_file;
+        exit();
+    }
+} else {
+    // Extract folder name directly from URI
+    $folder = ltrim($request_uri, "/");
+    // Only check if it contains no additional slashes (single level)
+    if (strpos($folder, "/") === false) {
+        $index_file = $page_directory . "/" . $folder . "/index.php";
+        if (file_exists($index_file)) {
+            include $index_file;
+            exit();
+        }
+    }
+}
 
-    // here is the ambulance set
-    case "/ambulance":
-        include "./pages/ambulance/index.php";
-        break;
-    default:
-        http_response_code(404);
-        include "./pages/error/404.php";
-        break;
+// 404 fallback
+$not_found_file = $page_directory . "/404/index.php";
+if (file_exists($not_found_file)) {
+    include $not_found_file;
 }
 
 ?>

@@ -1,6 +1,6 @@
 <?php
 include "./components/topbar.html";
-include "./pages/landing-page/structure/bone.php";
+include "./page/index/structure/bone.php";
 
 // include "./pages/landing-page/structure/ui.html";
 ?>
