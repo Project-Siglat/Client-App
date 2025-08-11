@@ -19,10 +19,16 @@ async function setUserLocation() {
       const userLng = position.coords.longitude;
       console.log(`User location: ${userLat}, ${userLng}`);
       map.setView([userLat, userLng], 13);
+      return {
+        lat: userLat,
+        lng: userLng,
+      };
     } catch (error) {
       console.error("Error getting user location:", error.message);
+      return null;
     }
   } else {
     console.error("Geolocation is not supported by this browser.");
+    return null;
   }
 }
