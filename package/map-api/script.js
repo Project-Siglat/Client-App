@@ -1,4 +1,4 @@
-alert("yow");
+// alert("yow");
 function onMapClick(e) {
   const coordinates = {
     lng: e.latlng.lng,
