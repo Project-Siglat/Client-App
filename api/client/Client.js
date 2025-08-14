@@ -32,40 +32,54 @@ async function checkCurrentAlert() {
 }
 
 // Function to dynamically update route between user and assigned ambulance
-function updateLiveRoute() {
+async function updateLiveRoute() {
   // Check if we have an active alert with an assigned ambulance
   if (!currentAlertData || !currentAlertData.responder || !userLocation) {
     return;
   }
 
   // Don't update route if status is done
-  if (currentAlertStatus === "Done") {
+  if (currentAlertStatus === "Done" || currentAlertStatus === "done") {
     return;
   }
 
-  // Find the assigned ambulance in ambulanceData
-  const assignedAmbulance = ambulanceData.find(
-    (ambulance) => ambulance.id === currentAlertData.responder,
-  );
+  try {
+    // Fetch latest ambulance data to get current positions
+    await fetchAmbulanceData();
 
-  if (!assignedAmbulance) {
-    return; // Assigned ambulance not found in data
-  }
+    // Find the assigned ambulance in ambulanceData
+    const assignedAmbulance = ambulanceData.find(
+      (ambulance) => ambulance.id === currentAlertData.responder,
+    );
 
-  const ambulanceLat = parseFloat(assignedAmbulance.latitude);
-  const ambulanceLng = parseFloat(assignedAmbulance.longitude);
+    if (!assignedAmbulance) {
+      console.log("Assigned ambulance not found in data");
+      return; // Assigned ambulance not found in data
+    }
 
-  // Check if ambulance position has actually changed before updating
-  const currentAmbulancePosition = `${ambulanceLat},${ambulanceLng}`;
+    const ambulanceLat = parseFloat(assignedAmbulance.latitude);
+    const ambulanceLng = parseFloat(assignedAmbulance.longitude);
 
-  if (lastAmbulancePosition !== currentAmbulancePosition) {
-    console.log("Updating route...");
+    // Validate coordinates
+    if (isNaN(ambulanceLat) || isNaN(ambulanceLng)) {
+      console.log("Invalid ambulance coordinates");
+      return;
+    }
 
-    // Create route between user and assigned ambulance
-    createRoute(userLocation[0], userLocation[1], ambulanceLat, ambulanceLng);
+    // Check if ambulance position has actually changed before updating
+    const currentAmbulancePosition = `${ambulanceLat},${ambulanceLng}`;
 
-    // Update last known position
-    lastAmbulancePosition = currentAmbulancePosition;
+    if (lastAmbulancePosition !== currentAmbulancePosition) {
+      console.log("Updating route...", currentAmbulancePosition);
+
+      // Create route between user and assigned ambulance
+      createRoute(userLocation[0], userLocation[1], ambulanceLat, ambulanceLng);
+
+      // Update last known position
+      lastAmbulancePosition = currentAmbulancePosition;
+    }
+  } catch (error) {
+    console.error("Error updating live route:", error);
   }
 }
 
