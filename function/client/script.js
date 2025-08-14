@@ -33,7 +33,7 @@ setInterval(async () => {
   const alertData = await checkCurrentAlert();
   updateUIBasedOnAlert(alertData);
   updateLiveRoute(); // Update live route if ambulance has moved
-}, 2000);
+}, 500);
 
 // Load Leaflet Routing Machine CSS
 var cssLink = document.createElement("link");
