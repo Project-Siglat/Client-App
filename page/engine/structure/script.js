@@ -3,4 +3,7 @@ map.on("click", (event) => {
   onMapClick(event);
 });
 
-setUserLocation();
+setUserLocation(true);
+
+generateRandomAmbulancePin();
+getNearestAmbulanceAndRoute();

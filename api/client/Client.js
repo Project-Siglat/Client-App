@@ -55,12 +55,11 @@ function updateLiveRoute() {
   const ambulanceLat = parseFloat(assignedAmbulance.latitude);
   const ambulanceLng = parseFloat(assignedAmbulance.longitude);
 
-  // Check if ambulance position has changed
+  // Check if ambulance position has actually changed before updating
   const currentAmbulancePosition = `${ambulanceLat},${ambulanceLng}`;
 
   if (lastAmbulancePosition !== currentAmbulancePosition) {
-    // Ambulance has moved, update the route
-    console.log("Ambulance moved, updating route...");
+    console.log("Updating route...");
 
     // Create route between user and assigned ambulance
     createRoute(userLocation[0], userLocation[1], ambulanceLat, ambulanceLng);
@@ -381,7 +380,7 @@ async function fetchAmbulanceData() {
     });
   } catch (error) {
     console.error("Error fetching ambulance data:", error);
-    alert("Failed to load ambulance data from server");
+    // alert("Failed to load ambulance data from server");
   }
 }
 
@@ -465,7 +464,7 @@ function updateUserLocation(position) {
 // Function to find nearest ambulance using client-side calculation
 async function findNearestAmbulance() {
   if (!userLocation) {
-    alert("User location not available. Please allow location access.");
+    // alert("User location not available. Please allow location access.");
     return;
   }
 
@@ -474,7 +473,7 @@ async function findNearestAmbulance() {
     await fetchAmbulanceData();
 
     if (ambulanceData.length === 0) {
-      alert("No ambulances available.");
+      // alert("No ambulances available.");
       return;
     }
 
@@ -506,13 +505,13 @@ async function findNearestAmbulance() {
       const nearestLat = parseFloat(nearestAmbulance.latitude);
       const nearestLng = parseFloat(nearestAmbulance.longitude);
 
-      alert(
-        "Nearest ambulance is Unit " +
-          nearestAmbulance.id +
-          " at distance: " +
-          nearestAmbulance.distance.toFixed(2) +
-          " km",
-      );
+      // alert(
+      //   "Nearest ambulance is Unit " +
+      //     nearestAmbulance.id +
+      //     " at distance: " +
+      //     nearestAmbulance.distance.toFixed(2) +
+      //     " km",
+      // );
 
       // Create route to nearest ambulance
       createRoute(userLocation[0], userLocation[1], nearestLat, nearestLng);
@@ -520,11 +519,11 @@ async function findNearestAmbulance() {
       // Center map on nearest ambulance
       map.setView([nearestLat, nearestLng], 15);
     } else {
-      alert("No ambulance found.");
+      // alert("No ambulance found.");
     }
   } catch (error) {
     console.error("Error finding nearest ambulance:", error);
-    alert("Failed to find nearest ambulance");
+    // alert("Failed to find nearest ambulance");
   }
 }
 
