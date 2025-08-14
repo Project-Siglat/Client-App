@@ -1,0 +1,641 @@
+<!-- Loading screen -->
+<div
+    id="loading-screen"
+    style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-family: Arial, sans-serif;
+    "
+>
+    <div style="text-align: center">
+        <div style="font-size: 18px; margin-bottom: 10px">
+            Getting your location...
+        </div>
+        <div style="font-size: 14px; color: #ccc">
+            Please allow location access for accurate tracking
+        </div>
+        <div style="margin-top: 20px">
+            <div
+                style="
+                    width: 40px;
+                    height: 40px;
+                    border: 4px solid #f3f3f3;
+                    border-top: 4px solid #3498db;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto;
+                "
+            ></div>
+        </div>
+    </div>
+</div>
+
+<div
+    id="map"
+    class="h-screen w-screen m-0 p-0"
+    style="
+        height: calc(100vh - 82px);
+        max-height: calc(100vh - 82px);
+        width: 100vw;
+        margin: 0;
+        padding: 0;
+    "
+></div>
+
+<div
+    id="recenterButton"
+    class="button-animate"
+    style="
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #6366f1;
+        z-index: 2147483647;
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    "
+    onclick="handleRecenter()"
+>
+    <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        style="transition: transform 0.2s ease"
+    >
+        <path
+            d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7-7z"
+        />
+    </svg>
+</div>
+
+<style>
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
+<script>
+    // Wait for Leaflet JS to load before using L
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof L === "undefined") {
+            console.log("Leaflet not loaded");
+            return;
+        }
+
+        // Default coordinates (fallback only)
+        var defaultLat = 16.606254918019598;
+        var defaultLng = 121.18314743041994;
+
+        // Track if we have gotten actual location
+        var hasRealLocation = false;
+
+        // Variable to store current location marker
+        var currentLocationMarker = null;
+
+        // Variable to store alert marker
+        var alertMarker = null;
+
+        // Variable to store route control
+        var routeControl = null;
+
+        // Store current location coordinates
+        var currentLat = defaultLat;
+        var currentLng = defaultLng;
+
+        // Store previous location coordinates for comparison
+        var previousLat = null;
+        var previousLng = null;
+
+        // Store alert coordinates
+        var alertLat = null;
+        var alertLng = null;
+
+        // Variable to store location update interval
+        var locationUpdateInterval = null;
+
+        // Variables to track async operations
+        var isLocationUpdating = false;
+        var isApiUpdating = false;
+        var isAlertChecking = false;
+
+        // Variable to track if there's an active alert
+        var hasActiveAlert = false;
+
+        // Initialize map
+        var map = L.map("map").setView([defaultLat, defaultLng], 16);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: "© OpenStreetMap",
+        }).addTo(map);
+
+        // Custom icon for current location (aid ambulance)
+        var currentLocationIcon = L.icon({
+            iconUrl: "./assets/aid.png",
+            iconSize: [45, 45],
+            iconAnchor: [20, 20],
+            popupAnchor: [0, -20],
+            zIndexOffset: 1000,
+        });
+
+        // Custom icon for alert location (emergency pin)
+        var alertIcon = L.icon({
+            iconUrl: "./assets/pin.png",
+            iconSize: [60, 45],
+            iconAnchor: [16, 48],
+            popupAnchor: [0, -48],
+            zIndexOffset: 500,
+        });
+
+        // Function to hide loading screen
+        function hideLoadingScreen() {
+            var loadingScreen = document.getElementById("loading-screen");
+            if (loadingScreen) {
+                loadingScreen.style.display = "none";
+            }
+        }
+
+        // Haversine formula to calculate distance between two points
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371; // Radius of the Earth in kilometers
+            const dLat = ((lat2 - lat1) * Math.PI) / 180;
+            const dLng = ((lng2 - lng1) * Math.PI) / 180;
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos((lat1 * Math.PI) / 180) *
+                    Math.cos((lat2 * Math.PI) / 180) *
+                    Math.sin(dLng / 2) *
+                    Math.sin(dLng / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distance = R * c; // Distance in kilometers
+            return distance;
+        }
+
+        // Function to check if ambulance has moved significantly
+        function hasLocationChanged(newLat, newLng) {
+            if (previousLat === null || previousLng === null) {
+                return true;
+            }
+
+            // Consider movement significant if distance is more than 10 meters
+            const distance = calculateDistance(
+                previousLat,
+                previousLng,
+                newLat,
+                newLng,
+            );
+            return distance > 0.01; // 0.01 km = 10 meters
+        }
+
+        // Function to find nearest ambulance using Haversine formula
+        async function findNearestAmbulance(userLat, userLng) {
+            try {
+                var authToken = sessionStorage.getItem("authToken");
+                if (!authToken) {
+                    console.log("No auth token found");
+                    return null;
+                }
+
+                const response = await fetch(API() + "/api/v1/Ambulance/all", {
+                    method: "GET",
+                    headers: {
+                        Authorization: "Bearer " + authToken,
+                        Accept: "*/*",
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch ambulances");
+                }
+
+                const ambulances = await response.json();
+                let nearestAmbulance = null;
+                let shortestDistance = Infinity;
+
+                ambulances.forEach((ambulance) => {
+                    if (ambulance.latitude && ambulance.longitude) {
+                        const distance = calculateDistance(
+                            userLat,
+                            userLng,
+                            parseFloat(ambulance.latitude),
+                            parseFloat(ambulance.longitude),
+                        );
+
+                        if (distance < shortestDistance) {
+                            shortestDistance = distance;
+                            nearestAmbulance = ambulance;
+                        }
+                    }
+                });
+
+                return nearestAmbulance;
+            } catch (error) {
+                console.error("Error finding nearest ambulance:", error);
+                return null;
+            }
+        }
+
+        // Function to handle manual assistance request
+        async function handleManualAssistanceRequest(userLat, userLng) {
+            if (hasActiveAlert) {
+                console.log("Alert already active, skipping manual assistance");
+                return;
+            }
+
+            const nearestAmbulance = await findNearestAmbulance(
+                userLat,
+                userLng,
+            );
+            if (nearestAmbulance) {
+                const ambulanceLat = parseFloat(nearestAmbulance.latitude);
+                const ambulanceLng = parseFloat(nearestAmbulance.longitude);
+
+                // Draw route from user to nearest ambulance
+                drawRoute(userLat, userLng, ambulanceLat, ambulanceLng);
+
+                console.log(
+                    "Route drawn to nearest ambulance:",
+                    nearestAmbulance,
+                );
+            }
+        }
+
+        // Function to calculate and draw route between two points
+        function drawRoute(startLat, startLng, endLat, endLng) {
+            try {
+                // Remove existing route if it exists
+                if (routeControl) {
+                    map.removeControl(routeControl);
+                    routeControl = null;
+                }
+
+                // Use Leaflet Routing Machine for routing
+                routeControl = L.Routing.control({
+                    waypoints: [
+                        L.latLng(startLat, startLng),
+                        L.latLng(endLat, endLng),
+                    ],
+                    routeWhileDragging: false,
+                    addWaypoints: false,
+                    createMarker: function () {
+                        return null;
+                    }, // Don't create default markers
+                    lineOptions: {
+                        styles: [
+                            {
+                                color: "#ff0000",
+                                weight: 4,
+                                opacity: 0.7,
+                                dashArray: "10, 5",
+                            },
+                        ],
+                    },
+                    show: false,
+                    routeWhileDragging: false,
+                }).addTo(map);
+
+                // Hide the routing instructions panel
+                if (routeControl.getContainer()) {
+                    routeControl.getContainer().style.display = "none";
+                }
+            } catch (error) {
+                console.error("Error drawing route:", error);
+                // Fallback to simple straight line
+                if (routeControl) {
+                    map.removeControl(routeControl);
+                    routeControl = null;
+                }
+                routeControl = L.polyline(
+                    [
+                        [startLat, startLng],
+                        [endLat, endLng],
+                    ],
+                    {
+                        color: "#ff0000",
+                        weight: 3,
+                        opacity: 0.6,
+                        dashArray: "5, 5",
+                    },
+                ).addTo(map);
+            }
+        }
+
+        // Function to update route if both locations are available
+        function updateRoute() {
+            if (
+                hasActiveAlert &&
+                currentLocationMarker &&
+                alertMarker &&
+                alertLat &&
+                alertLng
+            ) {
+                // Only redraw route if ambulance has moved significantly
+                if (hasLocationChanged(currentLat, currentLng)) {
+                    drawRoute(currentLat, currentLng, alertLat, alertLng);
+                    previousLat = currentLat;
+                    previousLng = currentLng;
+                }
+            }
+        }
+
+        // Function to get current alert (async)
+        async function getCurrentAlert() {
+            if (isAlertChecking) return;
+            isAlertChecking = true;
+
+            try {
+                var authToken = sessionStorage.getItem("authToken");
+                if (!authToken) {
+                    console.log("No auth token found");
+                    return;
+                }
+
+                const myHeaders = new Headers();
+                myHeaders.append("Authorization", "Bearer " + authToken);
+                myHeaders.append("Accept", "*/*");
+
+                const requestOptions = {
+                    method: "GET",
+                    headers: myHeaders,
+                    redirect: "follow",
+                };
+
+                const response = await fetch(
+                    API() + "/api/v1/Ambulance/alert/current/amb",
+                    requestOptions,
+                );
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        // No current alert, remove existing marker and route if any
+                        hasActiveAlert = false;
+                        if (alertMarker) {
+                            map.removeLayer(alertMarker);
+                            alertMarker = null;
+                        }
+                        if (routeControl) {
+                            map.removeControl(routeControl);
+                            routeControl = null;
+                        }
+                        alertLat = null;
+                        alertLng = null;
+                        previousLat = null;
+                        previousLng = null;
+                        return;
+                    }
+                    throw new Error("Network response was not ok");
+                }
+
+                const result = await response.text();
+                if (result) {
+                    var data = JSON.parse(result);
+                    console.log("Current alert:", data);
+
+                    hasActiveAlert = true;
+                    alertLat = parseFloat(data.latitude);
+                    alertLng = parseFloat(data.longitude);
+
+                    // Remove existing alert marker if it exists
+                    if (alertMarker) {
+                        map.removeLayer(alertMarker);
+                    }
+
+                    // Add marker at alert location
+                    alertMarker = L.marker([alertLat, alertLng], {
+                        icon: alertIcon,
+                    }).addTo(map);
+
+                    // Add popup with alert information
+                    var popupContent = `
+                        <div style="font-family: Arial, sans-serif;">
+                            <h3 style="margin: 0 0 8px 0; color: #dc2626;">Emergency Alert</h3>
+                            <p style="margin: 4px 0;"><strong>Type:</strong> ${data.what}</p>
+                            <p style="margin: 4px 0;"><strong>Status:</strong> ${data.status}</p>
+                            <p style="margin: 4px 0;"><strong>Time:</strong> ${new Date(data.respondedAt).toLocaleString()}</p>
+                            <p style="margin: 4px 0;"><strong>Location:</strong> ${alertLat.toFixed(6)}, ${alertLng.toFixed(6)}</p>
+                        </div>
+                    `;
+                    alertMarker.bindPopup(popupContent);
+
+                    // Update route if current location is available
+                    updateRoute();
+                }
+            } catch (error) {
+                console.error("Error getting current alert:", error);
+            } finally {
+                isAlertChecking = false;
+            }
+        }
+
+        // Function to send coordinates to API (async)
+        async function sendCoordinatesToAPI(lat, lng) {
+            if (isApiUpdating) return;
+            isApiUpdating = true;
+
+            try {
+                var authToken = sessionStorage.getItem("authToken");
+                if (!authToken) {
+                    console.log("No auth token found");
+                    return;
+                }
+
+                var payload = {
+                    id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    latitude: lat.toString(),
+                    longitude: lng.toString(),
+                };
+
+                const response = await fetch(
+                    API() + "/api/v1/User/coordinates",
+                    {
+                        method: "POST",
+                        headers: {
+                            accept: "*/*",
+                            Authorization: "Bearer " + authToken,
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(payload),
+                    },
+                );
+
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+
+                // Check if response has content before parsing JSON
+                const contentType = response.headers.get("content-type");
+                let data;
+                if (
+                    contentType &&
+                    contentType.indexOf("application/json") !== -1
+                ) {
+                    data = await response.json();
+                } else {
+                    data = await response.text();
+                }
+
+                console.log("Coordinates sent successfully:", data);
+            } catch (error) {
+                console.error("Error sending coordinates:", error);
+            } finally {
+                isApiUpdating = false;
+            }
+        }
+
+        // Function to update location and marker (async)
+        async function updateLocation() {
+            if (isLocationUpdating) return;
+            isLocationUpdating = true;
+
+            try {
+                if (!navigator.geolocation) {
+                    return;
+                }
+
+                var options = {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0,
+                };
+
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        var lat = position.coords.latitude;
+                        var lng = position.coords.longitude;
+
+                        // Update current coordinates
+                        currentLat = lat;
+                        currentLng = lng;
+
+                        // Remove existing marker if it exists
+                        if (currentLocationMarker) {
+                            map.removeLayer(currentLocationMarker);
+                        }
+
+                        // Add marker at current location
+                        currentLocationMarker = L.marker([lat, lng], {
+                            icon: currentLocationIcon,
+                        }).addTo(map);
+
+                        // Only center map view on first location update
+                        if (!hasRealLocation) {
+                            map.setView([lat, lng], map.getZoom());
+                        }
+
+                        // Hide loading screen once we have real location
+                        if (!hasRealLocation) {
+                            hasRealLocation = true;
+                            hideLoadingScreen();
+                        }
+
+                        // Update route if alert location is available
+                        updateRoute();
+
+                        isLocationUpdating = false;
+                    },
+                    function (error) {
+                        console.log("Geolocation error:", error);
+                        // If error and no real location yet, hide loading
+                        if (!hasRealLocation) {
+                            hideLoadingScreen();
+                        }
+                        isLocationUpdating = false;
+                    },
+                    options,
+                );
+            } catch (error) {
+                console.error("Error updating location:", error);
+                isLocationUpdating = false;
+            }
+        }
+
+        function requestLiveLocation() {
+            if (!navigator.geolocation) {
+                // Geolocation not available, hide loading
+                if (!hasRealLocation) {
+                    hideLoadingScreen();
+                }
+                return;
+            }
+
+            // Get initial location
+            updateLocation();
+
+            // Start continuous location updates every 1 second
+            if (locationUpdateInterval) {
+                clearInterval(locationUpdateInterval);
+            }
+
+            locationUpdateInterval = setInterval(async function () {
+                await updateLocation();
+            }, 1000);
+
+            // Start continuous API updates every 2 seconds (staggered)
+            setTimeout(function () {
+                setInterval(async function () {
+                    await sendCoordinatesToAPI(currentLat, currentLng);
+                }, 2000);
+            }, 500);
+
+            // Start continuous alert checking every 3 seconds (staggered)
+            setTimeout(function () {
+                setInterval(async function () {
+                    await getCurrentAlert();
+                }, 3000);
+            }, 1000);
+        }
+
+        // Recenter function
+        function handleRecenter() {
+            // Add button animation
+            var button = document.getElementById("recenterButton");
+            button.style.transform = "scale(0.9)";
+            setTimeout(function () {
+                button.style.transform = "scale(1)";
+            }, 150);
+
+            // Immediately center to current location with no delay
+            map.setView([currentLat, currentLng], 16);
+        }
+
+        // Make functions globally accessible
+        window.handleRecenter = handleRecenter;
+        window.handleManualAssistanceRequest = handleManualAssistanceRequest;
+
+        // Request location initially
+        requestLiveLocation();
+
+        // Set a timeout to hide loading screen if location takes too long
+        setTimeout(function () {
+            if (!hasRealLocation) {
+                hideLoadingScreen();
+            }
+        }, 10000); // 10 seconds timeout
+    });
+</script>
