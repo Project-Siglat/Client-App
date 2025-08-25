@@ -1,21 +1,94 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	let contacts: string[] = [];
+	interface Contact {
+		id: string;
+		label: string;
+		contactType: string;
+		contactInformation: string;
+	}
+
+	let contacts: Contact[] = [];
 	let loading = true;
 
 	onMount(async () => {
-		// Simulate loading emergency contacts
-		setTimeout(() => {
+		try {
+			const response = await fetch('http://localhost:5000/api/v1.0/Admin/contact');
+			if (response.ok) {
+				contacts = await response.json();
+			} else {
+				// Fallback to static contacts if API fails
+				contacts = [
+					{
+						id: '1',
+						label: 'Emergency Hotline',
+						contactType: 'Phone',
+						contactInformation: '911'
+					},
+					{
+						id: '2',
+						label: 'Disaster Response',
+						contactType: 'Phone',
+						contactInformation: '(078) 396-2345'
+					},
+					{
+						id: '3',
+						label: 'Medical Emergency',
+						contactType: 'Phone',
+						contactInformation: '(078) 396-1234'
+					},
+					{
+						id: '4',
+						label: 'Fire Department',
+						contactType: 'Phone',
+						contactInformation: '(078) 396-3456'
+					},
+					{
+						id: '5',
+						label: 'Police Station',
+						contactType: 'Phone',
+						contactInformation: '(078) 396-4567'
+					}
+				];
+			}
+		} catch (error) {
+			console.error('Failed to fetch contacts:', error);
+			// Fallback to static contacts if API fails
 			contacts = [
-				'Emergency Hotline: 911',
-				'Disaster Response: (078) 396-2345',
-				'Medical Emergency: (078) 396-1234',
-				'Fire Department: (078) 396-3456',
-				'Police Station: (078) 396-4567'
+				{
+					id: '1',
+					label: 'Emergency Hotline',
+					contactType: 'Phone',
+					contactInformation: '911'
+				},
+				{
+					id: '2',
+					label: 'Disaster Response',
+					contactType: 'Phone',
+					contactInformation: '(078) 396-2345'
+				},
+				{
+					id: '3',
+					label: 'Medical Emergency',
+					contactType: 'Phone',
+					contactInformation: '(078) 396-1234'
+				},
+				{
+					id: '4',
+					label: 'Fire Department',
+					contactType: 'Phone',
+					contactInformation: '(078) 396-3456'
+				},
+				{
+					id: '5',
+					label: 'Police Station',
+					contactType: 'Phone',
+					contactInformation: '(078) 396-4567'
+				}
 			];
+		} finally {
 			loading = false;
-		}, 2000);
+		}
 	});
 </script>
 
@@ -55,7 +128,7 @@
 						</li>
 					{:else}
 						{#each contacts as contact}
-							<li class="text-center">{contact}</li>
+							<li class="text-center">{contact.label}: {contact.contactInformation}</li>
 						{/each}
 					{/if}
 				</ul>

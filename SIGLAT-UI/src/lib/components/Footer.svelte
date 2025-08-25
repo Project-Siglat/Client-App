@@ -6,7 +6,7 @@
 			<div class="space-y-3">
 				<div class="flex items-center mb-3">
 					<img
-						src="/images/siglat.png"
+						src="/siglat.png"
 						alt="SIGLAT Logo"
 						class="w-12 h-12 mr-3"
 					/>

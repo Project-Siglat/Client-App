@@ -1,10 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 
 	let activeTab = 'login';
 	let showLoginPassword = false;
 	let showPassword = false;
 	let showConfirmPassword = false;
+	let isLoading = false;
+	let errorMessage = '';
+	let successMessage = '';
 
 	let loginForm = {
 		email: '',
@@ -26,18 +30,176 @@
 
 	function switchTab(tab: string) {
 		activeTab = tab;
+		errorMessage = '';
+		successMessage = '';
 	}
 
-	function handleLogin(event: Event) {
+	// Check for existing session on page load
+	onMount(() => {
+		const token = sessionStorage.getItem('token');
+		
+		if (token) {
+			try {
+				// Decode JWT to get role and check if token is valid
+				const payload = JSON.parse(atob(token.split('.')[1]));
+				const role = payload.role;
+				const expiry = payload.exp * 1000; // Convert to milliseconds
+				
+				// Check if token is not expired
+				if (Date.now() < expiry) {
+					// Token is valid, redirect based on role
+					if (role === 'Admin') {
+						goto('/siglat');
+					} else {
+						goto('/');
+					}
+					return;
+				} else {
+					// Token expired, remove it
+					sessionStorage.removeItem('token');
+				}
+			} catch (error) {
+				// Invalid token, remove it
+				console.error('Invalid token found:', error);
+				sessionStorage.removeItem('token');
+			}
+		}
+	});
+
+	async function handleRegister(event: Event) {
 		event.preventDefault();
-		console.log('Login form:', loginForm);
-		// Handle login logic here
+		isLoading = true;
+		errorMessage = '';
+		
+		// Validate passwords match
+		if (registerForm.password !== registerForm.confirmPassword) {
+			errorMessage = 'Passwords do not match';
+			isLoading = false;
+			return;
+		}
+
+		// Validate password length
+		if (registerForm.password.length < 6) {
+			errorMessage = 'Password must be at least 6 characters long';
+			isLoading = false;
+			return;
+		}
+
+		try {
+			const response = await fetch('http://localhost:5000/api/v1.0/Auth/register', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					firstName: registerForm.firstName,
+					lastName: registerForm.lastName,
+					middleName: registerForm.middleName || '',
+					address: registerForm.address,
+					gender: registerForm.gender,
+					dateOfBirth: registerForm.dateOfBirth,
+					phoneNumber: registerForm.phoneNumber,
+					email: registerForm.email,
+					hashPass: registerForm.password
+				})
+			});
+
+			if (response.ok) {
+				successMessage = 'Registration successful! Please login with your credentials.';
+				
+				// Reset form
+				registerForm = {
+					firstName: '',
+					lastName: '',
+					middleName: '',
+					address: '',
+					gender: '',
+					dateOfBirth: '',
+					phoneNumber: '',
+					email: '',
+					password: '',
+					confirmPassword: ''
+				};
+				
+				// Switch to login tab after 2 seconds
+				setTimeout(() => {
+					switchTab('login');
+				}, 2000);
+			} else {
+				const errorData = await response.text();
+				try {
+					const errorJson = JSON.parse(errorData);
+					if (errorJson.errors && errorJson.errors.Password) {
+						errorMessage = errorJson.errors.Password[0];
+					} else {
+						errorMessage = errorJson.title || 'Registration failed. Please try again.';
+					}
+				} catch {
+					errorMessage = errorData || 'Registration failed. Please try again.';
+				}
+			}
+		} catch (error) {
+			errorMessage = 'Network error. Please check your connection and try again.';
+			console.error('Registration error:', error);
+		} finally {
+			isLoading = false;
+		}
 	}
 
-	function handleRegister(event: Event) {
+	async function handleLogin(event: Event) {
 		event.preventDefault();
-		console.log('Register form:', registerForm);
-		// Handle register logic here
+		isLoading = true;
+		errorMessage = '';
+		
+		// Validate password length for login too
+		if (loginForm.password.length < 6) {
+			errorMessage = 'Password must be at least 6 characters long';
+			isLoading = false;
+			return;
+		}
+		
+		try {
+			const response = await fetch('http://localhost:5000/api/v1.0/Auth/login', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					email: loginForm.email,
+					password: loginForm.password
+				})
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				
+				// Store token in sessionStorage
+				sessionStorage.setItem('token', data.token);
+				
+				// Decode JWT to get role
+				const payload = JSON.parse(atob(data.token.split('.')[1]));
+				const role = payload.role;
+				
+				successMessage = 'Login successful! Redirecting...';
+				
+				// Redirect based on role
+				setTimeout(() => {
+					if (role === 'Admin') {
+						goto('/siglat');
+					} else {
+						goto('/');
+					}
+				}, 1500);
+			} else {
+				const errorData = await response.text();
+				errorMessage = errorData || 'Login failed. Please check your credentials.';
+			}
+		} catch (error) {
+			errorMessage = 'Network error. Please check your connection and try again.';
+			console.error('Login error:', error);
+		} finally {
+			isLoading = false;
+		}
 	}
 </script>
 
@@ -66,6 +228,19 @@
 
 		<!-- Registration/Login Tabs -->
 		<div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-2xl border border-gray-200">
+			<!-- Error/Success Messages -->
+			{#if errorMessage}
+				<div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+					<p class="text-red-700 text-sm">{errorMessage}</p>
+				</div>
+			{/if}
+			
+			{#if successMessage}
+				<div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+					<p class="text-green-700 text-sm">{successMessage}</p>
+				</div>
+			{/if}
+			
 			<div class="mb-6">
 				<div class="flex bg-gray-200 rounded-lg p-1 relative">
 					<div class="absolute h-[calc(100%-8px)] w-[calc(50%-4px)] bg-red-600 rounded-md transition-transform duration-300 top-1 {activeTab === 'register' ? 'translate-x-[calc(100%+4px)]' : 'translate-x-1'}"></div>
@@ -104,7 +279,8 @@
 							type={showLoginPassword ? 'text' : 'password'}
 							id="loginPassword"
 							bind:value={loginForm.password}
-							placeholder="Enter your password"
+							placeholder="Enter your password (min 6 characters)"
+							minlength="6"
 							class="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg text-gray-900 text-sm transition-all focus:border-red-600 focus:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-red-100"
 							required
 						/>
@@ -118,8 +294,8 @@
 							<label for="showLoginPassword" class="text-sm text-gray-800 cursor-pointer">Show password</label>
 						</div>
 					</div>
-					<button type="submit" class="w-full py-3 px-4 bg-red-600 text-white border-none rounded-lg text-base font-semibold cursor-pointer transition-all hover:bg-red-700 hover:-translate-y-0.5 hover:shadow-lg mt-2">
-						Sign In
+					<button type="submit" disabled={isLoading} class="w-full py-3 px-4 bg-red-600 text-white border-none rounded-lg text-base font-semibold cursor-pointer transition-all hover:bg-red-700 hover:-translate-y-0.5 hover:shadow-lg mt-2 disabled:opacity-50 disabled:cursor-not-allowed">
+						{isLoading ? 'Signing In...' : 'Sign In'}
 					</button>
 					<button type="button" class="w-full py-2 px-4 bg-transparent text-red-600 border border-red-600 rounded-lg text-sm font-medium cursor-pointer transition-all hover:bg-red-600 hover:text-white hover:-translate-y-0.5 mt-1">
 						Forgot Password?
@@ -228,7 +404,8 @@
 							type={showPassword ? 'text' : 'password'}
 							id="password"
 							bind:value={registerForm.password}
-							placeholder="Create a secure password"
+							placeholder="Create a secure password (min 6 characters)"
+							minlength="6"
 							class="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg text-gray-900 text-sm transition-all focus:border-red-600 focus:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-red-100"
 							required
 						/>
@@ -241,6 +418,7 @@
 							/>
 							<label for="showPassword" class="text-sm text-gray-800 cursor-pointer">Show password</label>
 						</div>
+						<p class="text-xs text-gray-600 mt-1">Password must be at least 6 characters long</p>
 					</div>
 					<div>
 						<label for="confirmPassword" class="block text-sm font-medium text-gray-800 mb-2">Confirm Password</label>
@@ -248,7 +426,8 @@
 							type={showConfirmPassword ? 'text' : 'password'}
 							id="confirmPassword"
 							bind:value={registerForm.confirmPassword}
-							placeholder="Confirm your password"
+							placeholder="Confirm your password (min 6 characters)"
+							minlength="6"
 							class="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg text-gray-900 text-sm transition-all focus:border-red-600 focus:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-red-100"
 							required
 						/>
@@ -262,8 +441,8 @@
 							<label for="showConfirmPassword" class="text-sm text-gray-800 cursor-pointer">Show password</label>
 						</div>
 					</div>
-					<button type="submit" class="w-full py-3 px-4 bg-red-600 text-white border-none rounded-lg text-base font-semibold cursor-pointer transition-all hover:bg-red-700 hover:-translate-y-0.5 hover:shadow-lg mt-2">
-						Create Account
+					<button type="submit" disabled={isLoading} class="w-full py-3 px-4 bg-red-600 text-white border-none rounded-lg text-base font-semibold cursor-pointer transition-all hover:bg-red-700 hover:-translate-y-0.5 hover:shadow-lg mt-2 disabled:opacity-50 disabled:cursor-not-allowed">
+						{isLoading ? 'Creating Account...' : 'Create Account'}
 					</button>
 				</form>
 			{/if}

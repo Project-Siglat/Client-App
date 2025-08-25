@@ -23,7 +23,7 @@
 	<!-- Hero Section -->
 	<div class="text-center max-w-4xl mx-auto relative z-10 flex flex-col justify-center h-full">
 		<div class="flex justify-center mb-2">
-			<img src="/images/siglat.png" alt="Siglat Logo" class="max-w-24 h-auto" />
+			<img src="/siglat.png" alt="Siglat Logo" class="max-w-24 h-auto" />
 		</div>
 		<h1 class="text-red-600 text-3xl mb-2 font-light tracking-tight">
 			Siglat Alert System
