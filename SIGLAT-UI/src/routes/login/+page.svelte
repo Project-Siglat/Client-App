@@ -2,6 +2,16 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
+	function handleHomeClick() {
+		console.log('Home button clicked');
+		try {
+			goto('/');
+		} catch (error) {
+			console.error('goto failed:', error);
+			window.location.href = '/';
+		}
+	}
+
 	let activeTab = 'login';
 	let showLoginPassword = false;
 	let showPassword = false;
@@ -50,6 +60,8 @@
 					// Token is valid, redirect based on role
 					if (role === 'Admin') {
 						goto('/siglat');
+					} else if (role === 'User') {
+						goto('/client');
 					} else {
 						goto('/');
 					}
@@ -186,6 +198,8 @@
 				setTimeout(() => {
 					if (role === 'Admin') {
 						goto('/siglat');
+					} else if (role === 'User') {
+						goto('/client');
 					} else {
 						goto('/');
 					}
@@ -205,12 +219,18 @@
 
 <div class="min-h-screen bg-white text-gray-800 relative overflow-hidden">
 	<!-- Back to Home Button -->
-	<a href="/" class="fixed top-8 left-8 flex items-center gap-2 text-gray-800 hover:text-red-600 transition-colors z-10">
-		<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-		</svg>
-		<span>Home</span>
-	</a>
+	<div class="fixed top-8 left-8 z-50">
+		<button 
+			on:click={handleHomeClick} 
+			class="flex items-center gap-2 text-gray-800 hover:text-red-600 transition-colors bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg shadow-md border border-gray-200"
+			type="button"
+		>
+			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+			</svg>
+			<span>Home</span>
+		</button>
+	</div>
 
 	<!-- Animated background elements -->
 	<div class="fixed inset-0 pointer-events-none z-0">

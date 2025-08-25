@@ -1,101 +1,79 @@
-<div
-	class="w-full p-3 font-sans bg-gradient-to-br from-white to-gray-50 h-[500px] relative overflow-hidden grid-pattern"
->
-	<!-- Heartbeat Animation Background -->
-	<div class="absolute inset-0 pointer-events-none opacity-30">
-		{#each Array(5) as _, i}
-			<div class="heartbeat-line" style="top: {20 + i * 15}%; animation-delay: {i * 0.3}s;"></div>
-		{/each}
-	</div>
+<script lang="ts">
+	import { goto } from '$app/navigation';
 
-	<!-- Floating Icons -->
-	<div class="absolute inset-0 pointer-events-none">
-		<div class="absolute top-8 left-6 text-red-400 text-2xl float-animation">🚑</div>
-		<div class="absolute top-16 right-8 text-red-500 text-xl float-animation-delay">🩹</div>
-		<div class="absolute top-32 left-1/4 text-red-600 text-xl heart-rate-animation">💓</div>
-		<div class="absolute top-40 right-1/4 text-red-400 text-2xl float-animation-delay">⛑️</div>
-		<div class="absolute bottom-16 left-6 text-red-500 text-xl float-animation">🚨</div>
-		<div class="absolute bottom-24 right-8 text-red-600 text-xl float-animation-delay">⚕️</div>
-		<div class="absolute top-1/3 right-4 text-red-400 text-lg float-animation">🆘</div>
-		<div class="absolute bottom-1/3 left-4 text-red-500 text-xl float-animation-delay">🏥</div>
-	</div>
+	function handleLogin() {
+		goto('/login');
+	}
+</script>
 
-	<!-- Hero Section -->
-	<div class="text-center max-w-4xl mx-auto relative z-10 flex flex-col justify-center h-full">
-		<div class="flex justify-center mb-2">
-			<img src="/siglat.png" alt="Siglat Logo" class="max-w-24 h-auto" />
+<!-- Clean Navigation Header -->
+<div class="bg-white border-b border-gray-200 sticky top-0 z-50">
+	<nav class="bg-white shadow-sm px-4 py-3">
+		<div class="max-w-5xl mx-auto flex items-center justify-between">
+			<!-- Logo and Brand -->
+			<div class="flex items-center space-x-3">
+				<div class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
+					<img src="/siglat.png" alt="SIGLAT" class="w-6 h-6" />
+				</div>
+				<div>
+					<h1 class="text-xl font-bold text-gray-900">SIGLAT</h1>
+					<p class="text-xs text-gray-600">Emergency Response System</p>
+				</div>
+			</div>
+
+			<!-- Status and Navigation -->
+			<div class="flex items-center space-x-4">
+				<!-- System Status Indicator -->
+				<div class="hidden sm:flex items-center space-x-2 bg-green-50 px-3 py-1.5 rounded-full">
+					<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+					<span class="text-green-700 text-sm font-medium">System Online</span>
+				</div>
+				
+				<!-- Emergency Hotline -->
+				<div class="hidden md:flex items-center space-x-2 bg-red-50 px-3 py-1.5 rounded-full">
+					<span class="text-red-600 text-sm">📞</span>
+					<span class="text-red-700 text-sm font-medium">911</span>
+				</div>
+				
+				<!-- Login Button -->
+				<button 
+					on:click={handleLogin}
+					class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+				>
+					Access System
+				</button>
+			</div>
 		</div>
-		<h1 class="text-red-600 text-3xl mb-2 font-light tracking-tight">
-			Siglat Alert System
-		</h1>
-		<p class="text-gray-600 text-sm leading-relaxed mb-5 max-w-lg mx-auto font-light">
-			Advanced monitoring and alert management system designed to keep you
-			informed and your operations secure. Stay ahead of critical events
-			with real-time notifications and comprehensive alert tracking.
-		</p>
+	</nav>
 
-		<!-- Login Button -->
-		<div class="text-center relative z-10">
-			<button
-				class="login-button bg-red-600 text-white border-none py-3 px-7 text-sm font-medium rounded-full cursor-pointer transition-all duration-300 shadow-lg hover:bg-red-700 hover:-translate-y-1 hover:shadow-xl active:-translate-y-0.5 active:shadow-lg"
-				on:click={() => window.location.href = '/login'}
-			>
-				Login to Siglat Alert System
-			</button>
+	<!-- Hero Banner -->
+	<div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+		<div class="max-w-5xl mx-auto px-4 py-8 text-center">
+			<h2 class="text-3xl md:text-4xl font-bold mb-3">
+				Nueva Vizcaya Emergency Response
+			</h2>
+			<p class="text-lg md:text-xl text-blue-100 mb-6 max-w-3xl mx-auto">
+				Advanced incident management and rapid response coordination for Villaverde and surrounding areas
+			</p>
+			
+			<!-- Key Features -->
+			<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+				<div class="bg-white/10 backdrop-blur rounded-lg p-4">
+					<div class="text-2xl mb-2">⚡</div>
+					<h3 class="font-semibold mb-1">Rapid Response</h3>
+					<p class="text-sm text-blue-100">Sub-3 minute emergency response times</p>
+				</div>
+				<div class="bg-white/10 backdrop-blur rounded-lg p-4">
+					<div class="text-2xl mb-2">🗺️</div>
+					<h3 class="font-semibold mb-1">Smart Routing</h3>
+					<p class="text-sm text-blue-100">AI-powered route optimization</p>
+				</div>
+				<div class="bg-white/10 backdrop-blur rounded-lg p-4">
+					<div class="text-2xl mb-2">📱</div>
+					<h3 class="font-semibold mb-1">24/7 Monitoring</h3>
+					<p class="text-sm text-blue-100">Continuous system surveillance</p>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
-
-<style>
-	@keyframes float-up-down {
-		0%, 100% { transform: translateY(0px); }
-		50% { transform: translateY(-10px); }
-	}
-
-	.float-animation {
-		animation: float-up-down 3s ease-in-out infinite;
-	}
-
-	.float-animation-delay {
-		animation: float-up-down 3s ease-in-out infinite;
-		animation-delay: 1.5s;
-	}
-
-	@keyframes heart-rate-bounce {
-		0%, 100% { transform: translateY(0px) scale(1); }
-		25% { transform: translateY(-15px) scale(1.2); }
-		50% { transform: translateY(5px) scale(0.9); }
-		75% { transform: translateY(-8px) scale(1.1); }
-	}
-
-	.heart-rate-animation {
-		animation: heart-rate-bounce 1.2s ease-in-out infinite;
-	}
-
-	.grid-pattern {
-		background-image:
-			linear-gradient(rgba(220, 53, 69, 0.1) 1px, transparent 1px),
-			linear-gradient(90deg, rgba(220, 53, 69, 0.1) 1px, transparent 1px);
-		background-size: 50px 50px;
-	}
-
-	@keyframes heartbeat {
-		0%, 20%, 40%, 60%, 80%, 100% {
-			opacity: 0.3;
-			transform: scaleY(1);
-		}
-		10% { opacity: 1; transform: scaleY(1.8); }
-		30% { opacity: 1; transform: scaleY(2.2); }
-		50% { opacity: 1; transform: scaleY(1.5); }
-		70% { opacity: 1; transform: scaleY(1.2); }
-	}
-
-	.heartbeat-line {
-		position: absolute;
-		width: 100%;
-		height: 2px;
-		background: rgba(220, 53, 69, 0.2);
-		animation: heartbeat 2s infinite;
-		transform-origin: left center;
-	}
-</style>

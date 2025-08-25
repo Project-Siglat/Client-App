@@ -1,57 +1,64 @@
-<footer class="bg-black text-white py-6 px-4 border-t border-red-900">
-	<div class="max-w-6xl mx-auto">
+<!-- Facebook-style Compact Footer -->
+<footer class="bg-white border-t border-gray-200">
+	<div class="max-w-5xl mx-auto px-4 py-6">
 		<!-- Main Footer Content -->
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-			<!-- About Section -->
-			<div class="space-y-3">
-				<div class="flex items-center mb-3">
-					<img
-						src="/siglat.png"
-						alt="SIGLAT Logo"
-						class="w-12 h-12 mr-3"
-					/>
-					<h3 class="text-xl font-bold text-white">SIGLAT</h3>
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+			<!-- Brand Info -->
+			<div>
+				<div class="flex items-center space-x-3 mb-3">
+					<div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
+						<img src="/siglat.png" alt="SIGLAT" class="w-5 h-5" />
+					</div>
+					<h3 class="font-bold text-gray-900">SIGLAT</h3>
 				</div>
-				<p class="text-gray-300 mb-3 text-sm leading-relaxed">
-					System for Integrated Government Locality Alert and Tracking
-					- Protecting communities through advanced emergency response
-					coordination and disaster management.
+				<p class="text-sm text-gray-600 mb-3">
+					Emergency Response System for Villaverde, Nueva Vizcaya. 
+					Protecting communities through coordinated emergency services.
 				</p>
-				<div class="flex items-center bg-red-900 rounded px-3 py-2 border border-red-800">
-					<div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-					<span class="text-white text-sm font-medium">24/7 Emergency Services Active</span>
+				<div class="flex items-center space-x-2 bg-green-50 px-3 py-1.5 rounded-full">
+					<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+					<span class="text-green-700 text-xs font-medium">System Active</span>
 				</div>
 			</div>
 
-			<!-- Emergency Contacts -->
-			<div class="space-y-3">
-				<h4 class="text-lg font-bold mb-3 text-white">
-					Emergency Contacts
-				</h4>
+			<!-- Quick Links -->
+			<div>
+				<h4 class="font-semibold text-gray-900 mb-3 text-sm">Quick Access</h4>
+				<div class="space-y-2">
+					<a href="/login" class="flex items-center space-x-2 text-sm text-gray-600 hover:text-blue-600 transition-colors">
+						<span>🔐</span>
+						<span>Admin Portal</span>
+					</a>
+					<button class="flex items-center space-x-2 text-sm text-gray-600 hover:text-red-600 transition-colors">
+						<span>🚨</span>
+						<span>Emergency Alert</span>
+					</button>
+					<button class="flex items-center space-x-2 text-sm text-gray-600 hover:text-green-600 transition-colors">
+						<span>📞</span>
+						<span>Contact Support</span>
+					</button>
+				</div>
+			</div>
+
+			<!-- Emergency Info -->
+			<div>
+				<h4 class="font-semibold text-gray-900 mb-3 text-sm">Emergency</h4>
 				<div class="space-y-3">
-					<div class="bg-red-900 rounded p-3 border border-red-800">
-						<div class="flex items-center">
-							<span class="text-red-400 mr-2 text-lg">🚨</span>
+					<div class="bg-red-50 rounded-lg p-3">
+						<div class="flex items-center space-x-2">
+							<span class="text-red-600">🚨</span>
 							<div>
-								<p class="text-white font-bold text-sm">
-									Emergency Hotline
-								</p>
-								<p class="text-red-400 text-xs">
-									24/7 Available
-								</p>
+								<p class="font-semibold text-gray-900 text-sm">Hotline: 911</p>
+								<p class="text-xs text-red-600">24/7 Available</p>
 							</div>
 						</div>
 					</div>
-					<div class="bg-red-900 rounded p-3 border border-red-800">
-						<div class="flex items-center">
-							<span class="text-red-400 mr-2 text-lg">📍</span>
+					<div class="bg-blue-50 rounded-lg p-3">
+						<div class="flex items-center space-x-2">
+							<span class="text-blue-600">📍</span>
 							<div>
-								<p class="text-white font-bold text-sm">
-									Location
-								</p>
-								<p class="text-red-400 text-xs">
-									Villaverde, Nueva Vizcaya
-								</p>
+								<p class="font-semibold text-gray-900 text-sm">Villaverde</p>
+								<p class="text-xs text-blue-600">Nueva Vizcaya</p>
 							</div>
 						</div>
 					</div>
@@ -59,23 +66,37 @@
 			</div>
 		</div>
 
-		<!-- Divider -->
-		<div class="border-t border-red-900 pt-4">
-			<div class="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
-				<!-- Copyright -->
-				<div class="text-center sm:text-left">
-					<p class="text-red-400 font-medium text-xs">
-						&copy; 2025 SIGLAT Emergency Services &bull; Emergency
-						Response Division &bull; All Rights Reserved
-					</p>
+		<!-- Stats Bar -->
+		<div class="bg-gray-50 rounded-lg p-4 mb-6">
+			<div class="grid grid-cols-4 gap-4 text-center">
+				<div>
+					<p class="text-sm font-bold text-gray-900">99.8%</p>
+					<p class="text-xs text-gray-600">Uptime</p>
 				</div>
+				<div>
+					<p class="text-sm font-bold text-gray-900">&lt;2min</p>
+					<p class="text-xs text-gray-600">Response</p>
+				</div>
+				<div>
+					<p class="text-sm font-bold text-gray-900">24/7</p>
+					<p class="text-xs text-gray-600">Active</p>
+				</div>
+				<div>
+					<p class="text-sm font-bold text-gray-900">100%</p>
+					<p class="text-xs text-gray-600">Coverage</p>
+				</div>
+			</div>
+		</div>
 
-				<!-- Additional Info -->
-				<div class="text-center sm:text-right">
-					<p class="text-gray-400 text-xs">
-						Developed for community safety and disaster preparedness
-					</p>
-				</div>
+		<!-- Bottom Bar -->
+		<div class="flex flex-col sm:flex-row justify-between items-center pt-4 border-t border-gray-200 text-xs text-gray-500">
+			<div class="mb-2 sm:mb-0">
+				<p>&copy; 2025 SIGLAT Emergency Services • Nueva Vizcaya</p>
+			</div>
+			<div class="flex items-center space-x-4">
+				<span class="bg-gray-100 px-2 py-1 rounded">🏥 Healthcare</span>
+				<span class="bg-gray-100 px-2 py-1 rounded">🚒 Fire Dept</span>
+				<span class="bg-gray-100 px-2 py-1 rounded">👮 Police</span>
 			</div>
 		</div>
 	</div>

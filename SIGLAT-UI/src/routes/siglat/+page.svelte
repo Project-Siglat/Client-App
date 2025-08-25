@@ -7,16 +7,25 @@
 	let activeTab = "dashboard";
 	let contacts = [];
 	let incidents = [];
+	let users = [];
+	let verifications = [];
 	let analytics = null;
 	let showContactModal = false;
 	let showIncidentModal = false;
+	let showUserModal = false;
+	let showVerificationModal = false;
 	let showDeleteModal = false;
 	let showDeleteIncidentModal = false;
+	let showDeleteUserModal = false;
 	let editingContact = null;
 	let editingIncident = null;
+	let editingUser = null;
+	let editingVerification = null;
 	let deletingContact = null;
 	let deletingIncident = null;
+	let deletingUser = null;
 	let toast = { show: false, message: "", type: "" };
+	let verificationRemarks = "";
 	
 	let contactForm = {
 		id: null,
@@ -30,14 +39,21 @@
 		incidentType: "",
 		description: "",
 		involvedAgencies: [],
-		whoReportedId: "", // This will be set from JWT and be non-editable
 		timestamp: "",
-		latitude: "",
-		longitude: "",
-		location: "",
-		status: "Active",
-		priority: "Medium",
 		notes: ""
+	};
+	
+	let userForm = {
+		id: null,
+		firstName: "",
+		middleName: "",
+		lastName: "",
+		email: "",
+		phoneNumber: "",
+		role: "User",
+		gender: "Male",
+		dateOfBirth: "",
+		address: ""
 	};
 	
 	onMount(() => {
@@ -59,6 +75,8 @@
 			isAuthenticated = true;
 			loadContacts();
 			loadIncidents();
+			loadUsers();
+			loadVerifications();
 			loadAnalytics();
 		} catch (error) {
 			sessionStorage.removeItem("token");
@@ -97,9 +115,7 @@
 				console.error("Failed to load analytics:", response.status);
 				analytics = {
 					totalReports: 0,
-					byStatus: [],
 					byIncidentType: [],
-					byPriority: [],
 					byAgencies: []
 				};
 			}
@@ -107,9 +123,7 @@
 			console.error("Error loading analytics:", error);
 			analytics = {
 				totalReports: 0,
-				byStatus: [],
 				byIncidentType: [],
-				byPriority: [],
 				byAgencies: []
 			};
 		}
@@ -133,6 +147,48 @@
 			console.error("Error loading incidents:", error);
 			showToast("Failed to load incidents", "error");
 			incidents = [];
+		}
+	}
+	
+	async function loadUsers() {
+		try {
+			const token = sessionStorage.getItem("token");
+			const response = await fetch("http://localhost:5000/api/v1.0/Admin/userlist", {
+				headers: {
+					"Authorization": `Bearer ${token}`
+				}
+			});
+			if (response.ok) {
+				users = await response.json();
+			} else {
+				console.error("Failed to load users:", response.status);
+				users = [];
+			}
+		} catch (error) {
+			console.error("Error loading users:", error);
+			showToast("Failed to load users", "error");
+			users = [];
+		}
+	}
+	
+	async function loadVerifications() {
+		try {
+			const token = sessionStorage.getItem("token");
+			const response = await fetch("http://localhost:5000/api/v1.0/Admin/verifications", {
+				headers: {
+					"Authorization": `Bearer ${token}`
+				}
+			});
+			if (response.ok) {
+				verifications = await response.json();
+			} else {
+				console.error("Failed to load verifications:", response.status);
+				verifications = [];
+			}
+		} catch (error) {
+			console.error("Error loading verifications:", error);
+			showToast("Failed to load verifications", "error");
+			verifications = [];
 		}
 	}
 	
@@ -179,40 +235,16 @@
 				incidentType: incident.incidentType,
 				description: incident.description,
 				involvedAgencies: incident.involvedAgencies ? incident.involvedAgencies.split(',').map(a => a.trim()) : [],
-				whoReportedId: incident.whoReportedId,
 				timestamp: incident.timestamp ? new Date(incident.timestamp).toISOString().slice(0, 16) : "",
-				latitude: incident.latitude || "",
-				longitude: incident.longitude || "",
-				location: incident.location || "",
-				status: incident.status,
-				priority: incident.priority || "Medium",
 				notes: incident.notes || ""
 			};
 		} else {
-			// Get current user ID from JWT token
-			const token = sessionStorage.getItem("token");
-			let currentUserId = "";
-			if (token) {
-				try {
-					const payload = JSON.parse(atob(token.split(".")[1]));
-					currentUserId = payload.nameid || payload.sub || "";
-				} catch (error) {
-					console.error("Error parsing token:", error);
-				}
-			}
-			
 			incidentForm = {
 				id: null,
 				incidentType: "",
 				description: "",
 				involvedAgencies: [],
-				whoReportedId: currentUserId,
 				timestamp: new Date().toISOString().slice(0, 16),
-				latitude: "",
-				longitude: "",
-				location: "",
-				status: "Active",
-				priority: "Medium",
 				notes: ""
 			};
 		}
@@ -251,19 +283,30 @@
 				? `http://localhost:5000/api/v1.0/Report/${incidentForm.id}`
 				: "http://localhost:5000/api/v1.0/Report";
 			
+			// Get current user ID from JWT token
+			let currentUserId = "00000000-0000-0000-0000-000000000000";
+			if (token) {
+				try {
+					const payload = JSON.parse(atob(token.split(".")[1]));
+					currentUserId = payload.jti || payload.nameid || payload.sub || currentUserId;
+				} catch (error) {
+					console.error("Error parsing token:", error);
+				}
+			}
+			
 			const incidentData = {
-				id: incidentForm.id,
 				incidentType: incidentForm.incidentType,
 				description: incidentForm.description,
 				timestamp: new Date(incidentForm.timestamp).toISOString(),
-				latitude: incidentForm.latitude ? parseFloat(incidentForm.latitude) : null,
-				longitude: incidentForm.longitude ? parseFloat(incidentForm.longitude) : null,
-				location: incidentForm.location,
-				status: incidentForm.status,
 				involvedAgencies: incidentForm.involvedAgencies.join(', '),
-				priority: incidentForm.priority,
-				notes: incidentForm.notes
+				notes: incidentForm.notes,
+				whoReportedId: currentUserId
 			};
+			
+			// Only include id for edit operations
+			if (editingIncident && incidentForm.id) {
+				incidentData.id = incidentForm.id;
+			}
 			
 			const response = await fetch(url, {
 				method,
@@ -396,6 +439,180 @@
 		}
 	}
 	
+	// User Management Functions
+	function openUserModal(user = null) {
+		editingUser = user;
+		if (user) {
+			userForm = {
+				id: user.id,
+				firstName: user.firstName,
+				middleName: user.middleName || "",
+				lastName: user.lastName,
+				email: user.email,
+				phoneNumber: user.phoneNumber || "",
+				role: user.role,
+				gender: user.gender,
+				dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().slice(0, 10) : "",
+				address: user.address || ""
+			};
+		} else {
+			userForm = {
+				id: null,
+				firstName: "",
+				middleName: "",
+				lastName: "",
+				email: "",
+				phoneNumber: "",
+				role: "User",
+				gender: "Male",
+				dateOfBirth: "",
+				address: ""
+			};
+		}
+		showUserModal = true;
+	}
+	
+	function closeUserModal() {
+		showUserModal = false;
+		editingUser = null;
+	}
+	
+	function openDeleteUserModal(user) {
+		deletingUser = user;
+		showDeleteUserModal = true;
+	}
+	
+	function closeDeleteUserModal() {
+		showDeleteUserModal = false;
+		deletingUser = null;
+	}
+	
+	async function saveUser() {
+		try {
+			const token = sessionStorage.getItem("token");
+			const method = editingUser ? "PUT" : "POST";
+			const url = editingUser 
+				? `http://localhost:5000/api/v1.0/Admin/user/${userForm.id}`
+				: "http://localhost:5000/api/v1.0/Auth/register";
+			
+			const userData = {
+				id: userForm.id,
+				firstName: userForm.firstName,
+				middleName: userForm.middleName,
+				lastName: userForm.lastName,
+				email: userForm.email,
+				phoneNumber: userForm.phoneNumber,
+				role: userForm.role,
+				gender: userForm.gender,
+				dateOfBirth: userForm.dateOfBirth,
+				address: userForm.address,
+				hashPass: editingUser ? undefined : "TempPassword123!" // Temporary password for new users
+			};
+			
+			const response = await fetch(url, {
+				method,
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${token}`
+				},
+				body: JSON.stringify(userData)
+			});
+			
+			if (response.ok) {
+				await loadUsers();
+				closeUserModal();
+				showToast(
+					editingUser ? "User updated successfully" : "User created successfully",
+					"success"
+				);
+			} else {
+				const errorData = await response.text();
+				console.error("Save failed:", response.status, errorData);
+				showToast("Failed to save user", "error");
+			}
+		} catch (error) {
+			console.error("Save error:", error);
+			showToast("Failed to save user", "error");
+		}
+	}
+	
+	async function deleteUser() {
+		if (!deletingUser) return;
+		
+		const token = sessionStorage.getItem("token");
+		
+		try {
+			const response = await fetch(`http://localhost:5000/api/v1.0/Admin/user/${deletingUser.id}`, {
+				method: "DELETE",
+				headers: {
+					"Authorization": `Bearer ${token}`
+				}
+			});
+			
+			if (response.ok) {
+				await loadUsers();
+				closeDeleteUserModal();
+				showToast("User deleted successfully", "success");
+			} else {
+				const errorData = await response.json();
+				showToast(errorData.message || "Failed to delete user", "error");
+			}
+		} catch (error) {
+			showToast("Failed to delete user", "error");
+		}
+	}
+	
+	// Verification Management Functions
+	function openVerificationModal(verification) {
+		editingVerification = verification;
+		showVerificationModal = true;
+	}
+	
+	function closeVerificationModal() {
+		showVerificationModal = false;
+		editingVerification = null;
+		verificationRemarks = "";
+	}
+	
+	async function updateVerificationStatus(verificationId, status, remarks = "") {
+		try {
+			const token = sessionStorage.getItem("token");
+			const response = await fetch(`http://localhost:5000/api/v1.0/Admin/verification/${verificationId}/status`, {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${token}`
+				},
+				body: JSON.stringify({ status, remarks })
+			});
+			
+			if (response.ok) {
+				await loadVerifications();
+				closeVerificationModal();
+				showToast(`Verification ${status} successfully`, "success");
+			} else {
+				const errorData = await response.json();
+				showToast(errorData.message || "Failed to update verification", "error");
+			}
+		} catch (error) {
+			showToast("Failed to update verification", "error");
+		}
+	}
+	
+	function getVerificationStatusColor(status) {
+		switch (status?.toLowerCase()) {
+			case 'approved': return 'bg-green-100 text-green-800';
+			case 'rejected': return 'bg-red-100 text-red-800';
+			case 'under_review': return 'bg-yellow-100 text-yellow-800';
+			case 'pending': 
+			default: return 'bg-gray-100 text-gray-800';
+		}
+	}
+	
+	function formatVerificationType(type) {
+		return type?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Unknown';
+	}
+	
 	function showToast(message, type) {
 		toast = { show: true, message, type };
 		setTimeout(() => {
@@ -458,7 +675,7 @@
 
 {#if isAuthenticated}
 	<div class="min-h-screen bg-gray-100">
-		<header class="bg-white shadow-sm border-b">
+		<header class="bg-white shadow-sm border-b sticky top-0 z-50">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div class="flex justify-between items-center py-6">
 					<div>
@@ -478,7 +695,7 @@
 			</div>
 		</header>
 		
-		<nav class="bg-white border-b border-gray-200">
+		<nav class="bg-white border-b border-gray-200 sticky top-[97px] z-40">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div class="flex space-x-8">
 					<button
@@ -510,6 +727,36 @@
 						on:click={() => activeTab = 'incidents'}
 					>
 						Incident Management
+					</button>
+					<button
+						class="py-4 px-1 border-b-2 font-medium text-sm transition-colors {
+							activeTab === 'verifications' 
+								? 'border-red-500 text-red-600' 
+								: 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+						}"
+						on:click={() => activeTab = 'verifications'}
+					>
+						Verifications
+					</button>
+					<button
+						class="py-4 px-1 border-b-2 font-medium text-sm transition-colors {
+							activeTab === 'users' 
+								? 'border-red-500 text-red-600' 
+								: 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+						}"
+						on:click={() => activeTab = 'users'}
+					>
+						User Management
+					</button>
+					<button
+						class="py-4 px-1 border-b-2 font-medium text-sm transition-colors {
+							activeTab === 'weather' 
+								? 'border-red-500 text-red-600' 
+								: 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+						}"
+						on:click={() => activeTab = 'weather'}
+					>
+						Weather
 					</button>
 				</div>
 			</div>
@@ -543,9 +790,9 @@
 							</div>
 							<div class="ml-5 w-0 flex-1">
 								<dl>
-									<dt class="text-sm font-medium text-gray-500 truncate">Active Incidents</dt>
+									<dt class="text-sm font-medium text-gray-500 truncate">Total Incidents</dt>
 									<dd class="text-lg font-medium text-gray-900">
-										{analytics ? analytics.byStatus.find(s => s.status === 'Active')?.count || 0 : 0}
+										{analytics ? analytics.totalReports || 0 : 0}
 									</dd>
 								</dl>
 							</div>
@@ -587,42 +834,6 @@
 				
 				{#if analytics}
 					<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-						<!-- Incident Status Chart -->
-						<div class="bg-white rounded-lg shadow p-6">
-							<h3 class="text-lg font-medium text-gray-900 mb-4">Incidents by Status</h3>
-							{#if analytics.byStatus.length > 0}
-								<div class="flex items-center">
-									<div class="w-32 h-32 relative mr-6">
-										<svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
-											{#each calculatePieChart(analytics.byStatus) as slice, i}
-												<circle
-													cx="50"
-													cy="50"
-													r="40"
-													fill="none"
-													stroke={slice.color}
-													stroke-width="20"
-													stroke-dasharray="{slice.percentage * 2.51} 251"
-													stroke-dashoffset="{-slice.startAngle * 2.51 / 360}"
-													class="transition-all duration-300"
-												/>
-											{/each}
-										</svg>
-									</div>
-									<div class="flex-1">
-										{#each calculatePieChart(analytics.byStatus) as slice}
-											<div class="flex items-center mb-2">
-												<div class="w-4 h-4 rounded-full mr-2" style="background-color: {slice.color}"></div>
-												<span class="text-sm text-gray-600">{slice.status}: {slice.count} ({slice.percentage}%)</span>
-											</div>
-										{/each}
-									</div>
-								</div>
-							{:else}
-								<p class="text-gray-500 text-center py-8">No incident data available</p>
-							{/if}
-						</div>
-						
 						<!-- Incident Types Chart -->
 						<div class="bg-white rounded-lg shadow p-6">
 							<h3 class="text-lg font-medium text-gray-900 mb-4">Incidents by Type</h3>
@@ -658,45 +869,7 @@
 								<p class="text-gray-500 text-center py-8">No incident data available</p>
 							{/if}
 						</div>
-					</div>
 					
-					<div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-						<!-- Priority Chart -->
-						<div class="bg-white rounded-lg shadow p-6">
-							<h3 class="text-lg font-medium text-gray-900 mb-4">Incidents by Priority</h3>
-							{#if analytics.byPriority.length > 0}
-								<div class="flex items-center">
-									<div class="w-32 h-32 relative mr-6">
-										<svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
-											{#each calculatePieChart(analytics.byPriority) as slice, i}
-												<circle
-													cx="50"
-													cy="50"
-													r="40"
-													fill="none"
-													stroke={slice.color}
-													stroke-width="20"
-													stroke-dasharray="{slice.percentage * 2.51} 251"
-													stroke-dashoffset="{-slice.startAngle * 2.51 / 360}"
-													class="transition-all duration-300"
-												/>
-											{/each}
-										</svg>
-									</div>
-									<div class="flex-1">
-										{#each calculatePieChart(analytics.byPriority) as slice}
-											<div class="flex items-center mb-2">
-												<div class="w-4 h-4 rounded-full mr-2" style="background-color: {slice.color}"></div>
-												<span class="text-sm text-gray-600">{slice.priority}: {slice.count} ({slice.percentage}%)</span>
-											</div>
-										{/each}
-									</div>
-								</div>
-							{:else}
-								<p class="text-gray-500 text-center py-8">No incident data available</p>
-							{/if}
-						</div>
-						
 						<!-- Agencies Chart -->
 						<div class="bg-white rounded-lg shadow p-6">
 							<h3 class="text-lg font-medium text-gray-900 mb-4">Involved Agencies</h3>
@@ -771,7 +944,6 @@
 										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agencies</th>
 										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reported By</th>
 										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
 										<th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
 									</tr>
 								</thead>
@@ -802,15 +974,6 @@
 											</td>
 											<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
 												{new Date(incident.timestamp).toLocaleString()}
-											</td>
-											<td class="px-6 py-4 whitespace-nowrap">
-												<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {
-													incident.status === 'Active' ? 'bg-red-100 text-red-800' :
-													incident.status === 'Resolved' ? 'bg-green-100 text-green-800' :
-													'bg-yellow-100 text-yellow-800'
-												}">
-													{incident.status}
-												</span>
 											</td>
 											<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
 												<button
@@ -908,6 +1071,180 @@
 							</table>
 						</div>
 					{/if}
+				</div>
+			{:else if activeTab === "verifications"}
+				<div class="space-y-6">
+					<div class="bg-white rounded-lg shadow">
+						<div class="px-6 py-4 border-b border-gray-200">
+							<div>
+								<h3 class="text-lg font-medium text-gray-900">Verification Management</h3>
+								<p class="text-sm text-gray-500 mt-1">Review and manage user identity verifications</p>
+							</div>
+						</div>
+						<div class="overflow-x-auto">
+							<table class="min-w-full divide-y divide-gray-200">
+								<thead class="bg-gray-50">
+									<tr>
+										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+									</tr>
+								</thead>
+								<tbody class="bg-white divide-y divide-gray-200">
+									{#each verifications as verification}
+										<tr class="hover:bg-gray-50">
+											<td class="px-6 py-4 whitespace-nowrap">
+												<div class="text-sm font-medium text-gray-900">{verification.name || 'Unknown User'}</div>
+											</td>
+											<td class="px-6 py-4 whitespace-nowrap">
+												<div class="text-sm text-gray-900">{formatVerificationType(verification.verificationType)}</div>
+											</td>
+											<td class="px-6 py-4 whitespace-nowrap">
+												<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {getVerificationStatusColor(verification.status)}">
+													{verification.status?.toUpperCase()}
+												</span>
+											</td>
+											<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+												{new Date(verification.createdAt).toLocaleDateString()}
+											</td>
+											<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+												<button 
+													class="text-indigo-600 hover:text-indigo-900 mr-3"
+													on:click={() => openVerificationModal(verification)}
+												>
+													Review
+												</button>
+												{#if verification.status?.toLowerCase() === 'pending'}
+													<button 
+														class="text-green-600 hover:text-green-900 mr-3"
+														on:click={() => updateVerificationStatus(verification.id, 'approved')}
+													>
+														Approve
+													</button>
+													<button 
+														class="text-red-600 hover:text-red-900"
+														on:click={() => updateVerificationStatus(verification.id, 'rejected')}
+													>
+														Reject
+													</button>
+												{/if}
+											</td>
+										</tr>
+									{:else}
+										<tr>
+											<td colspan="5" class="px-6 py-4 text-center text-gray-500">No verifications found</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+			{:else if activeTab === "users"}
+				<div class="space-y-6">
+					<div class="bg-white rounded-lg shadow">
+						<div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+							<div>
+								<h3 class="text-lg font-medium text-gray-900">User Management</h3>
+								<p class="text-sm text-gray-500 mt-1">Manage system users and their roles</p>
+							</div>
+							<button 
+								class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+								on:click={() => openUserModal()}
+							>
+								Add User
+							</button>
+						</div>
+						<div class="overflow-x-auto">
+							<table class="min-w-full divide-y divide-gray-200">
+								<thead class="bg-gray-50">
+									<tr>
+										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+									</tr>
+								</thead>
+								<tbody class="bg-white divide-y divide-gray-200">
+									{#each users as user}
+										<tr class="hover:bg-gray-50">
+											<td class="px-6 py-4 whitespace-nowrap">
+												<div class="text-sm font-medium text-gray-900">
+													{user.firstName} {user.middleName ? user.middleName + ' ' : ''}{user.lastName}
+												</div>
+												<div class="text-sm text-gray-500">{user.gender}</div>
+											</td>
+											<td class="px-6 py-4 whitespace-nowrap">
+												<div class="text-sm text-gray-900">{user.email}</div>
+											</td>
+											<td class="px-6 py-4 whitespace-nowrap">
+												<div class="text-sm text-gray-900">{user.phoneNumber || 'N/A'}</div>
+											</td>
+											<td class="px-6 py-4 whitespace-nowrap">
+												<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {
+													user.role === 'Admin' 
+														? 'bg-red-100 text-red-800' 
+														: 'bg-blue-100 text-blue-800'
+												}">
+													{user.role}
+												</span>
+											</td>
+											<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+												{new Date(user.createdAt).toLocaleDateString()}
+											</td>
+											<td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+												<button 
+													class="text-indigo-600 hover:text-indigo-900"
+													on:click={() => openUserModal(user)}
+												>
+													Edit
+												</button>
+												<button 
+													class="text-red-600 hover:text-red-900"
+													on:click={() => openDeleteUserModal(user)}
+												>
+													Delete
+												</button>
+											</td>
+										</tr>
+									{:else}
+										<tr>
+											<td colspan="6" class="px-6 py-4 text-center text-gray-500">No users found</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+			{:else if activeTab === "weather"}
+				<div class="bg-white rounded-lg shadow">
+					<div class="px-6 py-4 border-b border-gray-200">
+						<h3 class="text-lg font-medium text-gray-900">Weather Information</h3>
+						<p class="text-sm text-gray-500 mt-1">Current weather conditions for Villaverde</p>
+					</div>
+					<div class="p-6">
+						<div class="w-full" style="height: 600px;">
+							<iframe
+								src="https://www.accuweather.com/en/ph/villaverde/265132/hourly-weather-forecast/265132"
+								width="100%"
+								height="100%"
+								frameborder="0"
+								title="Weather Forecast for Villaverde"
+								class="rounded-lg"
+								loading="lazy"
+							></iframe>
+						</div>
+						<div class="mt-4 text-sm text-gray-500">
+							<p><strong>Note:</strong> Weather data provided by AccuWeather for Villaverde, Philippines</p>
+						</div>
+					</div>
 				</div>
 			{/if}
 		</main>
@@ -1075,70 +1412,6 @@
 						</div>
 					</div>
 					
-					<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-						<div>
-							<label class="block text-sm font-medium text-gray-700 mb-2">Latitude</label>
-							<input
-								type="number"
-								step="any"
-								bind:value={incidentForm.latitude}
-								class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
-								placeholder="e.g., 14.5995"
-							/>
-						</div>
-						
-						<div>
-							<label class="block text-sm font-medium text-gray-700 mb-2">Longitude</label>
-							<input
-								type="number"
-								step="any"
-								bind:value={incidentForm.longitude}
-								class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
-								placeholder="e.g., 120.9842"
-							/>
-						</div>
-						
-						<div>
-							<label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
-							<input
-								type="text"
-								bind:value={incidentForm.location}
-								class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
-								placeholder="e.g., Barangay Centro"
-							/>
-						</div>
-					</div>
-					
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-						<div>
-							<label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-							<select
-								bind:value={incidentForm.status}
-								required
-								class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
-							>
-								<option value="Active">Active</option>
-								<option value="In Progress">In Progress</option>
-								<option value="Resolved">Resolved</option>
-								<option value="Cancelled">Cancelled</option>
-							</select>
-						</div>
-						
-						<div>
-							<label class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
-							<select
-								bind:value={incidentForm.priority}
-								required
-								class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
-							>
-								<option value="Low">Low</option>
-								<option value="Medium">Medium</option>
-								<option value="High">High</option>
-								<option value="Critical">Critical</option>
-							</select>
-						</div>
-					</div>
-					
 					<div class="mb-6">
 						<label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
 						<textarea
@@ -1232,6 +1505,290 @@
 					<button
 						type="button"
 						on:click={deleteIncident}
+						class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+					>
+						Delete
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+{/if}
+
+{#if showVerificationModal && editingVerification}
+	<div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+		<div class="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+			<div class="mt-3">
+				<h3 class="text-lg font-medium text-gray-900 mb-4">
+					Review Verification - {editingVerification.name}
+				</h3>
+				
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+					<!-- Left side - Document image -->
+					<div class="space-y-4">
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-2">Submitted Document</label>
+							<div class="border border-gray-300 rounded-lg p-4">
+								{#if editingVerification.b64Image}
+									<img 
+										src="data:image/jpeg;base64,{editingVerification.b64Image}" 
+										alt="Verification Document"
+										class="w-full h-auto max-h-96 object-contain rounded"
+									/>
+								{:else}
+									<div class="text-center text-gray-500 py-8">
+										No document image available
+									</div>
+								{/if}
+							</div>
+						</div>
+					</div>
+					
+					<!-- Right side - Verification details and actions -->
+					<div class="space-y-4">
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-2">Verification Type</label>
+							<div class="px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900">
+								{formatVerificationType(editingVerification.verificationType)}
+							</div>
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-2">Current Status</label>
+							<span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full {getVerificationStatusColor(editingVerification.status)}">
+								{editingVerification.status?.toUpperCase()}
+							</span>
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-2">Submitted Date</label>
+							<div class="px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900">
+								{new Date(editingVerification.createdAt).toLocaleString()}
+							</div>
+						</div>
+						
+						{#if editingVerification.remarks}
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-2">Previous Remarks</label>
+								<div class="px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900">
+									{editingVerification.remarks}
+								</div>
+							</div>
+						{/if}
+						
+						<!-- Actions -->
+						<div class="pt-4 border-t border-gray-200">
+							<label class="block text-sm font-medium text-gray-700 mb-2">Update Status</label>
+							<div class="space-y-3">
+								<div>
+									<label class="block text-sm text-gray-600 mb-1">Add Remarks (optional)</label>
+									<textarea
+										bind:value={verificationRemarks}
+										class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
+										rows="3"
+										placeholder="Add any remarks or feedback..."
+									></textarea>
+								</div>
+								
+								<div class="flex space-x-3">
+									<button
+										type="button"
+										on:click={() => updateVerificationStatus(editingVerification.id, 'approved', verificationRemarks)}
+										class="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+									>
+										Approve
+									</button>
+									<button
+										type="button"
+										on:click={() => updateVerificationStatus(editingVerification.id, 'under_review', verificationRemarks)}
+										class="flex-1 px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors"
+									>
+										Under Review
+									</button>
+									<button
+										type="button"
+										on:click={() => updateVerificationStatus(editingVerification.id, 'rejected', verificationRemarks)}
+										class="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+									>
+										Reject
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="flex justify-end mt-6 pt-4 border-t border-gray-200">
+					<button
+						type="button"
+						on:click={closeVerificationModal}
+						class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+					>
+						Close
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+{/if}
+
+{#if showUserModal}
+	<div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+		<div class="relative top-10 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+			<div class="mt-3">
+				<h3 class="text-lg font-medium text-gray-900 mb-4">
+					{editingUser ? "Edit User" : "Add New User"}
+				</h3>
+				
+				<form on:submit|preventDefault={saveUser}>
+					<div class="grid grid-cols-1 gap-4">
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+							<input
+								type="text"
+								bind:value={userForm.firstName}
+								required
+								class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
+								placeholder="Enter first name"
+							/>
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-2">Middle Name</label>
+							<input
+								type="text"
+								bind:value={userForm.middleName}
+								class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
+								placeholder="Enter middle name (optional)"
+							/>
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+							<input
+								type="text"
+								bind:value={userForm.lastName}
+								required
+								class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
+								placeholder="Enter last name"
+							/>
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+							<input
+								type="email"
+								bind:value={userForm.email}
+								required
+								class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
+								placeholder="Enter email address"
+							/>
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+							<input
+								type="tel"
+								bind:value={userForm.phoneNumber}
+								class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
+								placeholder="Enter phone number"
+							/>
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+							<select
+								bind:value={userForm.gender}
+								required
+								class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
+							>
+								<option value="Male">Male</option>
+								<option value="Female">Female</option>
+								<option value="Other">Other</option>
+							</select>
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+							<input
+								type="date"
+								bind:value={userForm.dateOfBirth}
+								required
+								class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
+							/>
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+							<select
+								bind:value={userForm.role}
+								required
+								class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
+							>
+								<option value="User">User</option>
+								<option value="Admin">Admin</option>
+							</select>
+						</div>
+						
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+							<textarea
+								bind:value={userForm.address}
+								required
+								class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
+								placeholder="Enter address"
+								rows="3"
+							></textarea>
+						</div>
+					</div>
+					
+					<div class="flex justify-end space-x-3 mt-6">
+						<button
+							type="button"
+							on:click={closeUserModal}
+							class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+						>
+							Cancel
+						</button>
+						<button
+							type="submit"
+							class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+						>
+							{editingUser ? "Update" : "Create"} User
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+{/if}
+
+{#if showDeleteUserModal}
+	<div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+		<div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+			<div class="mt-3 text-center">
+				<div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+					<span class="text-red-600 text-xl">⚠️</span>
+				</div>
+				<h3 class="text-lg font-medium text-gray-900 text-center mb-4">
+					Delete User
+				</h3>
+				<p class="text-sm text-gray-500 text-center mb-6">
+					Are you sure you want to delete user <strong>"{deletingUser?.firstName} {deletingUser?.lastName}"</strong>? 
+					This action cannot be undone.
+				</p>
+				
+				<div class="flex justify-center space-x-3">
+					<button
+						type="button"
+						on:click={closeDeleteUserModal}
+						class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+					>
+						Cancel
+					</button>
+					<button
+						type="button"
+						on:click={deleteUser}
 						class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
 					>
 						Delete
