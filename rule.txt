@@ -1,0 +1,21 @@
+SIGLAT PROJECT RULES
+
+1. Always read rule.txt first
+2. Always document everything every prompt, summarize it, every prompt must be a diary
+3. Our principle is minimalist and lightweight
+4. Use tmux for running in the background after we finish stuffs
+5. Push only in compilation branch, push everytime we finish a prompt
+6. Do not check if Docker is running, use it as it was
+7. Do not use sudo when running Docker commands
+
+Repository URLs:
+- UI: git@github.com:Craftmatrix24/SIGLAT-UI.git
+- API: git@github.com:Craftmatrix24/SIGLAT-API.git
+
+Workflow:
+- Clone repos
+- Go to localhost branch
+- Create "compilation" branch based on localhost
+- Push compilation branch immediately
+- Work only in compilation branch
+- Push after every prompt completion

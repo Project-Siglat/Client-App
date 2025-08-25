@@ -1,0 +1,43 @@
+
+> siglat-svelte@1.0.0 dev
+> vite dev --host 0.0.0.0 --port 3000
+
+10:10:17 AM [vite] (client) Forced re-optimization of dependencies
+Port 3000 is in use, trying another one...
+
+  VITE v7.1.3  ready in 1622 ms
+
+  ➜  Local:   http://localhost:3001/
+  ➜  Network: http://192.168.0.106:3001/
+(!) Failed to run dependency scan. Skipping dependency pre-bundling. Error:   Failed to scan for dependencies from entries:
+  /home/recruas/Projects/Siglat/SIGLAT-SVELTE/src/routes/+layout.svelte
+/home/recruas/Projects/Siglat/SIGLAT-SVELTE/src/routes/+page.svelte
+/home/recruas/Projects/Siglat/SIGLAT-SVELTE/src/routes/admin/+page.svelte
+/home/recruas/Projects/Siglat/SIGLAT-SVELTE/src/routes/client/+page.svelte
+/home/recruas/Projects/Siglat/SIGLAT-SVELTE/src/routes/ambulance/+page.svelte
+/home/recruas/Projects/Siglat/SIGLAT-SVELTE/src/routes/login/+page.svelte
+
+  [31m✘ [41;31m[[41;97mERROR[41;31m][0m [1m"await" can only be used inside an "async" function[0m
+
+    script:/home/recruas/Projects/Siglat/SIGLAT-SVELTE/src/routes/client/+page.svelte?id=0:117:28:
+[37m      117 │ ...       const L = window.L || [32mawait[37m import('leaflet').then(m =>...
+          ╵                                 [32m~~~~~[0m
+
+  Consider adding the "async" keyword here:
+
+    script:/home/recruas/Projects/Siglat/SIGLAT-SVELTE/src/routes/client/+page.svelte?id=0:112:26:
+[37m      112 │         ambulanceData.forEach([32m[37mambulance => {
+          │                               [32m^[37m
+          ╵                               [32masync[0m
+
+
+    at failureErrorWithLog (/home/recruas/Projects/Siglat/SIGLAT-SVELTE/node_modules/esbuild/lib/main.js:1467:15)
+    at /home/recruas/Projects/Siglat/SIGLAT-SVELTE/node_modules/esbuild/lib/main.js:926:25
+    at runOnEndCallbacks (/home/recruas/Projects/Siglat/SIGLAT-SVELTE/node_modules/esbuild/lib/main.js:1307:45)
+    at buildResponseToResult (/home/recruas/Projects/Siglat/SIGLAT-SVELTE/node_modules/esbuild/lib/main.js:924:7)
+    at /home/recruas/Projects/Siglat/SIGLAT-SVELTE/node_modules/esbuild/lib/main.js:936:9
+    at new Promise (<anonymous>)
+    at requestCallbacks.on-end (/home/recruas/Projects/Siglat/SIGLAT-SVELTE/node_modules/esbuild/lib/main.js:935:54)
+    at handleRequest (/home/recruas/Projects/Siglat/SIGLAT-SVELTE/node_modules/esbuild/lib/main.js:628:17)
+    at handleIncomingPacket (/home/recruas/Projects/Siglat/SIGLAT-SVELTE/node_modules/esbuild/lib/main.js:653:7)
+    at Socket.readFromStdout (/home/recruas/Projects/Siglat/SIGLAT-SVELTE/node_modules/esbuild/lib/main.js:581:7)
