@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/assets/siglat.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SIGLAT - Emergency Response System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              'sans': ['Inter', 'system-ui', 'sans-serif'],
+              'display': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+            },
+            colors: {
+              primary: {
+                50: '#fee2e2',
+                100: '#fecaca',
+                200: '#fca5a5',
+                300: '#f87171',
+                400: '#ef4444',
+                500: '#dc2626',
+                600: '#b91c1c',
+                700: '#991b1b',
+                800: '#7f1d1d',
+                900: '#6b1d20',
+              },
+              emergency: {
+                50: '#fef2f2',
+                100: '#fee2e2',
+                200: '#fecaca',
+                300: '#fca5a5',
+                400: '#f87171',
+                500: '#ef4444',
+                600: '#dc2626',
+                700: '#b91c1c',
+                800: '#991b1b',
+                900: '#7f1d1d',
+              },
+              glass: {
+                50: 'rgba(255, 255, 255, 0.9)',
+                100: 'rgba(255, 255, 255, 0.8)',
+                200: 'rgba(255, 255, 255, 0.7)',
+                300: 'rgba(255, 255, 255, 0.6)',
+                400: 'rgba(255, 255, 255, 0.5)',
+                500: 'rgba(255, 255, 255, 0.4)',
+              }
+            },
+            animation: {
+              'pulse-emergency': 'pulse 1.5s ease-in-out infinite',
+              'bounce-slow': 'bounce 2s infinite',
+              'float': 'float 3s ease-in-out infinite',
+              'glow': 'glow 2s ease-in-out infinite alternate',
+              'slide-up': 'slideUp 0.5s ease-out',
+              'slide-down': 'slideDown 0.5s ease-out',
+              'fade-in': 'fadeIn 0.6s ease-out',
+              'scale-in': 'scaleIn 0.4s ease-out',
+              'shake': 'shake 0.5s ease-in-out',
+              'ripple': 'ripple 2s linear infinite',
+              'gradient-shift': 'gradientShift 3s ease-in-out infinite',
+            },
+            keyframes: {
+              float: {
+                '0%, 100%': { transform: 'translateY(0px)' },
+                '50%': { transform: 'translateY(-10px)' }
+              },
+              glow: {
+                '0%': { boxShadow: '0 0 20px rgba(239, 68, 68, 0.5)' },
+                '100%': { boxShadow: '0 0 30px rgba(239, 68, 68, 0.8), 0 0 40px rgba(239, 68, 68, 0.3)' }
+              },
+              slideUp: {
+                '0%': { transform: 'translateY(20px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' }
+              },
+              slideDown: {
+                '0%': { transform: 'translateY(-20px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' }
+              },
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' }
+              },
+              scaleIn: {
+                '0%': { transform: 'scale(0.9)', opacity: '0' },
+                '100%': { transform: 'scale(1)', opacity: '1' }
+              },
+              shake: {
+                '0%, 100%': { transform: 'translateX(0)' },
+                '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-2px)' },
+                '20%, 40%, 60%, 80%': { transform: 'translateX(2px)' }
+              },
+              ripple: {
+                '0%': { transform: 'scale(0)', opacity: '1' },
+                '100%': { transform: 'scale(4)', opacity: '0' }
+              },
+              gradientShift: {
+                '0%, 100%': { backgroundPosition: '0% 50%' },
+                '50%': { backgroundPosition: '100% 50%' }
+              }
+            },
+            backdropBlur: {
+              'xs': '2px',
+            },
+            backgroundSize: {
+              '200%': '200%',
+              '300%': '300%',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+      }
+      .glass-effect {
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .text-shadow {
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .hover-lift:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+      .gradient-text {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .emergency-glow {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        animation: emergency-pulse 2s infinite;
+      }
+      @keyframes emergency-pulse {
+        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+        70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
